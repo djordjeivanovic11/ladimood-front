@@ -1,0 +1,48 @@
+{
+  "name": "ladimood",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+    "@mui/lab": "^5.0.0-alpha.173",
+    "@mui/material": "^5.16.7",
+    "@prisma/client": "^5.18.0",
+    "@types/react-datepicker": "^7.0.0",
+    "aos": "^2.3.4",
+    "axios": "^1.7.4",
+    "bcryptjs": "^2.4.3",
+    "chart.js": "^4.4.4",
+    "date-fns": "^3.6.0",
+    "hashids": "^2.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "next": "^13.2.5",
+    "react": "^18",
+    "react-chartjs-2": "^5.2.0",
+    "react-datepicker": "^7.3.0",
+    "react-dom": "^18",
+    "react-i18next": "^15.0.1",
+    "react-icons": "^5.3.0",
+    "react-phone-input-2": "^2.15.1",
+    "recharts": "^2.12.7"
+  },
+  "devDependencies": {
+    "@types/aos": "^3.0.7",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.5",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
