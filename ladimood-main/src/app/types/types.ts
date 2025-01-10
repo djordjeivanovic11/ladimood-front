@@ -124,7 +124,7 @@ export interface CartItem {
   product: Product; // Full Product object
   quantity: number;
   color: string;
-  size: SizeEnum;
+  size: Size;
 }
 
 // Cart Interface
@@ -155,7 +155,7 @@ export interface OrderItemCreate {
   product_id: number;
   quantity: number;
   color: string;
-  size: SizeEnum;
+  size: Size;
 }
 
 // OrderCreate Interface
@@ -171,7 +171,7 @@ export interface OrderItem {
   product: Product;
   quantity: number;
   color: string;
-  size: SizeEnum;
+  size: Size;
   price: number;
 }
 
@@ -184,8 +184,9 @@ export interface OrderBase {
 
 // Order Interface
 export interface Order extends OrderBase {
-  id: string; 
+  id: number; 
   user_id: number;
+  plain_id: string;
   items: OrderItem[]; 
   created_at: Date;
   updated_at: Date;
@@ -194,7 +195,7 @@ export interface Order extends OrderBase {
 
 // Order Details Props
 export interface OrderDetailsProps {
-  orderId: string;
+  orderId: number;
   onClose: () => void;
 }
 
@@ -204,7 +205,7 @@ export interface WishlistItem {
   id: number;
   product: Product;
   color: string; 
-  size: SizeEnum;
+  size: Size;
 }
 
 export interface Wishlist {
@@ -221,7 +222,7 @@ export interface SalesRecord {
 }
 
 // Enum Interfaces
-export enum SizeEnum {
+export enum Size{
   XS = "XS",
   S = "S",
   M = "M",

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getPastOrders } from '@/api/account/axios';
+import { getUserOrders } from '@/api/account/axios';
 import { Order, OrderItem } from '@/app/types/types';
 
 const OrderHistory: React.FC = () => {
@@ -10,7 +10,7 @@ const OrderHistory: React.FC = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const data = await getPastOrders();
+                const data = await getUserOrders();
                 setOrders(data);
             } catch (err) {
                 setError('Failed to fetch order history.');

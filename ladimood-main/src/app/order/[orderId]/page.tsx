@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import {useRouter } from 'next/navigation';
-import OrderSummary from '@/components/Order/FinalizeOrder/OrderSummary';
+import OrderSummary from '@/components/Order/Order/OrderSummary';
 import AddressManager from '@/components/Account/AddressManager';
 import { getCurrentUser } from '@/api/account/axios';
 

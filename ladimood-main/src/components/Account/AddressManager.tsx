@@ -103,6 +103,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
                             name="street_address" 
                             value={form.street_address} 
                             onChange={handleChange} 
+                            placeholder="Street Address"
                             required 
                             className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0097B2] outline-none text-gray-900"
                         />
@@ -113,6 +114,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
                             name="city" 
                             value={form.city} 
                             onChange={handleChange} 
+                            placeholder="City"
                             required 
                             className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0097B2] outline-none text-gray-900"
                         />
@@ -123,6 +125,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
                             name="state" 
                             value={form.state} 
                             onChange={handleChange} 
+                            placeholder="State"
                             className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0097B2] outline-none text-gray-900"
                         />
                     </div>
@@ -131,6 +134,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
                         <input 
                             name="postal_code" 
                             value={form.postal_code} 
+                            placeholder="Postal code"
                             onChange={handleChange} 
                             required 
                             className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0097B2] outline-none text-gray-900"
@@ -141,6 +145,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
                         <input 
                             name="country" 
                             value={form.country} 
+                            placeholder="Country"
                             onChange={handleChange} 
                             required 
                             className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0097B2] outline-none text-gray-900"

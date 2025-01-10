@@ -13,7 +13,7 @@ import {
   Product,
   Referral,
   ReferralRequest,
-  SizeEnum,
+  Size,
 } from '@/app/types/types';
 import { encodeOrderId, decodeOrderId } from '@/utils/OrderDecoder';
 
@@ -153,17 +153,6 @@ export const getOrderDetails = async (orderId: string): Promise<Order> => {
   }
 };
 
-// Get all past orders for the authenticated user
-export const getPastOrders = async (): Promise<Order[]> => {
-  try {
-    const response: AxiosResponse<Order[]> = await api.get('/account/past-orders');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching past orders:', error);
-    throw error;
-  }
-};
-
 // Create an order
 export const createOrder = async (order: OrderCreate): Promise<Order> => {
   try {
@@ -268,7 +257,7 @@ export const updateCartItem = async (cartItem: CartItem): Promise<CartItem> => {
 };
 
 // Remove Item from Cart
-export const removeFromCart = async (itemId: number, color: string, size: SizeEnum): Promise<MessageResponse> => {
+export const removeFromCart = async (itemId: number, color: string, size: Size): Promise<MessageResponse> => {
   try {
     const response: AxiosResponse<MessageResponse> = await api.delete(`/account/cart/${itemId}`);
     return response.data;
@@ -317,7 +306,7 @@ export const getCurrentUser = async (): Promise<User> => {
       throw new Error('No access token found');
     }
 
-    const response = await api.get<User>('/account/user', {
+    const response = await api.get<User>('/account/details', {
       headers: {
         'Authorization': `Bearer ${token}`,  // Include the token in the Authorization header
       },
