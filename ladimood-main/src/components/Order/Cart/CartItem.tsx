@@ -46,6 +46,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, updateQuantity, removeFromCar
             value={item.quantity}
             onChange={handleQuantityChange}
             className="w-12 text-center text-black border border-gray-300"
+            title="Quantity"
           />
         </div>
       </div>
@@ -53,6 +54,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, updateQuantity, removeFromCar
       <button
         onClick={() => removeFromCart(item.id, item.color, item.size)}
         className="ml-4 text-red-600 hover:text-red-800"
+        title="Remove item from cart"
       >
         <FaTimes size={16} />
       </button>
