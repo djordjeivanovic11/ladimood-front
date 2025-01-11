@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import CartItemComponent from './CartItem';
-import { CartItem, CartSidebarProps, SizeEnum } from '@/app/types/types';
+import { CartItem, CartSidebarProps, Size } from '@/app/types/types';
 import CallToOrder from '@/components/Order/Cart/CallToOrder';
 import { getCart, removeFromCart, addToCart } from '@/api/account/axios';
 
@@ -26,7 +26,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
 
   const handleRemoveFromCart = async (id: number, color: string, size: string) => {
     try {
-      await removeFromCart(id, color, size as SizeEnum);
+      await removeFromCart(id, color, size as Size);
       setCartItems((prevItems) =>
         prevItems.filter((item) => !(item.id === id && item.color === color && item.size === size))
       );
@@ -68,7 +68,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
       <div className="p-4 flex flex-col h-full">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl sm:text-2xl font-bold text-[#0097B2]">Your Cart</h2>
-          <button onClick={closeCart} className="text-gray-600 hover:text-gray-800">
+          <button onClick={closeCart} className="text-gray-600 hover:text-gray-800" title="Close Cart">
             <FaTimes size={24} />
           </button>
         </div>

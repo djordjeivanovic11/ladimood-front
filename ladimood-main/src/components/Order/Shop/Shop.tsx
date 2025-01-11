@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import ProductFilter from './ProductFilter';
 import ProductGrid from './ProductGrid';
 import CartSidebar from '@/components/Order/Cart/CartSidebar';
-import { Product, CartItem, SizeEnum } from '@/app/types/types';
+import { Product, CartItem, Size } from '@/app/types/types';
+
 import { getCurrentUser, getCart, addToCart, getProducts } from '@/api/account/axios';
 
 const Shop: React.FC = () => {
@@ -126,7 +127,7 @@ const Shop: React.FC = () => {
         product,
         quantity: 1,
         color: selectedColor,
-        size: selectedSize as SizeEnum,
+        size: selectedSize as Size,
       };
 
       // Send the new cart item to the backend

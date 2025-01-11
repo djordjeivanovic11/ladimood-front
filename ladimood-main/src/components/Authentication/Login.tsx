@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FaEye, FaEyeSlash } from 'react-icons/fa'; // For the eye icon
-import { getCurrentUser } from '@/api/account/axios';  // Assuming this function fetches user info based on token
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { getCurrentUser } from '@/api/account/axios';  
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false); // State for toggling password visibility
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -19,7 +19,6 @@ const Login = () => {
         setShowPassword(!showPassword);
     };
 
-    // Check if the user is already logged in and redirect to /account if they are
     useEffect(() => {
         const token = localStorage.getItem('access_token');
         if (token) {
@@ -27,11 +26,11 @@ const Login = () => {
             .then((user) => {
               if (user) {
                 setIsLoggedIn(true);
-                router.push('/account');  // Redirect to /account if the user is already logged in
+                router.push('/account'); 
               }
             })
             .catch(() => {
-              setIsLoggedIn(false);  // In case of error or invalid token
+              setIsLoggedIn(false);  
             });
         }
       }, [router]);
@@ -52,7 +51,10 @@ const Login = () => {
 
             if (response.ok) {
                 localStorage.setItem('access_token', data.access_token);
-                router.push('/account'); // Redirect to a protected route
+                router.push('/account'); 
+                // page reload to update the user state
+                window.location.reload();   
+                
             } else {
                 setError(data.detail || 'Login failed. Please check your credentials.');
             }

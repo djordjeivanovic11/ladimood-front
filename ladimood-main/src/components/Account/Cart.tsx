@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { getCart, removeFromCart, clearCart } from '@/api/account/axios';
-import { Cart as CartType, CartItem as CartItemType, SizeEnum } from '@/app/types/types';
+import { Cart as CartType, CartItem as CartItemType, Size } from '@/app/types/types';
 
 const Cart: React.FC = () => {
     const [cart, setCart] = useState<CartType | null>(null);
@@ -14,7 +14,7 @@ const Cart: React.FC = () => {
     // Handle removing an item from the cart
     const handleRemove = async (itemId: number, color: string, size: string) => {
         try {
-            await removeFromCart(itemId, color, size as SizeEnum);
+            await removeFromCart(itemId, color, size as Size);
             const updatedCart = await getCart();  // Fetch the updated cart after removal
             setCart(updatedCart);
         } catch (error) {

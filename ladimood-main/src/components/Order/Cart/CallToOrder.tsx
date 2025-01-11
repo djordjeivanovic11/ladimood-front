@@ -23,6 +23,11 @@ const CallToOrder: React.FC<CallToOrderProps> = ({ cartItems, onCancel }) => {
           id: item.product.id,
           name: item.product.name,
           price: item.product.price,
+          image: item.product.image_url,
+          description: item.product.description,
+          created_at: item.product.created_at,
+          updated_at: item.product.updated_at,
+          category: item.product.category
         },
         quantity: item.quantity,
         color: item.color,
@@ -31,9 +36,9 @@ const CallToOrder: React.FC<CallToOrderProps> = ({ cartItems, onCancel }) => {
       total: totalAmount,
     };
   
-    console.log('Order Data:', orderData); // Debugging
+    console.log('Order Data:', orderData); 
     sessionStorage.setItem('orderData', JSON.stringify(orderData));
-    router.push('/confirmation'); // Navigate to confirmation page
+    router.push('/confirmation'); 
   };
   
   

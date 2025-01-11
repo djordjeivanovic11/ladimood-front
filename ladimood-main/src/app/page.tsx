@@ -9,7 +9,7 @@ import Newsletter from "@/components/Frontpage/Newsletter";
 import OurStory from '@/components/Frontpage/OurStory';
 import ShopPrompt from '@/components/Frontpage/ShopPrompt';
 import { getProducts, getCart, addToCart } from '@/api/account/axios';
-import { Product, CartItem, SizeEnum } from '@/app/types/types';
+import { Product, CartItem, Size } from '@/app/types/types';
 
 const Frontpage: React.FC = () => {
   const [showDiscountPopup, setShowDiscountPopup] = useState(true);
@@ -38,7 +38,7 @@ const Frontpage: React.FC = () => {
         product,
         quantity: 1,
         color: selectedColor,
-        size: selectedSize as SizeEnum,
+        size: selectedSize as Size,
       };
 
       await addToCart(newCartItem);

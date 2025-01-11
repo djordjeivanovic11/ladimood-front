@@ -16,22 +16,31 @@ const UserDetails: React.FC = () => {
       .catch(console.error);
   }, []);
 
-  // Function to handle logout
   const handleLogout = async () => {
     try {
       const refreshToken = localStorage.getItem('refresh_token');
+  
       if (refreshToken) {
+        // Call the logout API to invalidate the token on the server
         await logoutUser(refreshToken);
-        // Clear tokens from localStorage
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        // Redirect to the homepage
-        router.push('/');
+      } else {
+        console.warn('No refresh token found');
       }
+  
+      // Clear tokens from localStorage regardless
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+  
+      // Redirect the user to the homepage
+      window.location.reload();
+      router.push('/');
     } catch (error) {
+      alert('Failed to log out. Please try again.');
       console.error('Logout failed', error);
     }
   };
+  
+  
 
   if (!user) {
     return <div className="text-center text-gray-500">Loading...</div>;

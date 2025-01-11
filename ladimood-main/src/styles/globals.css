@@ -28,7 +28,7 @@ body {
 
 @layer utilities {
   .text-balance {
-    text-wrap: balance;
+    word-break: break-word;
   }
 }
 
@@ -64,4 +64,10 @@ html, body {
 .custom-dropdown {
   background-color: white;
   color: black; 
+}
+
+.color-button {
+
+  background-color: var(--button-color);
+
 }
