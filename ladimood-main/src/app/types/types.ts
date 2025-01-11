@@ -217,9 +217,17 @@ export interface Wishlist {
 // Sales Record Interfaces
 export interface SalesRecord {
   id: number;
-  user: User;
-  orders: Order[];
+  order_id: number;
+  user_id: number;
+  items: {
+    product: any;
+    product_name: string;
+    quantity: number;
+    price: number;
+  }[];
+  created_at: string; 
 }
+
 
 // Enum Interfaces
 export enum Size{
@@ -250,4 +258,65 @@ export interface Referral {
 
 export interface ReferralRequest {
   referrals: Referral[];
+}
+
+export interface OrderManage {
+  id: number;
+  user: {
+    full_name: string;
+    email: string;
+    address: {
+      street_address: string;
+      city: string;
+      country: string;
+    };
+  };
+  created_at: string;
+  updated_at: string;
+  total_price: number;
+  status: string;
+  items: {
+    id: number;
+    product: {
+      name: string;
+    };
+    quantity: number;
+    price: number;
+  }[];
+}
+
+export interface AddressManagement {
+  street_address: string;
+  city: string;
+  state?: string;
+  postal_code: string;
+  country: string;
+}
+
+export interface UserManagement {
+  id: number;
+  email: string;
+  full_name: string;
+  phone_number?: string | null;
+}
+
+export interface OrderItemManagement {
+  id: number;
+  product_name: string;
+  quantity: number;
+  color: string;
+  size: string;
+  price: number;
+}
+
+export interface OrderManagement {
+  id: number;
+  user_id: number;
+  user?: UserManagement;
+  address?: AddressManagement; 
+  status: OrderStatusEnum;
+  total_price: number;
+  items: OrderItemManagement[];
+  created_at: string;
+  updated_at: string;
 }

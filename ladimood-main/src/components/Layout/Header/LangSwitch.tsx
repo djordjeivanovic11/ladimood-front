@@ -36,7 +36,7 @@ const LanguageSwitcher: React.FC = () => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <button className="flex items-center p-2 rounded-lg">
+      <button className="flex items-center p-2 rounded-lg" title={`Current language: ${i18n.language}`}>
         <Image
           src={`/images/lang/${i18n.language}.png`}
           alt={`${i18n.language} flag`}

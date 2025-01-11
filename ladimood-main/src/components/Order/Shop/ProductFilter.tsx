@@ -115,6 +115,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                       checked={selectedCategory.includes(category)}
                       onChange={() => toggleCategory(category)}
                       className="form-checkbox text-[#0097B2] rounded focus:ring-[#0097B2]"
+                      title={`Select category ${category}`}
                     />
                     <span>{category}</span>
                   </label>
@@ -136,6 +137,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               <div className="mt-4">
                 <div className="flex flex-col space-y-4">
                   <input
+                    placeholder='Min Price'
                     type="range"
                     min={0}
                     max={100}
@@ -166,11 +168,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                 {colors.map((color) => (
                   <button
                     key={color}
-                    className={`w-7 h-7 rounded-full border ${
-                      selectedColors.includes(color) ? 'border-[#0097B2]' : 'border-gray-300'
+                    className={`w-7 h-7 rounded-full border color-button ${
+                      selectedColors.includes(color) ? 'selected-color' : 'unselected-color'
                     }`}
-                    style={{ backgroundColor: color }}
                     onClick={() => toggleColor(color)}
+                    title={`Select color ${color}`}
                   />
                 ))}
               </div>
@@ -191,11 +193,12 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                 {sizes.map((size) => (
                   <label key={size} className="flex items-center space-x-2 text-gray-700">
                     <input
-                      type="checkbox"
-                      checked={selectedSizes.includes(size)}
-                      onChange={() => toggleSize(size)}
-                      className="form-checkbox text-[#0097B2] rounded focus:ring-[#0097B2]"
-                    />
+                        type="checkbox"
+                        checked={selectedSizes.includes(size)}
+                        onChange={() => toggleSize(size)}
+                        className="form-checkbox text-[#0097B2] rounded focus:ring-[#0097B2]"
+                        title={`Select size ${size}`}
+                      />
                     <span>{size}</span>
                   </label>
                 ))}
@@ -207,6 +210,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
           <div className="mb-6">
             <label className="block font-semibold mb-2 text-lg">Sort By</label>
             <select
+              title="Sort By"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               className="w-full border border-gray-300 rounded-lg p-2 text-gray-700 focus:border-[#0097B2] focus:ring-[#0097B2]"
