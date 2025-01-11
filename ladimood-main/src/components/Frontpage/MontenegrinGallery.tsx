@@ -4,14 +4,16 @@ import Image from 'next/image';
 const MontenegrinGallery: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Debug auto-scroll logic
   useEffect(() => {
     const scrollContainer = scrollRef.current;
     let scrollAmount = 0;
 
     const scrollImages = () => {
       if (scrollContainer) {
-        scrollAmount += 3; 
+        scrollAmount += 3; // Speed of scrolling
         scrollContainer.scrollLeft = scrollAmount;
+
         if (
           scrollAmount >=
           scrollContainer.scrollWidth - scrollContainer.clientWidth
@@ -22,26 +24,14 @@ const MontenegrinGallery: React.FC = () => {
     };
 
     const intervalId = setInterval(scrollImages, 30);
-
     return () => clearInterval(intervalId);
   }, []);
 
-  // Example images array – ensure these paths are correct
+  // Load one image at a time for debugging
   const images = [
-    '/images/slide/image1.webp',
-    '/images/slide/image2.webp',
-    '/images/slide/image3.webp',
-    '/images/slide/image4.webp',
-    '/images/slide/image5.webp',
-    '/images/slide/image6.webp',
-    '/images/slide/image7.webp',
-    '/images/slide/image8.webp',
-    '/images/slide/image9.webp',
-    '/images/slide/image10.webp',
-    '/images/slide/image11.webp',
-    '/images/slide/image12.webp',
-    '/images/slide/image13.webp',
-    '/images/slide/image14.webp',
+    '/images/slide/image1.webp', // Step 1: Test with this image only
+    '/images/slide/image2.webp', // Step 2: Uncomment and test this
+    '/images/slide/image3.webp', // Step 3: Uncomment and test this
   ];
 
   return (
@@ -59,15 +49,18 @@ const MontenegrinGallery: React.FC = () => {
 
         {/* Horizontal Scrollable Image Gallery */}
         <div className="relative">
-          <div ref={scrollRef} className="flex space-x-8 pb-8 overflow-x-auto scrollbar-hide">
-            {images.map((src, index) => (
+          <div
+            ref={scrollRef}
+            className="flex space-x-8 pb-8 overflow-x-auto scrollbar-hide"
+          >
+            {images.slice(0, 1).map((src, index) => ( // Only load the first image for now
               <div
                 key={index}
                 className="flex-none w-[300px] sm:w-[450px] md:w-[600px] relative overflow-hidden"
               >
                 <Image
                   src={src}
-                  alt={`Ladimood style party ${index + 1}`}
+                  alt={`Montenegrin culture ${index + 1}`}
                   width={600}
                   height={600}
                   className="object-cover rounded-lg shadow-xl"
