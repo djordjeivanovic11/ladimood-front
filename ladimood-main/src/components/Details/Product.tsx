@@ -51,18 +51,19 @@ const Product: React.FC<ProductProps> = ({
 
         {/* Color Options */}
         {availableColors.map((color, index) => (
-            <button
-              key={index}
-              title={`Select color ${color}`}
-              onClick={() => onSelectColor(color)}
-              className={`w-8 h-8 m-5 rounded-full border transition-colors ${
-                selectedColor === color
-                  ? 'border-teal-300 border-4 shadow-lg'
-                  : 'border-gray-300 border-2'
-              } hover:border-teal-300`}
-              style={{ backgroundColor: color }}
-            />
-          ))}
+          <button
+            key={index}
+            title={`Select color ${color}`}
+            onClick={() => onSelectColor(color)}
+            className={`w-8 h-8 m-1 rounded-full border ${
+              selectedColor === color
+                ? 'border-teal-300 border-4 shadow-lg'
+                : 'border-gray-300 border-2'
+            }`}
+            style={{ backgroundColor: color }}
+          />
+        ))}
+
 
 
         {/* Size Options */}

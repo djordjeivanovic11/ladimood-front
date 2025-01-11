@@ -270,15 +270,24 @@ export const removeFromCart = async (itemId: number, color: string, size: Size):
 
 export const clearCart = async (): Promise<MessageResponse> => {
   try {
-    // Ensure you're passing the correct headers including authorization (if necessary)
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      throw new Error('No access token found. Please log in.');
+    }
+
     const response: AxiosResponse<MessageResponse> = await api.delete('account/cart/clear', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('access_token')}`, // Assuming Bearer token auth
+        Authorization: `Bearer ${token}`, // Ensure token is sent in the Authorization header
       },
     });
-    return response.data;
-  } catch (error) {
-    console.error('Error clearing cart:', error);
+
+    console.log('Cart cleared successfully:', response.data.message);
+    return response.data; // Message: "Cart cleared successfully"
+  } catch (error: any) {
+    console.error('Error clearing cart:', error.response?.data || error.message || error);
+    if (error.response?.status === 404) {
+      console.warn('Cart is already empty.');
+    }
     throw error;
   }
 };

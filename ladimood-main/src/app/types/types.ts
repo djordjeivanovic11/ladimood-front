@@ -124,7 +124,7 @@ export interface CartItem {
   product: Product; // Full Product object
   quantity: number;
   color: string;
-  size: Size;
+  size: SizeType;
 }
 
 // Cart Interface
@@ -238,6 +238,8 @@ export enum Size{
   XL = "XL",
   XXL = "XXL",
 }
+
+export type SizeType = "XS" | "S" | "M" | "L" | "XL" | "XXL";
 
 export enum OrderStatusEnum {
   CREATED = "CREATED",

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FaViber, FaWhatsapp, FaShoppingCart, FaUser, FaBars, FaTimes } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaBars, FaTimes } from 'react-icons/fa';
 import LangSwitch from '../Header/LangSwitch';
 import CartSidebar from '@/components/Order/Cart/CartSidebar';
 import { CartItem } from '@/app/types/types';
@@ -95,13 +95,11 @@ const Navbar: React.FC<NavbarProps> = () => {
             >
               Shop
             </div>
-            <div className="flex items-center space-x-4 text-[#0097B2]">
-              <Link href="viber://chat?number=+38269851872">
-                <FaViber size={24} className="hover:scale-105 hover:text-teal-200 cursor-pointer" />
-              </Link>
-              <Link href="https://wa.me/+38269851872">
-                <FaWhatsapp size={24} className="hover:scale-105 hover:text-teal-200 cursor-pointer" />
-              </Link>
+            <div
+              onClick={() => handleProtectedLink('/contact')}
+              className="cursor-pointer text-lg font-serif text-[#0097B2] transition-transform transform hover:scale-105 hover:text-teal-200"
+            >
+              Contact
             </div>
             <LangSwitch />
             {!isLoggedIn ? (
@@ -133,13 +131,8 @@ const Navbar: React.FC<NavbarProps> = () => {
             <div onClick={() => router.push('/shop')} className="cursor-pointer">
               <span className="text-lg font-serif text-[#0097B2]">Shop</span>
             </div>
-            <div className="flex items-center space-x-4 text-[#0097B2]">
-              <Link href="viber://chat?number=+38269851872" onClick={handleMenuClose}>
-                <FaViber size={24} className="hover:text-teal-200 cursor-pointer" />
-              </Link>
-              <Link href="https://wa.me/+38269851872" onClick={handleMenuClose}>
-                <FaWhatsapp size={24} className="hover:text-teal-200 cursor-pointer" />
-              </Link>
+            <div onClick={() => router.push('/contact')} className="cursor-pointer">
+              <span className="text-lg font-serif text-[#0097B2]">Contact</span>
             </div>
             <LangSwitch />
             {isLoggedIn ? (

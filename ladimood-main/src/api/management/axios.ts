@@ -55,3 +55,20 @@ export const updateOrderStatus = async (
     );
   }
 };
+
+
+export const submitContactForm = async (contactData: {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  inquiry_type: string;
+}): Promise<{ message: string }> => {
+  try {
+    const response = await axiosInstance.post<{ message: string }>('/management/contact', contactData);
+    return response.data;
+  } catch (error: any) {
+    console.error(`Error submitting contact form:`, error?.response?.data?.detail || error.message);
+    throw new Error(error?.response?.data?.detail || `Failed to submit contact form.`);
+  }
+};

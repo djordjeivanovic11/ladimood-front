@@ -78,7 +78,7 @@ const SuccessPage: React.FC = () => {
         </div>
 
         {/* Referral Section */}
-        <div className="lg:w-1/2 rounded-lg">
+        <div className="lg:w-1/2 bg-gray-100 p-6 rounded-lg shadow-md">
           <ReferralPopup onClose={() => setShowReferral(false)} />
         </div>
       </div>
