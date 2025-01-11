@@ -5,6 +5,7 @@ import Hero from '@/components/Frontpage/Hero';
 import Categories from "@/components/Frontpage/Categories";
 import ProductGrid from "@/components/Order/Shop/ProductGrid";
 import Newsletter from "@/components/Frontpage/Newsletter";
+import MontenegrinGallery from '@/components/Frontpage/MontenegrinGallery';
 
 import OurStory from '@/components/Frontpage/OurStory';
 import ShopPrompt from '@/components/Frontpage/ShopPrompt';
@@ -73,9 +74,15 @@ const Frontpage: React.FC = () => {
         <Hero />
       </div>
 
-      {/* Our Story Section */}
+         {/* Our Story Section */}
       <div className="mb-16"> {/* Increased space */}
         <OurStory />
+      </div>
+
+
+      {/* Montenegrin Gallery */}
+      <div className="mb-16"> {/* Increased space */}
+        <MontenegrinGallery />
       </div>
 
       {/* Product Grid */}
