@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { getWishlist, removeFromWishlist } from "@/api/account/axios";
 import { WishlistItem } from "@/app/types/types";
+import Image from "next/image";
 
 const Wishlist: React.FC = () => {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
@@ -41,7 +42,7 @@ const Wishlist: React.FC = () => {
               >
                 {/* Product Image */}
                 {item.product.image_url && (
-                  <img
+                  <Image
                     src={item.product.image_url}
                     alt={item.product.name}
                     className="w-full sm:w-32 h-32 object-cover rounded-md border border-gray-300 mb-3 mx-auto"

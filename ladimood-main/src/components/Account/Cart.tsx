@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { getCart, removeFromCart } from "@/api/account/axios";
 import { Cart as CartType, CartItem as CartItemType, Size } from "@/app/types/types";
+import Image from "next/image";
 
 const Cart: React.FC = () => {
   const [cart, setCart] = useState<CartType | null>(null);
@@ -42,7 +43,7 @@ const Cart: React.FC = () => {
               >
                 {/* Product Image */}
                 {item.product.image_url && (
-                  <img
+                  <Image
                     src={item.product.image_url}
                     alt={item.product.name}
                     className="w-full sm:w-32 h-32 object-cover rounded-md border border-gray-300 mb-3 mx-auto"

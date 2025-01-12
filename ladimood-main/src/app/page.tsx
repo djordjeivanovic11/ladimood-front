@@ -26,8 +26,8 @@ const Frontpage: React.FC = () => {
       setProducts(fetchedProducts);
       setIsLoading(false);
     } catch (error) {
-      console.error("Error fetching products:", error);
-      setError("Failed to load products. Please try again later.");
+      console.error("Greška prilikom učitavanja proizvoda:", error);
+      setError("Nije moguće učitati proizvode. Pokušajte ponovo kasnije.");
       setIsLoading(false);
     }
   };
@@ -51,8 +51,8 @@ const Frontpage: React.FC = () => {
       setCartItems(updatedCart.items);
       setIsCartOpen(true);
     } catch (error) {
-      console.error("Error adding item to cart:", error);
-      setError("Failed to add item to cart. Please try again.");
+      console.error("Greška prilikom dodavanja proizvoda u korpu:", error);
+      setError("Nije moguće dodati proizvod u korpu. Pokušajte ponovo.");
     }
   };
 
@@ -74,26 +74,26 @@ const Frontpage: React.FC = () => {
   return (
     <>
       <head>
-        <title>Ladimood | High-Quality Montenegrin-Inspired Clothing</title>
+        <title>Ladimood | Visokokvalitetna odjeća inspirisana crnogorskom kulturom</title>
         <meta
           name="description"
-          content="Ladimood brings you high-quality t-shirts and clothing inspired by Montenegrin culture. Wear your roots with pride and express your unique style."
+          content="Ladimood vam donosi visokokvalitetne majice i odjeću inspirisanu crnogorskom kulturom. Nosi svoje korijene s ponosom i izrazi svoj jedinstveni stil."
         />
-       <meta name="keywords" content="Ladimood, Montenegrin clothing, cultural t-shirts, high-quality t-shirts, unique designs, fashion Montenegro, Ladimood, Crnogorski brendovi, Balkanski brendovi, kul majice, balkanske izreke, balkanske fore, visokokvalitetne majice, jedinstveni dizajn, moda Crna Gora" />
+       <meta name="keywords" content="Ladimood, crnogorska odjeća, kulturne majice, visokokvalitetne majice, jedinstveni dizajn, moda Crna Gora, Ladimood, Crnogorski brendovi, Balkanski brendovi, kul majice, balkanske izreke, balkanske fore, visokokvalitetne majice, jedinstveni dizajn, moda Crna Gora" />
         <meta name="author" content="Ladimood" />
-        <meta property="og:title" content="Ladimood | High-Quality Montenegrin-Inspired Clothing" />
+        <meta property="og:title" content="Ladimood | Visokokvalitetna odjeća inspirisana crnogorskom kulturom" />
         <meta
           property="og:description"
-          content="Discover Ladimood's unique Montenegrin-inspired clothing. Our t-shirts combine bold designs, cultural sayings, and premium materials."
+          content="Otkrijte jedinstvenu odjeću inspirisanu crnogorskom kulturom uz Ladimood. Naše majice spajaju odvažne dizajne, kulturne izreke i vrhunske materijale."
         />
         <meta property="og:image" content="/images/og-image.jpg" />
         <meta property="og:url" content="https://www.ladimood.com" />
         <meta property="og:type" content="website" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Ladimood | High-Quality Montenegrin-Inspired Clothing" />
+        <meta name="twitter:title" content="Ladimood | Visokokvalitetna odjeća inspirisana crnogorskom kulturom" />
         <meta
           name="twitter:description"
-          content="Shop Ladimood for unique, high-quality t-shirts inspired by Montenegrin culture. Wear your roots and share your style."
+          content="Kupujte kod Ladimooda jedinstvene, visokokvalitetne majice inspirisane crnogorskom kulturom. Nosi svoje korijene i dijeli svoj stil."
         />
         <meta name="twitter:image" content="/images/og-image.jpg" />
         <meta name="robots" content="index, follow" />
@@ -104,7 +104,7 @@ const Frontpage: React.FC = () => {
           <Hero />
         </div>
 
-        {/* Our Story Section */}
+        {/* Naša priča */}
         <div className="mb-16">
           <OurStory />
         </div>
@@ -119,7 +119,7 @@ const Frontpage: React.FC = () => {
 
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="loader">Loading products...</div>
+            <div className="loader">Učitavanje proizvoda...</div>
           </div>
         ) : (
           <div className="mb-16">
