@@ -1,16 +1,17 @@
-import React, { useEffect, useRef } from 'react';
-import Image from 'next/image';
+import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 const MontenegrinGallery: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
     let scrollAmount = 0;
 
     const scrollImages = () => {
-      if (scrollContainer) {
-        scrollAmount += 6;
+      if (scrollContainer && !isUserScrolling) {
+        scrollAmount += 4;
         scrollContainer.scrollLeft = scrollAmount;
         if (
           scrollAmount >=
@@ -24,20 +25,43 @@ const MontenegrinGallery: React.FC = () => {
     const intervalId = setInterval(scrollImages, 20);
 
     return () => clearInterval(intervalId);
+  }, [isUserScrolling]);
+
+  // Event handlers to detect user interaction
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+
+    const handleMouseEnter = () => setIsUserScrolling(true);
+    const handleMouseLeave = () => setIsUserScrolling(false);
+    const handleScroll = () => setIsUserScrolling(true);
+
+    if (scrollContainer) {
+      scrollContainer.addEventListener("mouseenter", handleMouseEnter);
+      scrollContainer.addEventListener("mouseleave", handleMouseLeave);
+      scrollContainer.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (scrollContainer) {
+        scrollContainer.removeEventListener("mouseenter", handleMouseEnter);
+        scrollContainer.removeEventListener("mouseleave", handleMouseLeave);
+        scrollContainer.removeEventListener("scroll", handleScroll);
+      }
+    };
   }, []);
 
   const images = [
-    '/images/slideshow/image1.jpeg',
-    '/images/slideshow/image2.jpeg',
-    '/images/slideshow/image3.jpeg',
-    '/images/slideshow/image4.jpeg',
-    '/images/slideshow/image5.jpeg',
-    '/images/slideshow/image7.jpeg',
-    '/images/slideshow/image8.jpeg',
-    '/images/slideshow/image9.jpeg',
-    '/images/slideshow/image10.jpeg',
-    '/images/slideshow/image11.jpeg',
-    '/images/slideshow/image12.jpeg',
+    "/images/slideshow/image1.jpeg",
+    "/images/slideshow/image2.jpeg",
+    "/images/slideshow/image3.jpeg",
+    "/images/slideshow/image4.jpeg",
+    "/images/slideshow/image5.jpeg",
+    "/images/slideshow/image7.jpeg",
+    "/images/slideshow/image8.jpeg",
+    "/images/slideshow/image9.jpeg",
+    "/images/slideshow/image10.jpeg",
+    "/images/slideshow/image11.jpeg",
+    "/images/slideshow/image12.jpeg",
   ];
 
   return (
@@ -45,12 +69,15 @@ const MontenegrinGallery: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Heading */}
         <h2 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-[#0097B2] text-center leading-tight mb-12 tracking-wide">
-          Crafted in Montenegro
+          Made in Montenegro
         </h2>
         <p className="text-md sm:text-lg md:text-2xl text-gray-600 text-center max-w-3xl mx-auto mb-12 leading-relaxed">
-          Experience the essence of Montenegrin culture through our{' '}
-          <span className="font-semibold text-[#0097B2]">high-quality t-shirts</span>. Each design is inspired by local
-          sayings, bold humor, and cultural pride, telling a story that&apos;s authentically Montenegrin.
+          Doživite suštinu crnogorske kulture kroz našu{" "}
+          <span className="font-semibold text-[#0097B2]">
+            visokokvalitetnu odjeću
+          </span>
+          . Svaki dizajn inspirisan je lokalnim izrekama, smjelim humorom i
+          kulturnim ponosom. Prenosimo autentično crnogorski kulerski stil.
         </p>
 
         {/* Horizontal Scrollable Image Gallery */}
@@ -66,7 +93,7 @@ const MontenegrinGallery: React.FC = () => {
               >
                 <Image
                   src={src}
-                  alt={`Ladimood style party ${index + 1}`}
+                  alt={`Ladimood stil zabava ${index + 1}`}
                   width={800}
                   height={800}
                   className="object-cover rounded-lg shadow-2xl"
@@ -88,14 +115,15 @@ const MontenegrinGallery: React.FC = () => {
         {/* Call to Action Section */}
         <div className="text-center mt-16">
           <p className="text-md sm:text-lg md:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto mb-8">
-            Every product is a testament to Montenegrin craftsmanship, combining{' '}
-            <span className="font-semibold text-[#0097B2]">bold design</span> with cultural authenticity. Celebrate Montenegro, wear your
-            roots, and stand out with every step.
+            Naši proizvodi su izrađeni od <span className="font-semibold text-[#0097B2]">najkvalitetnijih majica</span>, koristeći 100% pamuk za maksimalnu udobnost i trajnost. Svaki detalj je pažljivo osmišljen. 
+            Kombinujemo <span className="font-semibold text-[#0097B2]"> crnogorske izreke, fore i šale</span> sa kulturnom autentičnošću. 
+            Proslavite Crnu Goru, nosite svoje korijene i istaknite se na svakom koraku.
           </p>
           <button className="px-6 sm:px-8 py-3 sm:py-4 bg-[#0097B2] text-white font-bold text-md sm:text-lg rounded-full shadow-lg hover:bg-[#007B92] transition-transform transform hover:scale-105 duration-300">
-            Shop the Collection
+            Shop
           </button>
         </div>
+
       </div>
     </section>
   );

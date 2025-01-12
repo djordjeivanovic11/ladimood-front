@@ -17,19 +17,19 @@ const ShopPrompt = () => {
       </div>
 
       <h2 className="text-4xl text-[#0097B2] md:text-6xl font-extrabold leading-tight mb-6 tracking-wide">
-        Wear Your Culture, Share Your Style
+        Nosi svoju kulturu, dijeli svoj stil
       </h2>
       <p className="text-lg text-[#0097B2] md:text-2xl max-w-3xl mx-auto leading-relaxed mb-8">
-        Our t-shirts don’t just cover your back—they tell a story! With local sayings and cool, catchy designs,
-        you’re not just wearing a tee, you’re wearing your roots. Whether you&lsquo;re looking for a unique gift or something
-        bold for your wardrobe, we&lsquo;ve got you covered!
+        Naše majice nisu samo odjevni komadi—one pričaju priču! Sa lokalnim izrazima i smjelim, privlačnim dizajnima,
+        ne nosite samo majicu, već nosite svoje korijene. Bilo da tražite jedinstven poklon ili nešto posebno za svoj
+        garderober, mi smo tu za vas!
       </p>
       <div className="mt-12">
         <Link 
           href="/shop"
           className="bg-white text-[#0097B2] font-bold py-4 px-10 rounded-full hover:bg-gray-100 shadow-lg hover:shadow-2xl transition duration-300"
         >
-          Shop Now
+          Shop
         </Link>
       </div>
     </div>
@@ -37,4 +37,3 @@ const ShopPrompt = () => {
 };
 
 export default ShopPrompt;
-

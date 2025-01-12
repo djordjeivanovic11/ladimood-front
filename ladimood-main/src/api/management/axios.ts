@@ -1,7 +1,6 @@
 import axiosInstance from '../axiosInstance';
 import { Order, SalesRecord, OrderStatusEnum, OrderManagement} from '@/app/types/types';
 
-// Sales Records API
 export const fetchSalesRecords = async (): Promise<SalesRecord[]> => {
   try {
     const response = await axiosInstance.get<SalesRecord[]>('/management/sales');
@@ -10,8 +9,23 @@ export const fetchSalesRecords = async (): Promise<SalesRecord[]> => {
     console.error('Error fetching sales records:', error?.response?.data?.detail || error.message);
     throw new Error(error?.response?.data?.detail || 'Failed to fetch sales records.');
   }
-};
+}
 
+export const createSalesRecord = async (salesRecord: {
+  user_id: number;
+  order_id: number;
+  date_of_sale: string;
+  buyer_name: string;
+  price: number;
+}): Promise<SalesRecord> => {
+  try {
+    const response = await axiosInstance.post<SalesRecord>('/management/sales', salesRecord);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error creating sales record:', error?.response?.data?.detail || error.message);
+    throw new Error(error?.response?.data?.detail || 'Failed to create sales record.');
+  }
+};
 
 // Orders API
 export const fetchAllOrdersWithDetails = async (): Promise<OrderManagement[]> => {

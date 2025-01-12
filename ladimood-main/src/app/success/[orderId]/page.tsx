@@ -22,7 +22,7 @@ const SuccessPage: React.FC = () => {
   }, [router]);
 
   if (!order) {
-    return <div className="text-center text-gray-600 mt-10">Loading your order...</div>;
+    return <div className="text-center text-gray-600 mt-10">Učitavanje vaše narudžbe...</div>;
   }
 
   return (
@@ -33,19 +33,19 @@ const SuccessPage: React.FC = () => {
           <div className="text-center lg:text-left">
             <FaCheckCircle className="text-[#0097B2] text-6xl mx-auto lg:mx-0 mb-6" />
             <h2 className="text-3xl font-bold text-black mb-4">
-              Thank You for Your Order!
+              Hvala Vam na Vašoj porudžbini!
             </h2>
             <p className="text-gray-700 mb-6">
-              We’re thrilled you chose Ladimood for your needs. Your order has been successfully placed!
+              Srećni smo što ste odabrali Ladimood. Vaša porudžbina je uspješno zabilježena!
             </p>
             <p className="text-gray-600 mb-8 leading-relaxed">
-              A confirmation email with your order details has been sent to your inbox. Meanwhile, here’s a summary of your purchase:
+              Email sa detaljima porudžbine je poslat na vašu email adresu. U međuvremenu, ovdje je rezime vaše kupovine:
             </p>
           </div>
 
           {/* Order Summary */}
           <div className="mb-8">
-            <h3 className="text-lg font-semibold text-[#0097B2] mb-4">Your Items:</h3>
+            <h3 className="text-lg font-semibold text-[#0097B2] mb-4">Vaši Artikli:</h3>
             <ul className="space-y-4">
               {order.items.map((item: any, index: number) => (
                 <li
@@ -55,7 +55,7 @@ const SuccessPage: React.FC = () => {
                   <div className="flex items-center space-x-4">
                     <Image
                       src={item.image || '/images/default-product.jpg'}
-                      alt={item.name || 'Product'}
+                      alt={item.name || 'Proizvod'}
                       className="w-16 h-16 rounded-md object-cover border"
                       width={64}
                       height={64}
@@ -67,18 +67,17 @@ const SuccessPage: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <p className="font-medium">€{(item.quantity * item.price).toFixed(2)}</p>
                 </li>
               ))}
             </ul>
-            <div className="mt-6 flex justify-end">
-              <p className="text-lg font-bold">Total: €{order.total_price.toFixed(2)}</p>
+            <div className="mt-6 flex text-black justify-end">
+              <p className="text-lg text-black font-bold">Total: €{order.total_price.toFixed(2)}</p>
             </div>
           </div>
         </div>
 
         {/* Referral Section */}
-        <div className="lg:w-1/2 bg-gray-100 p-6 rounded-lg shadow-md">
+        <div className="lg:w-1/2 p-6 rounded-lg">
           <ReferralPopup onClose={() => setShowReferral(false)} />
         </div>
       </div>
@@ -89,13 +88,13 @@ const SuccessPage: React.FC = () => {
           onClick={() => router.push('/account')}
           className="px-5 py-2 bg-[#0097B2] text-white rounded-md shadow hover:bg-[#007A90] transition-all duration-300"
         >
-          Go to Account
+          Idi na Profil
         </button>
         <button
           onClick={() => router.push('/')}
           className="px-5 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-all duration-300"
         >
-          Return Home
+          Povratak na Početnu
         </button>
       </div>
     </div>

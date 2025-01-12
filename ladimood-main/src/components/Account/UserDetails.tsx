@@ -1,15 +1,14 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { getUserDetails } from '@/api/account/axios';
-import { logoutUser } from '@/api/auth/axios';
-import { User } from '@/app/types/types';
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getUserDetails } from "@/api/account/axios";
+import { logoutUser } from "@/api/auth/axios";
+import { User } from "@/app/types/types";
 
 const UserDetails: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
-  // Fetch the user details on component mount
   useEffect(() => {
     getUserDetails()
       .then(setUser)
@@ -18,60 +17,63 @@ const UserDetails: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      const refreshToken = localStorage.getItem('refresh_token');
-  
+      const refreshToken = localStorage.getItem("refresh_token");
       if (refreshToken) {
-        // Call the logout API to invalidate the token on the server
         await logoutUser(refreshToken);
-      } else {
-        console.warn('No refresh token found');
       }
-  
-      // Clear tokens from localStorage regardless
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-  
-      // Redirect the user to the homepage
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
       window.location.reload();
-      router.push('/');
+      router.push("/");
     } catch (error) {
-      alert('Failed to log out. Please try again.');
-      console.error('Logout failed', error);
+      alert("Failed to log out. Please try again.");
+      console.error("Logout failed", error);
     }
   };
-  
-  
 
   if (!user) {
-    return <div className="text-center text-gray-500">Loading...</div>;
+    return (
+      <div className="text-center text-gray-500 min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0097B2]"></div>
+        <p className="ml-4">Loading...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-white border border-[#0097B2] rounded-lg shadow-md p-4 sm:p-6 max-w-lg mx-4 sm:mx-auto mt-8 sm:mt-12">
-      <div className="space-y-4 sm:space-y-6">
-        {/* User Details */}
-        <div className="flex flex-col sm:flex-row items-center justify-between">
-          <p className="text-sm sm:text-lg font-medium text-[#0097B2]">Name</p>
-          <p className="text-base sm:text-lg font-semibold text-gray-800 mt-1 sm:mt-0">{user.full_name}</p>
+    <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-6 sm:p-8 max-w-lg mx-auto mt-12">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800">Welcome, {user.full_name}!</h2>
+          <p className="text-gray-500 text-sm">Manage your account details below</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center justify-between">
-          <p className="text-sm sm:text-lg font-medium text-[#0097B2]">Email</p>
-          <p className="text-base sm:text-lg font-semibold text-gray-800 mt-1 sm:mt-0">{user.email}</p>
-        </div>
-        <div className="flex flex-col sm:flex-row items-center justify-between">
-          <p className="text-sm sm:text-lg font-medium text-[#0097B2]">Phone Number</p>
-          <p className="text-base sm:text-lg font-semibold text-gray-800 mt-1 sm:mt-0">{user.phone_number}</p>
-        </div>
-      </div>
 
-      {/* Logout Button */}
-      <div className="mt-6 sm:mt-8 text-center">
-        <button
-          onClick={handleLogout}
-          className="bg-[#0097B2] text-white font-semibold py-2 px-6 rounded-md w-full sm:w-auto hover:bg-[#007A90] transition-all duration-200"
-        >
-          Logout
-        </button>
+        {/* User Details */}
+        <div className="space-y-4">
+          <div>
+            <p className="text-sm font-medium text-gray-500">Name:</p>
+            <p className="text-lg font-semibold text-gray-800 break-words">{user.full_name}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">Email:</p>
+            <p className="text-lg font-semibold text-gray-800 break-words">{user.email}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-500">Phone:</p>
+            <p className="text-lg font-semibold text-gray-800 break-words">{user.phone_number}</p>
+          </div>
+        </div>
+
+        {/* Logout Button */}
+        <div className="text-center">
+          <button
+            onClick={handleLogout}
+            className="bg-[#0097B2] text-white font-semibold py-3 px-8 rounded-md shadow-md hover:bg-[#007A90] hover:shadow-lg focus:ring-2 focus:ring-[#0097B2] transition-all duration-300 w-full"
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </div>
   );

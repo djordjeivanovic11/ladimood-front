@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect } from 'react';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import Link from 'next/link';
+import React, { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import Link from "next/link";
 
 const Hero: React.FC = () => {
   useEffect(() => {
@@ -10,7 +10,7 @@ const Hero: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
+    <div className="relative w-full h-screen overflow-hidden /* remove mt-4 or pt-4 if exists */">
       {/* Video Background */}
       <video
         autoPlay
@@ -29,13 +29,13 @@ const Hero: React.FC = () => {
           className="text-white text-4xl md:text-6xl font-bold drop-shadow-lg"
           data-aos="fade-up"
         >
-          WORK HARD, PLAY HARD
+          KO LADI
           <br />
-          WITH LADIMOOD
+          ZLO NE MISLI
         </h1>
         <div className="mt-8" data-aos="fade-up" data-aos-delay="500">
           <Link href="/shop">
-            <span className="bg-white text-[#0097B2] font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-110 hover:bg-[#007A90] drop-shadow-md cursor-pointer">
+            <span className="bg-white text-[#0097B2] font-bold py-3 px-8 rounded-full transition-transform hover:scale-110 hover:bg-[#007A90] drop-shadow-md cursor-pointer">
               Shop Now
             </span>
           </Link>

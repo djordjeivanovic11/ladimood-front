@@ -27,7 +27,7 @@ const CategoryComponent = () => {
   return (
     <div className="bg-white py-16">
       <h1 className="text-center text-5xl md:text-6xl font-bold text-[#0097B2] leading-tight mb-16">
-        Explore Our Categories
+        Istraži kategorije
       </h1>
       <div className="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 px-4 md:px-8">
         {categories.map((category, index) => (

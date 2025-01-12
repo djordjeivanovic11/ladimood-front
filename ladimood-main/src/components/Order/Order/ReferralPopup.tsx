@@ -26,7 +26,7 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
       // Filter out empty referral entries
       const validReferrals = referrals.filter(referral => referral.name && referral.email);
       if (validReferrals.length === 0) {
-        setError('Please fill in at least one referral.');
+        setError('Molimo vas da unesete bar jednu preporuku.');
         return;
       }
 
@@ -37,24 +37,23 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
         setSubmitted(true); 
         setError(null);
 
-        
         setTimeout(() => {
           onClose();
         }, 3000);
       } else {
-        setError('Failed to send referrals. Please try again.');
+        setError('Nije uspjelo slanje preporuka. Pokušajte ponovo.');
       }
     } catch (error) {
       console.error('Failed to send referrals:', error);
-      setError('Failed to send referrals. Please try again.');
+      setError('Nije uspjelo slanje preporuka. Pokušajte ponovo.');
     }
   };
 
   return (
     <div className="p-8 bg-white shadow-lg rounded-lg text-center transform transition-transform duration-300 scale-100 w-96">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Recommend Friends</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-4">Preporučite Prijatelje</h2>
       <p className="text-gray-700 mb-6">
-        Share Ladimood with your friends and let them discover what we stand for!
+        Podijelite Ladimood sa svojim prijateljima i omogućite im da otkriju naš brend!
       </p>
 
       {referrals.map((referral, index) => (
@@ -66,19 +65,19 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
               <FaUser className="text-gray-500 text-2xl" />
             )}
             <span className="text-gray-800 font-semibold">
-              {referral.name ? referral.name : `Person ${index + 1}`}
+              {referral.name ? referral.name : `Osoba ${index + 1}`}
             </span>
           </div>
           <input
             type="text"
-            placeholder="Full Name"
+            placeholder="Ime i Prezime"
             value={referral.name}
             onChange={(e) => handleChange(index, 'name', e.target.value)}
             className="w-full px-3 py-2 mb-2 border rounded-md text-gray-900"
           />
           <input
             type="email"
-            placeholder="Email Address"
+            placeholder="Email Adresa"
             value={referral.email}
             onChange={(e) => handleChange(index, 'email', e.target.value)}
             className="w-full px-3 py-2 border rounded-md text-gray-900"
@@ -91,19 +90,19 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
         className="mt-6 w-full bg-[#0097B2] text-white py-2 rounded-lg shadow hover:bg-[#007A90] transition duration-300"
         disabled={submitted}
       >
-        Submit Referrals
+        Pošaljite Preporuke
       </button>
       <button
         onClick={onClose}
         className="mt-4 w-full text-[#0097B2] py-2 rounded-lg hover:underline transition duration-300"
       >
-        Skip
+        Preskoči
       </button>
 
       {error && <p className="mt-4 text-red-500">{error}</p>}
       {submitted && (
         <p className="mt-4 text-green-600 font-semibold">
-          Emails have been sent to your friends!
+          Emailovi su poslati vašim prijateljima!
         </p>
       )}
     </div>

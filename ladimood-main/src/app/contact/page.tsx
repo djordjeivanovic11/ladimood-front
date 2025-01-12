@@ -4,7 +4,7 @@ import ContactForm from '@/components/Contact/ContactForm';
 
 const ContactPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-6">
+    <div className="min-h-screen bg-white py-12 px-6">
       <div className="max-w-4xl mx-auto">
         <ContactForm />
       </div>

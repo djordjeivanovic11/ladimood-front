@@ -1,166 +1,139 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { getAddress, setAddress, deleteAddress } from '@/api/account/axios';
-import { Address } from '@/app/types/types';
+import React, { useEffect, useState } from "react";
+import { getAddress, setAddress, deleteAddress } from "@/api/account/axios";
+import { Address } from "@/app/types/types";
 
 interface AddressManagerProps {
-    onAddressSaved?: (address: Address) => void;
+  onAddressSaved?: (address: Address) => void;
 }
 
 const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
-    const [address, setAddressState] = useState<Address | null>(null); // State to store the fetched address
-    const [form, setForm] = useState({
-        street_address: '',
-        city: '',
-        state: '',
-        postal_code: '',
-        country: ''
-    });
+  const [address, setAddressState] = useState<Address | null>(null);
+  const [form, setForm] = useState({
+    street_address: "",
+    city: "",
+    state: "",
+    postal_code: "",
+    country: "",
+  });
 
-    // Fetch the address when the component mounts
-    useEffect(() => {
-        getAddress()
-            .then((data) => {
-                setAddressState(data); // Set the fetched address to the state
-                setForm({
-                    street_address: data.street_address || '',
-                    city: data.city || '',
-                    state: data.state || '',
-                    postal_code: data.postal_code || '',
-                    country: data.country || ''
-                }); // Populate the form with the fetched address data
-            })
-            .catch(() => setAddressState(null)); // If no address, set it to null
-    }, []);
-
-    // Handle form input changes
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    };
-
-    // Handle form submission to set or update the address
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const updatedAddress = await setAddress(form); // Send form data to setAddress API
-            setAddressState(updatedAddress); // Update the address state
-
-            if (onAddressSaved) {
-                onAddressSaved(updatedAddress); // Trigger callback when address is saved
-            }
-        } catch (error) {
-            console.error('Failed to set address', error); // Handle errors here
-        }
-    };
-
-    // Handle address deletion
-    const handleDelete = async () => {
-        try {
-            await deleteAddress(); // Call the deleteAddress API
-            setAddressState(null); // Clear the address state after deletion
-            setForm({
-                street_address: '',
-                city: '',
-                state: '',
-                postal_code: '',
-                country: ''
-            }); // Reset the form
-        } catch (error) {
-            console.error('Failed to delete address', error); // Handle errors here
-        }
-    };
-
-    // Handle form reset to clear fields
-    const handleReset = () => {
+  useEffect(() => {
+    getAddress()
+      .then((data) => {
+        setAddressState(data);
         setForm({
-            street_address: '',
-            city: '',
-            state: '',
-            postal_code: '',
-            country: ''
+          street_address: data.street_address || "",
+          city: data.city || "",
+          state: data.state || "",
+          postal_code: data.postal_code || "",
+          country: data.country || "",
         });
-    };
+      })
+      .catch(() => setAddressState(null));
+  }, []);
 
-    return (
-        <div className="bg-white shadow-lg rounded-xl p-8 border border-[#0097B2]">
-            {address ? (
-                <div className="space-y-4">
-                    <p className="text-lg text-gray-900">{`${address.street_address}, ${address.city}, ${address.state}, ${address.postal_code}, ${address.country}`}</p>
-                    <div className="flex space-x-4">
-                        <button 
-                            onClick={handleDelete} 
-                            className="bg-[#0097B2] text-white px-4 py-2 rounded-lg shadow hover:bg-red-600 transition"
-                        >
-                            Delete Address
-                        </button>
-                    </div>
-                </div>
-            ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label className="block text-lg font-medium text-gray-700">Street Address:</label>
-                        <input 
-                            name="street_address" 
-                            value={form.street_address} 
-                            onChange={handleChange} 
-                            placeholder="Street Address"
-                            required 
-                            className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0097B2] outline-none text-gray-900"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-lg font-medium text-gray-700">City:</label>
-                        <input 
-                            name="city" 
-                            value={form.city} 
-                            onChange={handleChange} 
-                            placeholder="City"
-                            required 
-                            className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0097B2] outline-none text-gray-900"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-lg font-medium text-gray-700">State:</label>
-                        <input 
-                            name="state" 
-                            value={form.state} 
-                            onChange={handleChange} 
-                            placeholder="State"
-                            className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0097B2] outline-none text-gray-900"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-lg font-medium text-gray-700">Postal Code:</label>
-                        <input 
-                            name="postal_code" 
-                            value={form.postal_code} 
-                            placeholder="Postal code"
-                            onChange={handleChange} 
-                            required 
-                            className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0097B2] outline-none text-gray-900"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-lg font-medium text-gray-700">Country:</label>
-                        <input 
-                            name="country" 
-                            value={form.country} 
-                            placeholder="Country"
-                            onChange={handleChange} 
-                            required 
-                            className="w-full mt-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0097B2] outline-none text-gray-900"
-                        />
-                    </div>
-                    <button 
-                        type="submit" 
-                        className="w-full bg-[#0097B2] text-white py-2 rounded-lg shadow hover:bg-[#007A90] transition"
-                    >
-                        {address ? 'Update Address' : 'Add Address'}
-                    </button>
-                </form>
-            )}
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const updatedAddress = await setAddress(form);
+      setAddressState(updatedAddress);
+
+      if (onAddressSaved) {
+        onAddressSaved(updatedAddress);
+      }
+    } catch (error) {
+      console.error("Failed to set address", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteAddress();
+      setAddressState(null);
+      setForm({
+        street_address: "",
+        city: "",
+        state: "",
+        postal_code: "",
+        country: "",
+      });
+    } catch (error) {
+      console.error("Failed to delete address", error);
+    }
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-white to-gray-50 shadow-md rounded-xl p-8 border border-gray-300 max-w-2xl mx-auto mt-12">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800">
+            {address ? "Manage Your Address" : "Add a New Address"}
+          </h2>
+          <p className="text-sm text-gray-500">
+            {address
+              ? "Edit or delete your saved address below."
+              : "Fill in the form to save your address."}
+          </p>
         </div>
-    );
+
+        {/* Address Display or Form */}
+        {address ? (
+          <div className="bg-white shadow-sm rounded-lg p-6 border border-gray-200 space-y-4">
+            <p className="text-lg font-medium text-gray-700">
+              {`${address.street_address}, ${address.city}, ${address.state}, ${address.postal_code}, ${address.country}`}
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={handleDelete}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg shadow hover:bg-red-700 transition-all duration-200 flex items-center space-x-2"
+              >
+                <span>Delete Address</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {[
+              { name: "street_address", label: "Street Address" },
+              { name: "city", label: "City" },
+              { name: "state", label: "State" },
+              { name: "postal_code", label: "Postal Code" },
+              { name: "country", label: "Country" },
+            ].map(({ name, label }) => (
+              <div key={name}>
+                <label
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                  htmlFor={name}
+                >
+                  {label}
+                </label>
+                <input
+                  id={name}
+                  name={name}
+                  value={form[name as keyof typeof form]}
+                  onChange={handleChange}
+                  placeholder={label}
+                  required
+                  className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0097B2] focus:outline-none text-gray-800 shadow-sm"
+                />
+              </div>
+            ))}
+            <button
+              type="submit"
+              className="w-full bg-[#0097B2] text-white py-3 rounded-lg shadow hover:bg-[#007A90] transition-all duration-300"
+            >
+              {address ? "Update Address" : "Save Address"}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default AddressManager;

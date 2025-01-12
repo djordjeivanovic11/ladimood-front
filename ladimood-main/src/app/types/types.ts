@@ -12,7 +12,7 @@ export interface AuthContextProps {
 // Auth and Token Interfaces
 export interface TokenResponse {
   access_token: string;
-  refresh_token?: string; // Optional
+  refresh_token?: string;
   token_type: string;
 }
 
@@ -49,7 +49,7 @@ export interface UserCreate extends UserBase {
 export interface User extends UserBase {
   id: number;
   is_active: boolean;
-  role?: Role; // Optional role
+  role?: Role; 
   created_at: Date;
   updated_at: Date;
 }
@@ -82,7 +82,7 @@ export interface ProductBase {
   name: string;
   description: string;
   price: number;
-  image_url?: string; // Optional image URL
+  image_url: string;
 }
 export interface ProductCreate extends ProductBase {
   category_id: number;
@@ -90,7 +90,7 @@ export interface ProductCreate extends ProductBase {
 
 export interface Product extends ProductBase {
   id: number;
-  category: Category;
+  category?: Category;
   created_at: Date;
   updated_at: Date;
 }
@@ -110,18 +110,18 @@ export interface ProductGridProps {
 // Category Interfaces
 export interface CategoryBase {
   name: string;
-  description?: string; // Optional description
+  description?: string; 
 }
 
 export interface Category extends CategoryBase {
   id: number;
-  products?: Product[]; // Optional list of products in the category
+  products?: Product[]; 
 }
 
 // Cart and Cart Item Interfaces
 export interface CartItem {
   id: number;
-  product: Product; // Full Product object
+  product: Product; 
   quantity: number;
   color: string;
   size: SizeType;
@@ -146,7 +146,7 @@ export interface CartSidebarProps {
 
 export interface CallToOrderProps {
   cartItems: CartItem[];
-  onOrder?: () => void; // Make this optional since navigation will handle the main action
+  onOrder?: () => void; 
   onCancel: () => void;
 }
 
@@ -168,12 +168,15 @@ export interface OrderCreate {
 // OrderItem Interface
 export interface OrderItem {
   id: number;
-  product: Product;
+  product_id: number;     
+  product_name: string;
   quantity: number;
-  color: string;
-  size: Size;
+  color: string | null;
+  size: string | null;
   price: number;
+  product: Product;
 }
+
 
 // OrderBase Interface
 export interface OrderBase {
@@ -216,16 +219,12 @@ export interface Wishlist {
 
 // Sales Record Interfaces
 export interface SalesRecord {
-  id: number;
-  order_id: number;
-  user_id: number;
-  items: {
-    product: any;
-    product_name: string;
-    quantity: number;
-    price: number;
-  }[];
-  created_at: string; 
+  id: number; 
+  user_id: number; 
+  order_id: number; 
+  date_of_sale: string; 
+  buyer_name: string; 
+  price: number; 
 }
 
 
@@ -287,6 +286,45 @@ export interface OrderManage {
   }[];
 }
 
+// OrderResponse Interface (from your backend)
+export interface OrderResponse {
+  id: number;
+  status: string; 
+  created_at: string;
+  updated_at: string;
+  user: {
+    full_name: string;
+    email: string;
+    phone_number?: string | null;
+  };
+  address: {
+    street_address: string;
+    city: string;
+    state?: string | null;
+    postal_code: string;
+    country: string;
+  };
+  total_price: number;
+  items: Array<{
+    id: number;
+    product_name?: string | null;
+    color?: string | null;
+    size?: string | null;
+    quantity: number;
+    price: number;
+    product?: {
+      id?: number;
+      name?: string;
+      description?: string;
+      category?: string;
+      price?: number;
+      image_url?: string | null;
+      created_at?: string;
+      updated_at?: string;
+    } | null;
+  }>;
+}
+
 export interface AddressManagement {
   street_address: string;
   city: string;
@@ -302,13 +340,32 @@ export interface UserManagement {
   phone_number?: string | null;
 }
 
-export interface OrderItemManagement {
+
+interface OrderItemManagement {
+
   id: number;
+
+  product_id: number;
+
   product_name: string;
+
   quantity: number;
-  color: string;
-  size: string;
+
+  color: string | null;
+
+  size: string | null;
+
   price: number;
+
+  product: Product;
+
+}
+
+
+
+export interface OrderByIdProps {
+  orderId: number;
+  item: OrderItemManagement;
 }
 
 export interface OrderManagement {

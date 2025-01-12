@@ -88,7 +88,7 @@ const Shop: React.FC = () => {
     // Apply category filter
     if (selectedCategory.length > 0) {
       filtered = filtered.filter((product) =>
-        selectedCategory.some((category) => product.category.name.includes(category))
+        selectedCategory.some((category) => product.category?.name.includes(category))
       );
     }
 
