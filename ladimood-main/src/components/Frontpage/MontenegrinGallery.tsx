@@ -4,16 +4,14 @@ import Image from 'next/image';
 const MontenegrinGallery: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Debug auto-scroll logic
   useEffect(() => {
     const scrollContainer = scrollRef.current;
     let scrollAmount = 0;
 
     const scrollImages = () => {
       if (scrollContainer) {
-        scrollAmount += 3; // Speed of scrolling
+        scrollAmount += 6;
         scrollContainer.scrollLeft = scrollAmount;
-
         if (
           scrollAmount >=
           scrollContainer.scrollWidth - scrollContainer.clientWidth
@@ -23,15 +21,23 @@ const MontenegrinGallery: React.FC = () => {
       }
     };
 
-    const intervalId = setInterval(scrollImages, 30);
+    const intervalId = setInterval(scrollImages, 20);
+
     return () => clearInterval(intervalId);
   }, []);
 
-  // Load one image at a time for debugging
   const images = [
-    '/images/slide/image1.webp', // Step 1: Test with this image only
-    '/images/slide/image2.webp', // Step 2: Uncomment and test this
-    '/images/slide/image3.webp', // Step 3: Uncomment and test this
+    '/images/slideshow/image1.jpeg',
+    '/images/slideshow/image2.jpeg',
+    '/images/slideshow/image3.jpeg',
+    '/images/slideshow/image4.jpeg',
+    '/images/slideshow/image5.jpeg',
+    '/images/slideshow/image7.jpeg',
+    '/images/slideshow/image8.jpeg',
+    '/images/slideshow/image9.jpeg',
+    '/images/slideshow/image10.jpeg',
+    '/images/slideshow/image11.jpeg',
+    '/images/slideshow/image12.jpeg',
   ];
 
   return (
@@ -44,7 +50,7 @@ const MontenegrinGallery: React.FC = () => {
         <p className="text-md sm:text-lg md:text-2xl text-gray-600 text-center max-w-3xl mx-auto mb-12 leading-relaxed">
           Experience the essence of Montenegrin culture through our{' '}
           <span className="font-semibold text-[#0097B2]">high-quality t-shirts</span>. Each design is inspired by local
-          sayings, bold humor, and cultural pride, telling a story that’s authentically Montenegrin.
+          sayings, bold humor, and cultural pride, telling a story that&apos;s authentically Montenegrin.
         </p>
 
         {/* Horizontal Scrollable Image Gallery */}
@@ -53,21 +59,30 @@ const MontenegrinGallery: React.FC = () => {
             ref={scrollRef}
             className="flex space-x-8 pb-8 overflow-x-auto scrollbar-hide"
           >
-            {images.slice(0, 1).map((src, index) => ( // Only load the first image for now
+            {images.map((src, index) => (
               <div
                 key={index}
-                className="flex-none w-[300px] sm:w-[450px] md:w-[600px] relative overflow-hidden"
+                className="flex-none w-[400px] sm:w-[600px] md:w-[800px] relative overflow-hidden"
               >
                 <Image
                   src={src}
-                  alt={`Montenegrin culture ${index + 1}`}
-                  width={600}
-                  height={600}
-                  className="object-cover rounded-lg shadow-xl"
+                  alt={`Ladimood style party ${index + 1}`}
+                  width={800}
+                  height={800}
+                  className="object-cover rounded-lg shadow-2xl"
                 />
               </div>
             ))}
           </div>
+          <style jsx>{`
+            .scrollbar-hide::-webkit-scrollbar {
+              display: none;
+            }
+            .scrollbar-hide {
+              -ms-overflow-style: none;
+              scrollbar-width: none;
+            }
+          `}</style>
         </div>
 
         {/* Call to Action Section */}
@@ -77,7 +92,7 @@ const MontenegrinGallery: React.FC = () => {
             <span className="font-semibold text-[#0097B2]">bold design</span> with cultural authenticity. Celebrate Montenegro, wear your
             roots, and stand out with every step.
           </p>
-          <button className="px-6 sm:px-8 py-3 sm:py-4 bg-[#0097B2] text-white font-bold text-md sm:text-lg rounded-full shadow-md hover:bg-[#007B92] transition-colors duration-300">
+          <button className="px-6 sm:px-8 py-3 sm:py-4 bg-[#0097B2] text-white font-bold text-md sm:text-lg rounded-full shadow-lg hover:bg-[#007B92] transition-transform transform hover:scale-105 duration-300">
             Shop the Collection
           </button>
         </div>

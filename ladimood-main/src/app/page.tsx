@@ -6,6 +6,7 @@ import Categories from "@/components/Frontpage/Categories";
 import ProductGrid from "@/components/Order/Shop/ProductGrid";
 import Newsletter from "@/components/Frontpage/Newsletter";
 import MontenegrinGallery from '@/components/Frontpage/MontenegrinGallery';
+import SuggestionBox from '@/components/Frontpage/ShareIdeas';
 
 import OurStory from '@/components/Frontpage/OurStory';
 import ShopPrompt from '@/components/Frontpage/ShopPrompt';
@@ -79,15 +80,11 @@ const Frontpage: React.FC = () => {
         <OurStory />
       </div>
 
-
-      {/* Montenegrin Gallery */}
-      <div className="mb-16"> {/* Increased space */}
+      <div className="mb-16"> 
         <MontenegrinGallery />
       </div>
 
-      {/* Product Grid */}
-      {/* Our Story Section */}
-      <div className="mb-16"> {/* Increased space */}
+      <div className="mb-16"> 
         <ShopPrompt />
       </div>
       {isLoading ? (
@@ -95,18 +92,20 @@ const Frontpage: React.FC = () => {
           <div className="loader">Loading products...</div>
         </div>
       ) : (
-        <div className="mb-16"> {/* Increased space */}
+        <div className="mb-16">
           <ProductGrid products={products} handleAddToCart={handleAddToCart} />
         </div>
       )}
 
-      {/* Categories Section */}
-      <div className="mb-16"> {/* Increased space */}
+      <div className="mb-16">
+        <SuggestionBox />
+      </div>
+
+      <div className="mb-16"> 
         <Categories />
       </div>
 
-      {/* Newsletter Section */}
-      <div className="mt-16"> {/* Increased space */}
+      <div className="mt-16"> 
         <Newsletter />
       </div>
     </div>
