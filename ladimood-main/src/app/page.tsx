@@ -72,46 +72,74 @@ const Frontpage: React.FC = () => {
   }
 
   return (
-    <div className="bg-white">
-      <div className="mb-16">
-        <Hero />
-      </div>
-
-      {/* Our Story Section */}
-      <div className="mb-16">
-        <OurStory />
-      </div>
-
-      <div className="mb-16">
-        <MontenegrinGallery />
-      </div>
-
-      <div className="mb-16">
-        <ShopPrompt />
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="loader">Loading products...</div>
-        </div>
-      ) : (
+    <>
+      <head>
+        <title>Ladimood | High-Quality Montenegrin-Inspired Clothing</title>
+        <meta
+          name="description"
+          content="Ladimood brings you high-quality t-shirts and clothing inspired by Montenegrin culture. Wear your roots with pride and express your unique style."
+        />
+       <meta name="keywords" content="Ladimood, Montenegrin clothing, cultural t-shirts, high-quality t-shirts, unique designs, fashion Montenegro, Ladimood, Crnogorski brendovi, Balkanski brendovi, kul majice, balkanske izreke, balkanske fore, visokokvalitetne majice, jedinstveni dizajn, moda Crna Gora" />
+        <meta name="author" content="Ladimood" />
+        <meta property="og:title" content="Ladimood | High-Quality Montenegrin-Inspired Clothing" />
+        <meta
+          property="og:description"
+          content="Discover Ladimood's unique Montenegrin-inspired clothing. Our t-shirts combine bold designs, cultural sayings, and premium materials."
+        />
+        <meta property="og:image" content="/images/og-image.jpg" />
+        <meta property="og:url" content="https://www.ladimood.com" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Ladimood | High-Quality Montenegrin-Inspired Clothing" />
+        <meta
+          name="twitter:description"
+          content="Shop Ladimood for unique, high-quality t-shirts inspired by Montenegrin culture. Wear your roots and share your style."
+        />
+        <meta name="twitter:image" content="/images/og-image.jpg" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://www.ladimood.com" />
+      </head>
+      <div className="bg-white">
         <div className="mb-16">
-          <ProductGrid products={products} handleAddToCart={handleAddToCart} />
+          <Hero />
         </div>
-      )}
 
-      <div className="mb-16">
-        <SuggestionBox />
-      </div>
+        {/* Our Story Section */}
+        <div className="mb-16">
+          <OurStory />
+        </div>
 
-      <div className="mb-16">
-        <Categories />
-      </div>
+        <div className="mb-16">
+          <MontenegrinGallery />
+        </div>
 
-      <div className="mt-16">
-        <Newsletter />
+        <div className="mb-16">
+          <ShopPrompt />
+        </div>
+
+        {isLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="loader">Loading products...</div>
+          </div>
+        ) : (
+          <div className="mb-16">
+            <ProductGrid products={products} handleAddToCart={handleAddToCart} />
+          </div>
+        )}
+
+        <div className="mb-16">
+          <SuggestionBox />
+        </div>
+
+        <div className="mb-16">
+          <Categories />
+        </div>
+
+        <div className="mt-16">
+          <Newsletter />
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
