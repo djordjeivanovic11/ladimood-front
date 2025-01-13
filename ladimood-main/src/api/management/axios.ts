@@ -17,15 +17,24 @@ export const createSalesRecord = async (salesRecord: {
   date_of_sale: string;
   buyer_name: string;
   price: number;
-}): Promise<SalesRecord> => {
+}): Promise<SalesRecord | null> => {
   try {
     const response = await axiosInstance.post<SalesRecord>('/management/sales', salesRecord);
     return response.data;
   } catch (error: any) {
+    // Check for the "already exists" case
+    if (error?.response?.status === 400 && error?.response?.data?.detail) {
+      if (error.response.data.detail.includes('already exists')) {
+        console.warn('A sales record for this order already exists. Returning null instead of throwing.');
+        return null; 
+      }
+    }
     console.error('Error creating sales record:', error?.response?.data?.detail || error.message);
     throw new Error(error?.response?.data?.detail || 'Failed to create sales record.');
   }
 };
+
+
 
 // Orders API
 export const fetchAllOrdersWithDetails = async (): Promise<OrderManagement[]> => {

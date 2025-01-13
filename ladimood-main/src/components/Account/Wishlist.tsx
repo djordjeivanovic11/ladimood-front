@@ -45,6 +45,8 @@ const Wishlist: React.FC = () => {
                   <Image
                     src={item.product.image_url}
                     alt={item.product.name}
+                    width={128}
+                    height={128}
                     className="w-full sm:w-32 h-32 object-cover rounded-md border border-gray-300 mb-3 mx-auto"
                   />
                 )}

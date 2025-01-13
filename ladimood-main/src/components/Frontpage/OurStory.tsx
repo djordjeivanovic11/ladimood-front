@@ -10,9 +10,11 @@ const AboutUs: React.FC = () => {
           <h1 className="text-5xl md:text-6xl font-bold text-[#0097B2] leading-tight">
             LADIMOOD®  
             <br />  
-            BREND SA RITMOM I ENERGIJOM  
+            PROMOVIŠEMO PODGORIČKU KULTURU,
             <br />
-            STVARA EMOCIJU U SVAKOM PROIZVODU
+            ZASLUŽENI ODMOR i 
+            <br />
+            UŽIVANJE U MALIM TRENUCIMA
           </h1>
         </div>
 
@@ -30,7 +32,7 @@ const AboutUs: React.FC = () => {
           {/* Optional Video/Additional Text */}
           <div className="text-gray-700 text-lg">
             <p>
-              U Ladimoodu težimo da isporučimo proizvode koji odražavaju vaš način života—podstičući pozitivne emocije i stvarajući jedinstven stil. Otkrijte šta nas čini posebnim.
+              Ladimood je posvećen kreiranju proizvoda vrhunskog kvaliteta koji odražavaju podgorički način života, promovišu pozitivnu energiju i humor.
             </p>
 
             {/* Example button for further interaction */}

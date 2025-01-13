@@ -4,20 +4,20 @@ import Link from 'next/link';
 
 const categories = [
   {
-    title: 'HOODIES',
-    subtitle: 'HOODIES | SWEATERS',
+    title: 'DUKSERICE',
+    subtitle: ' PULLOVER HOODIE | FULL ZIP HOODIE| CREWNECK',
     imageSrc: '/images/categories/hoodies.png',
     link: '/shop?category=hoodies',
   },
   {
-    title: 'TEES',
-    subtitle: 'BASIC | LONG SLEEVE | TOPS',
+    title: 'MAJICE',
+    subtitle: 'SLIM FIT| OVERSIZE | KLASIČNE',
     imageSrc: '/images/categories/tees.png',
     link: '/shop?category=T-Shirts',
   },
   {
     title: 'ACCESSORIES',
-    subtitle: 'HATS | BRACELETS | KEYCHAINS | SOCKS',
+    subtitle: 'KAPE | NARUKVICE | TORBE | ČARAPE',
     imageSrc: '/images/categories/accessories.png',
     link: '/shop?category=accessories',
   },

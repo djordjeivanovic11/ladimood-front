@@ -29,9 +29,9 @@ const Hero: React.FC = () => {
           className="text-white text-4xl md:text-6xl font-bold drop-shadow-lg"
           data-aos="fade-up"
         >
-          KO LADI
+          WORK HARD, PLAY HARDER
           <br />
-          ZLO NE MISLI
+          UZ LADIMOOD
         </h1>
         <div className="mt-8" data-aos="fade-up" data-aos-delay="500">
           <Link href="/shop">

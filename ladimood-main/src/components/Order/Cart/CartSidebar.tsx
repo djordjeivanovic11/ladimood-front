@@ -1,3 +1,4 @@
+// CartSidebar.tsx
 import React, { useEffect, useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import CartItemComponent from './CartItem';
@@ -8,18 +9,14 @@ import { getCart, removeFromCart, addToCart } from '@/api/account/axios';
 const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  
   useEffect(() => {
     if (isOpen) {
       const fetchCartItems = async () => {
         try {
           const response = await getCart();
           setCartItems(response.items);
-        } catch (error) {
-          console.error('Failed to load cart items:', error);
-        }
+        } catch (error) {}
       };
-
       fetchCartItems();
     }
   }, [isOpen]);
@@ -30,9 +27,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
       setCartItems((prevItems) =>
         prevItems.filter((item) => !(item.id === id && item.color === color && item.size === size))
       );
-    } catch (error) {
-      console.error('Failed to remove item from cart:', error);
-    }
+    } catch (error) {}
   };
 
   const handleUpdateQuantity = async (id: number, color: string, size: string, quantity: number) => {
@@ -46,17 +41,15 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
           )
         );
       }
-    } catch (error) {
-      console.error('Failed to update quantity:', error);
-    }
+    } catch (error) {}
   };
 
   const handleOrder = () => {
-    closeCart(); 
+    closeCart();
   };
 
   const handleCancelOrder = () => {
-    closeCart(); 
+    closeCart();
   };
 
   return (
@@ -86,12 +79,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
                 />
               ))}
             </div>
-
-            <CallToOrder
-              cartItems={cartItems}
-              onOrder={handleOrder}
-              onCancel={handleCancelOrder}
-            />
+            <CallToOrder cartItems={cartItems} onOrder={handleOrder} onCancel={handleCancelOrder} />
           </>
         )}
       </div>

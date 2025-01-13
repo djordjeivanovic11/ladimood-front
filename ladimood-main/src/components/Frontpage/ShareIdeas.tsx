@@ -12,7 +12,7 @@ const SuggestionBox: React.FC = () => {
             Imate cool ideju za majicu?
           </h2>
           <p className="text-gray-700 text-lg md:text-xl leading-relaxed mb-8">
-            Podijelite svoje ideje i pomozite nam da kreiramo jedinstvene dizajne majica koje slave crnogorsku kulturu i stil života. Radujemo se vašim prijedlozima!
+            Podijelite svoje ideje i pomozite nam da kreiramo jedinstvene majice koje slave podgoričku kulturu i stil života. Radujemo se vašim prijedlozima!
           </p>
           <Link href="/contact" passHref>
             <button

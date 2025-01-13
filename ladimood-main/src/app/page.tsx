@@ -73,32 +73,6 @@ const Frontpage: React.FC = () => {
 
   return (
     <>
-      <head>
-        <title>Ladimood | Visokokvalitetna odjeća inspirisana crnogorskom kulturom</title>
-        <meta
-          name="description"
-          content="Ladimood vam donosi visokokvalitetne majice i odjeću inspirisanu crnogorskom kulturom. Nosi svoje korijene s ponosom i izrazi svoj jedinstveni stil."
-        />
-       <meta name="keywords" content="Ladimood, crnogorska odjeća, kulturne majice, visokokvalitetne majice, jedinstveni dizajn, moda Crna Gora, Ladimood, Crnogorski brendovi, Balkanski brendovi, kul majice, balkanske izreke, balkanske fore, visokokvalitetne majice, jedinstveni dizajn, moda Crna Gora" />
-        <meta name="author" content="Ladimood" />
-        <meta property="og:title" content="Ladimood | Visokokvalitetna odjeća inspirisana crnogorskom kulturom" />
-        <meta
-          property="og:description"
-          content="Otkrijte jedinstvenu odjeću inspirisanu crnogorskom kulturom uz Ladimood. Naše majice spajaju odvažne dizajne, kulturne izreke i vrhunske materijale."
-        />
-        <meta property="og:image" content="/images/og-image.jpg" />
-        <meta property="og:url" content="https://www.ladimood.com" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Ladimood | Visokokvalitetna odjeća inspirisana crnogorskom kulturom" />
-        <meta
-          name="twitter:description"
-          content="Kupujte kod Ladimooda jedinstvene, visokokvalitetne majice inspirisane crnogorskom kulturom. Nosi svoje korijene i dijeli svoj stil."
-        />
-        <meta name="twitter:image" content="/images/og-image.jpg" />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://www.ladimood.com" />
-      </head>
       <div className="bg-white">
         <div className="mb-16">
           <Hero />

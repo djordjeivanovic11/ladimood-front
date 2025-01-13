@@ -1,53 +1,31 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 
 const MontenegrinGallery: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [isUserScrolling, setIsUserScrolling] = useState(false);
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
     let scrollAmount = 0;
 
     const scrollImages = () => {
-      if (scrollContainer && !isUserScrolling) {
-        scrollAmount += 4;
+      if (scrollContainer) {
+        scrollAmount += 4; // Adjust speed as needed
         scrollContainer.scrollLeft = scrollAmount;
+
         if (
           scrollAmount >=
           scrollContainer.scrollWidth - scrollContainer.clientWidth
         ) {
-          scrollAmount = 0;
+          scrollAmount = 0; // Reset to the start for infinite scrolling
         }
       }
+      requestAnimationFrame(scrollImages); // Continue the animation
     };
 
-    const intervalId = setInterval(scrollImages, 20);
+    const animationId = requestAnimationFrame(scrollImages);
 
-    return () => clearInterval(intervalId);
-  }, [isUserScrolling]);
-
-  // Event handlers to detect user interaction
-  useEffect(() => {
-    const scrollContainer = scrollRef.current;
-
-    const handleMouseEnter = () => setIsUserScrolling(true);
-    const handleMouseLeave = () => setIsUserScrolling(false);
-    const handleScroll = () => setIsUserScrolling(true);
-
-    if (scrollContainer) {
-      scrollContainer.addEventListener("mouseenter", handleMouseEnter);
-      scrollContainer.addEventListener("mouseleave", handleMouseLeave);
-      scrollContainer.addEventListener("scroll", handleScroll);
-    }
-
-    return () => {
-      if (scrollContainer) {
-        scrollContainer.removeEventListener("mouseenter", handleMouseEnter);
-        scrollContainer.removeEventListener("mouseleave", handleMouseLeave);
-        scrollContainer.removeEventListener("scroll", handleScroll);
-      }
-    };
+    return () => cancelAnimationFrame(animationId); // Clean up on unmount
   }, []);
 
   const images = [
@@ -72,12 +50,11 @@ const MontenegrinGallery: React.FC = () => {
           Made in Montenegro
         </h2>
         <p className="text-md sm:text-lg md:text-2xl text-gray-600 text-center max-w-3xl mx-auto mb-12 leading-relaxed">
-          Doživite suštinu crnogorske kulture kroz našu{" "}
-          <span className="font-semibold text-[#0097B2]">
-            visokokvalitetnu odjeću
-          </span>
-          . Svaki dizajn inspirisan je lokalnim izrekama, smjelim humorom i
-          kulturnim ponosom. Prenosimo autentično crnogorski kulerski stil.
+          Doživite suštinu podgoričke kulture kroz našu{" "}
+          <span className="font-semibold text-[#0097B2]">kolekciju majica</span>
+          . Ladimood je brend čiji je cilj da promoviše zasluženo meračenje,
+          uživanje u malim trenucima - s kaficom u ruci, đe god sunce ugrije. Ne
+          želimo žurbu i stres, već opuštenost i smijeh.
         </p>
 
         {/* Horizontal Scrollable Image Gallery */}
@@ -94,8 +71,8 @@ const MontenegrinGallery: React.FC = () => {
                 <Image
                   src={src}
                   alt={`Ladimood stil zabava ${index + 1}`}
-                  width={800}
-                  height={800}
+                  width={900}
+                  height={900}
                   className="object-cover rounded-lg shadow-2xl"
                 />
               </div>
@@ -115,15 +92,18 @@ const MontenegrinGallery: React.FC = () => {
         {/* Call to Action Section */}
         <div className="text-center mt-16">
           <p className="text-md sm:text-lg md:text-xl text-gray-700 leading-relaxed max-w-3xl mx-auto mb-8">
-            Naši proizvodi su izrađeni od <span className="font-semibold text-[#0097B2]">najkvalitetnijih majica</span>, koristeći 100% pamuk za maksimalnu udobnost i trajnost. Svaki detalj je pažljivo osmišljen. 
-            Kombinujemo <span className="font-semibold text-[#0097B2]"> crnogorske izreke, fore i šale</span> sa kulturnom autentičnošću. 
-            Proslavite Crnu Goru, nosite svoje korijene i istaknite se na svakom koraku.
+            Naši proizvodi su izrađeni za maksimalnu udobnost i trajnost. Svaki
+            detalj je pažljivo osmišljen i izrađen. Kombinujemo{" "}
+            <span className="font-semibold text-[#0097B2]">
+              crnogorske izreke, fore i šale
+            </span>{" "}
+            sa kulturnom autentičnošću. Proslavite Crnu Goru, nosite svoje
+            korijene i istaknite se na svakom koraku.
           </p>
           <button className="px-6 sm:px-8 py-3 sm:py-4 bg-[#0097B2] text-white font-bold text-md sm:text-lg rounded-full shadow-lg hover:bg-[#007B92] transition-transform transform hover:scale-105 duration-300">
             Shop
           </button>
         </div>
-
       </div>
     </section>
   );

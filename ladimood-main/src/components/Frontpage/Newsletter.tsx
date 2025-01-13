@@ -1,59 +1,76 @@
-"use client";
-import React, { useState } from 'react';
-import { addToNewsletter } from '@/api/account/axios'; // Import the addToNewsletter function
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { addToNewsletter } from '@/api/account/axios'; 
 
 const SubscribeNewsletter: React.FC = () => {
   const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false); // Track the submit state
-  const [message, setMessage] = useState(''); // For success or error messages
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true); // Set submitting to true
+    setIsSubmitting(true);
+    setMessage(null);
 
     try {
-      // Use the addToNewsletter function to send the email
       await addToNewsletter(email);
-
-      // Success message and clear email input
-      setMessage('Successfully subscribed to the newsletter!');
-      setEmail(''); // Clear email input
+      setMessage({ type: 'success', text: 'Successfully subscribed to the newsletter!' });
+      setEmail('');
     } catch (error: any) {
-      // Handle the error, e.g., if the email is already registered
       if (error.response && error.response.status === 400) {
-        setMessage('This email is already registered.');
+        setMessage({ type: 'error', text: 'This email is already registered.' });
       } else {
-        setMessage('An error occurred. Please try again.');
+        setMessage({ type: 'error', text: 'An error occurred. Please try again.' });
       }
     } finally {
-      setIsSubmitting(false); // Reset submitting state
+      setIsSubmitting(false);
     }
   };
 
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   return (
-    <div className="bg-white py-12">
-      <div className="max-w-screen-md mx-auto text-center">
-        <h2 className="text-3xl font-semibold text-[#0097B2] mb-4">Subscribe to our newsletter</h2>
-        <p className="text-gray-500 mb-6">Be the first to know about new collections and exclusive offers.</p>
-        {message && <p className={`mb-4 ${message.includes('error') ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
-        <form onSubmit={handleSubmit} className="flex justify-center items-center">
-          <div className="relative w-full max-w-lg">
+    <div className="bg-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto text-center bg-white p-8 relative">
+        <h2 className="mt-6 text-3xl font-extrabold text-gray-800">Subscribe to our Newsletter</h2>
+        <p className="mt-4 text-lg text-gray-600">
+          Stay updated with the latest collections and exclusive offers.
+        </p>
+        {message && (
+          <div
+            className={`mt-4 p-3 rounded-md text-sm ${
+              message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            }`}
+          >
+            {message.text}
+          </div>
+        )}
+        <form onSubmit={handleSubmit} className="mt-8 flex flex-col sm:flex-row justify-center items-center">
+          <div className="w-full sm:max-w-md flex">
             <input
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full py-3 px-4 pr-32 text-gray-700 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#0097B2]"
+              className="text-black w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-[#0097B2] focus:border-transparent"
               required
             />
-            <button
-              type="submit"
-              className="absolute top-0 right-0 h-full px-6 bg-[#0097B2] text-white font-semibold rounded-full hover:bg-[#007A90] focus:outline-none"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Submitting...' : 'SUBMIT'}
-            </button>
           </div>
+          <button
+            type="submit"
+            className={`mt-4 sm:mt-0 sm:ml-4 px-6 py-3 bg-[#0097B2] text-white font-semibold rounded-full shadow-md hover:bg-[#007A90] transition-colors duration-300 flex items-center justify-center ${
+              isSubmitting ? 'cursor-not-allowed opacity-75' : ''
+            }`}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Subscribe'}
+          </button>
         </form>
       </div>
     </div>

@@ -7,6 +7,8 @@ const SalesManagement: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const totalSales = salesRecords.reduce((total, record) => total + record.price, 0);
+
   useEffect(() => {
     const fetchRecords = async () => {
       setIsLoading(true);
@@ -71,11 +73,19 @@ const SalesManagement: React.FC = () => {
                     {new Date(record.date_of_sale).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ${record.price}
+                    ${record.price.toFixed(2)}
                   </td>
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr className="bg-gray-100">
+                <td colSpan={5} className="px-6 py-4 text-right font-semibold text-gray-700">
+                  Total Sales:
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-900">${totalSales.toFixed(2)}</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       )}

@@ -1,8 +1,9 @@
+// CallToOrder.tsx
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CallToOrderProps } from '@/app/types/types';
 
-const CallToOrder: React.FC<CallToOrderProps> = ({ cartItems, onCancel }) => {
+const CallToOrder: React.FC<CallToOrderProps> = ({ cartItems, onCancel, onOrder }) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -11,7 +12,7 @@ const CallToOrder: React.FC<CallToOrderProps> = ({ cartItems, onCancel }) => {
   }
 
   const totalAmount = cartItems.reduce((total, item) => {
-    const price = item.product?.price || 0; 
+    const price = item.product?.price || 0;
     return total + price * item.quantity;
   }, 0);
 
@@ -35,13 +36,13 @@ const CallToOrder: React.FC<CallToOrderProps> = ({ cartItems, onCancel }) => {
       })),
       total: totalAmount,
     };
-  
-    console.log('Order Data:', orderData); 
     sessionStorage.setItem('orderData', JSON.stringify(orderData));
-    router.push('/confirmation'); 
+    if (onOrder) {
+      onOrder();
+    }
+    router.push('/confirmation');
   };
-  
-  
+
   return (
     <div className="p-4 bg-white shadow-md">
       <div className="flex justify-between items-center">

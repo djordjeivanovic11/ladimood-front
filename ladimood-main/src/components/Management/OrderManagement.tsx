@@ -11,7 +11,8 @@ const OrdersManagement: React.FC = () => {
   const [orders, setOrders] = useState<OrderManagement[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<OrderManagement[]>([]);
   const [error, setError] = useState<string | null>(null);
-
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertType, setAlertType] = useState<'success' | 'error' | null>(null);
   // Filter states
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
@@ -41,6 +42,17 @@ const OrdersManagement: React.FC = () => {
     };
     fetchOrdersData();
   }, []);
+
+  useEffect(() => {
+    if (alertMessage) {
+      const timer = setTimeout(() => {
+        setAlertMessage(null);
+        setAlertType(null);
+      }, 5000); // Clear message after 5 seconds
+      return () => clearTimeout(timer); // Cleanup on component unmount or alert change
+    }
+  }, [alertMessage]);
+  
 
   /**
    * Handle status change for an order
@@ -75,17 +87,31 @@ const OrdersManagement: React.FC = () => {
       const salesRecordData = {
         user_id: order.user_id,
         order_id: order.id,
-        date_of_sale: new Date().toISOString(), // Current time as sale date
+        date_of_sale: new Date().toISOString(),
         buyer_name: order.user ? order.user.full_name : "N/A",
         price: order.total_price,
       };
-      await createSalesRecord(salesRecordData);
-      alert("Sale finalized and sales record created successfully!");
-    } catch (err) {
+  
+      const result = await createSalesRecord(salesRecordData);
+  
+      if (result === null) {
+        // Duplicate sale record
+        setAlertMessage("A sales record for this order already exists.");
+        setAlertType("error");
+      } else {
+        // Successfully created a new sales record
+        setAlertMessage("Sale finalized and sales record created successfully!");
+        setAlertType("success");
+      }
+    } catch (err: any) {
+      // This catch block runs only for genuine errors (not duplicates),
+      // because duplicates return `null` instead of throwing.
       console.error("Error finalizing sale:", err);
-      alert("Failed to finalize the sale. Please try again.");
+      setAlertMessage("Failed to finalize the sale. Please try again.");
+      setAlertType("error");
     }
   };
+  
 
   /**
    * Apply all selected filters
@@ -119,6 +145,7 @@ const OrdersManagement: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
+
       {/* Page Title */}
       <h2 className="text-2xl font-bold mb-6 text-[#0097B2]">
         Orders Management
@@ -137,21 +164,21 @@ const OrdersManagement: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Start Date Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="block text-black text-sm font-medium">
               Start Date
             </label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="mt-1 text-black block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               title="Start Date"
             />
           </div>
 
           {/* End Date Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
+            <label className="text-black block text-sm font-medium text-gray-700">
               End Date
             </label>
             <input
@@ -159,7 +186,7 @@ const OrdersManagement: React.FC = () => {
               placeholder="End Date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             />
           </div>
 
@@ -172,7 +199,7 @@ const OrdersManagement: React.FC = () => {
               aria-label="Status Filter"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              className="text-black mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             >
               <option value="">All</option>
               {Object.values(OrderStatusEnum).map((status) => (
@@ -249,7 +276,15 @@ const OrdersManagement: React.FC = () => {
                   </p>
                 </div>
               </div>
-
+              {alertMessage && (
+                  <div
+                    className={`mb-4 p-4 rounded ${
+                      alertType === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    <p>{alertMessage}</p>
+                  </div>
+                )}
               {/* Order Items */}
               <div className="mt-4">
                 <h4 className="text-lg font-medium text-[#0097B2]">Items:</h4>
@@ -271,6 +306,9 @@ const OrdersManagement: React.FC = () => {
                 >
                   Finalize Sale
                 </button>
+                <span id="saleStatus" className="ml-4 text-green-700 font-semibold hidden">
+                  Sale finalized successfully!
+                </span>
               </div>
             </div>
           ))

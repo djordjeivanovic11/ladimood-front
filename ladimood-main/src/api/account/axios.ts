@@ -183,15 +183,29 @@ export const cancelOrder = async (orderId: string): Promise<void> => {
 //         WISHLIST ROUTES           //
 //-----------------------------------//
 
-// Add Item to Wishlist (Frontend Axios Call)
-export const addToWishlist = async (wishlistItem: WishlistItem): Promise<WishlistItem> => {
+export interface AddWishlistItemRequest {
+  product_id: number; 
+  color: string;
+  size: string;
+}
+
+export const addToWishlist = async (wishlistItem: AddWishlistItemRequest): Promise<WishlistItem> => {
   try {
-    // Send color and size with the wishlist item
     const response: AxiosResponse<WishlistItem> = await api.post('/account/wishlist', wishlistItem);
     return response.data;
-  } catch (error) {
-    console.error('Error adding item to wishlist:', error);
-    throw error;
+  } catch (error: any) {
+    if (error.response) {
+      const detail = error.response.data?.detail;
+      if (detail === "Item already in wishlist") {
+        throw new Error("ItemAlreadyInWishlist"); // Use a custom error identifier
+      }
+      console.error('Server responded with an error:', error.response.data);
+    } else if (error.request) {
+      console.error('No response from server:', error.request);
+    } else {
+      console.error('Error setting up the request:', error.message);
+    }
+    throw error; // Re-throw the error to handle it in the calling code
   }
 };
 
@@ -292,20 +306,10 @@ export const clearCart = async (): Promise<MessageResponse> => {
   }
 };
 
-
-export const addToNewsletter = async (email: any) => {
-  try {
-    await axios.post('/api/account/add-to-newsletter', { email });
-    alert('Successfully subscribed to the newsletter!');
-  } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      alert('This email is already registered.');
-    } else {
-      console.error('Error subscribing to the newsletter', error);
-    }
-  }
+export const addToNewsletter = async (email: string) => {
+  const response = await api.post('/account/add-to-newsletter', { email });
+  return response.data;
 };
-
 
 
 export const getCurrentUser = async (): Promise<User> => {
