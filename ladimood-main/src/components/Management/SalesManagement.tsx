@@ -15,7 +15,11 @@ const SalesManagement: React.FC = () => {
       setError(null);
       try {
         const data = await fetchSalesRecords();
-        setSalesRecords(data);
+        // Sort sales records by date_of_sale in descending order
+        const sortedData = data.sort(
+          (a: SalesRecord, b: SalesRecord) => new Date(b.date_of_sale).getTime() - new Date(a.date_of_sale).getTime()
+        );
+        setSalesRecords(sortedData);
       } catch (error) {
         setError('Failed to fetch sales records. Please try again later.');
         console.error('Error fetching sales records:', error);
@@ -23,9 +27,10 @@ const SalesManagement: React.FC = () => {
         setIsLoading(false);
       }
     };
-
+  
     fetchRecords();
   }, []);
+  
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
