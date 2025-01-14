@@ -1,5 +1,5 @@
 import axiosInstance from '../axiosInstance';
-import { Order, SalesRecord, OrderStatusEnum, OrderManagement} from '@/app/types/types';
+import { Order, SalesRecord, OrderStatusEnum, OrderManagement, OrderResponse} from '@/app/types/types';
 
 export const fetchSalesRecords = async (): Promise<SalesRecord[]> => {
   try {
@@ -47,9 +47,9 @@ export const fetchAllOrdersWithDetails = async (): Promise<OrderManagement[]> =>
   }
 };
 
-export const fetchOrderDetailsById = async (orderId: number): Promise<Order> => {
+export const fetchOrderDetailsById = async (orderId: number): Promise<OrderResponse> => {
   try {
-    const response = await axiosInstance.get<Order>(`/management/orders/${orderId}`);
+    const response = await axiosInstance.get<OrderResponse>(`/management/orders/${orderId}`);
     return response.data;
   } catch (error: any) {
     console.error(`Error fetching order details with ID ${orderId}:`, error?.response?.data?.detail || error.message);

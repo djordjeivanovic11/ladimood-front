@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { OrderManagement, OrderStatusEnum } from '@/app/types/types';
+import { OrderResponse, OrderStatusEnum } from '@/app/types/types';
 import { fetchOrderDetailsById } from '@/api/management/axios';
 import { FaUser, FaTruck, FaBoxOpen } from 'react-icons/fa';
 import OrderItem from './OrderItem';
@@ -11,7 +11,7 @@ interface OrderByIdProps {
 }
 
 const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
-  const [order, setOrder] = useState<OrderManagement | null>(null);
+  const [order, setOrder] = useState<OrderResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,8 +31,22 @@ const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
             color: item.color || 'Unknown Color',
             size: item.size || 'Unknown Size',
             price: item.price || 0,
-            product: item.product
+            product: {
+              id: item.product?.id || -1,
+              name: item.product?.name || 'Unknown Name',
+              description: item.product?.description || 'No Description',
+              category: item.product?.category || 'Uncategorized',
+              price: item.product?.price || 0,
+              image_url: item.product?.image_url || null,
+              created_at: item.product?.created_at
+                ? new Date(item.product.created_at).toISOString() // Conversion to ISO string
+                : undefined,
+              updated_at: item.product?.updated_at
+                ? new Date(item.product.updated_at).toISOString() // Conversion to ISO string
+                : undefined,
+            },
           })),
+          
         });
       } catch (err: any) {
         setError(err.message || 'Failed to fetch order details.');

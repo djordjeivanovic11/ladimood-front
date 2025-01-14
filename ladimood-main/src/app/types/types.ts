@@ -39,7 +39,7 @@ export interface ChangePasswordRequest {
 export interface UserBase {
   email: string;
   full_name: string;
-  phone_number?: string;
+  phone_number: string;
 }
 
 export interface UserCreate extends UserBase {
@@ -90,10 +90,12 @@ export interface ProductCreate extends ProductBase {
 
 export interface Product extends ProductBase {
   id: number;
-  category?: Category;
-  created_at: Date;
-  updated_at: Date;
+  category?: string | null;
+  created_at?: Date;
+  updated_at?: Date;
 }
+
+
 
 export interface ProductComponentProps {
   product: Product;
@@ -168,13 +170,22 @@ export interface OrderCreate {
 // OrderItem Interface
 export interface OrderItem {
   id: number;
-  product_id: number;     
+  product_id: number;
   product_name: string;
   quantity: number;
-  color: string | null;
-  size: string | null;
+  color?: string | null;
+  size?: string | null;
   price: number;
-  product: Product;
+  product: {
+    id: number;
+    name: string;
+    description: string;
+    category?: string | null;
+    price: number;
+    image_url?: string | null;
+    created_at?: string | undefined;
+    updated_at?: string | undefined;
+  };
 }
 
 
@@ -307,23 +318,25 @@ export interface OrderResponse {
   total_price: number;
   items: Array<{
     id: number;
-    product_name?: string | null;
+    product_id: number;
+    product_name: string;
+    quantity: number;
     color?: string | null;
     size?: string | null;
-    quantity: number;
     price: number;
-    product?: {
-      id?: number;
-      name?: string;
-      description?: string;
-      category?: string;
-      price?: number;
+    product: {
+      id: number;
+      name: string;
+      description: string;
+      category?: string | null;
+      price: number;
       image_url?: string | null;
-      created_at?: string;
-      updated_at?: string;
-    } | null;
+      created_at?: string | undefined;
+      updated_at?: string | undefined;
+    };
   }>;
 }
+
 
 export interface AddressManagement {
   street_address: string;
@@ -371,7 +384,7 @@ export interface OrderByIdProps {
 export interface OrderManagement {
   id: number;
   user_id: number;
-  user?: UserManagement;
+  user?: UserBase;
   address?: AddressManagement; 
   status: OrderStatusEnum;
   total_price: number;
@@ -379,3 +392,4 @@ export interface OrderManagement {
   created_at: string;
   updated_at: string;
 }
+
