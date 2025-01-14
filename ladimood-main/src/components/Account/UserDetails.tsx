@@ -21,9 +21,10 @@ const UserDetails: React.FC = () => {
       if (refreshToken) {
         await logoutUser(refreshToken);
       }
+      // Clear tokens
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
-      window.location.reload();
+
       router.push("/");
     } catch (error) {
       alert("Failed to log out. Please try again.");

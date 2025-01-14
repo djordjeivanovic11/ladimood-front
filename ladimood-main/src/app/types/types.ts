@@ -49,7 +49,7 @@ export interface UserCreate extends UserBase {
 export interface User extends UserBase {
   id: number;
   is_active: boolean;
-  role?: Role; 
+  role?: RoleBase; 
   created_at: Date;
   updated_at: Date;
 }

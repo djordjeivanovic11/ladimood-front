@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import Navbar from "@/components/Layout/Header/Navbar";
 import Footer from "@/components/Layout/Footer/Footer";
 import "../styles/globals.css";
+import { AuthProvider } from "@/components/Authentication/HOC/authContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -51,7 +52,7 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
         <Navbar />
 
         {/* Main Content */}
-        <main className="flex-grow w-full bg-white">{children}</main>
+        <main className="flex-grow w-full bg-white"><AuthProvider>{children}</AuthProvider></main>
 
         {/* Footer */}
         <Footer />

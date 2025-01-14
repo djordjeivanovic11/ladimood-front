@@ -1,9 +1,10 @@
 "use client";
-import React from 'react';
-import ShopFront from '@/components/Order/Shop/Shop';
+import React from "react";
+import ShopFront from "@/components/Order/Shop/Shop";
+import withAuth from "@/components/Authentication/HOC/withAuth";
 
-const Shop = () => {
+const Shop: React.FC = () => {
   return <ShopFront />;
 };
 
-export default Shop;
+export default withAuth(Shop);

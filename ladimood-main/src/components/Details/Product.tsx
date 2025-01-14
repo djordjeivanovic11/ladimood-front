@@ -62,7 +62,6 @@ const Product: React.FC<ProductProps> = ({
     }
   };
   
-
   
   return (
     <div className="productCard group bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-1">

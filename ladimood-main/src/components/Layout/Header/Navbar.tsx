@@ -78,7 +78,7 @@ const Navbar: React.FC = () => {
               Shop
             </div>
             <div
-              onClick={() => handleProtectedLink("/contact")}
+              onClick={() => router.push("/contact")}
               className="cursor-pointer text-lg font-serif text-[#0097B2] hover:text-teal-200"
             >
               Kontakt
@@ -136,7 +136,7 @@ const Navbar: React.FC = () => {
               Shoping
             </div>
             <div
-              onClick={() => handleProtectedLink("/contact")}
+              onClick={() => router.push("/contact")}
               className="cursor-pointer text-lg font-serif text-[#0097B2]"
             >
               Kontakt

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import OrderById from '@/components/Order/Order/OrderById';
-import Link from 'next/link';
+import withAuth from "@/components/Authentication/HOC/withAuth";
 
 interface OrderPageProps {
   params: Promise<{ orderId: string }>;
@@ -46,4 +46,4 @@ const OrderPage: React.FC<OrderPageProps> = ({ params }) => {
   );
 };
 
-export default OrderPage;
+export default withAuth(OrderPage);

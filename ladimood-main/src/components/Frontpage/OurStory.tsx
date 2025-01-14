@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const AboutUs: React.FC = () => {
   return (
@@ -37,7 +38,7 @@ const AboutUs: React.FC = () => {
 
             {/* Example button for further interaction */}
             <button className="mt-4 px-6 py-2 bg-[#0097B2] text-white font-semibold rounded-lg hover:bg-[#007B92] transition">
-              Pogledajte naše proizvode
+            <Link href="/shop" className="">Pogledaj kolekciju</Link>
             </button>
           </div>
         </div>

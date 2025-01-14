@@ -73,6 +73,16 @@ export const getUserDetails = async (): Promise<User> => {
   }
 };
 
+export const fetchCurrentUser = async (): Promise<User> => {
+  try {
+    const response: AxiosResponse<User> = await api.get("/account/me");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching current user details:", error);
+    throw error;
+  }
+};
+
 //-----------------------------------//
 //         ADDRESS ROUTES            //
 //-----------------------------------//
@@ -213,12 +223,18 @@ export const addToWishlist = async (wishlistItem: AddWishlistItemRequest): Promi
 export const getWishlist = async (): Promise<WishlistItem[]> => {
   try {
     const response: AxiosResponse<WishlistItem[]> = await api.get('/account/wishlist');
+    // Check if the wishlist is empty
+    if (response.data.length === 0) {
+      console.warn('Wishlist is empty');
+    }
     return response.data;
   } catch (error) {
     console.error('Error fetching wishlist:', error);
     throw error;
   }
 };
+
+
 
 // Remove Item from Wishlist
 export const removeFromWishlist = async (itemId: number): Promise<MessageResponse> => {

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaCheckCircle } from 'react-icons/fa';
 import Image from 'next/image';
+import withAuth from "@/components/Authentication/HOC/withAuth";
 import ReferralPopup from '@/components/Order/Order/ReferralPopup';
 
 const SuccessPage: React.FC = () => {
@@ -101,4 +102,4 @@ const SuccessPage: React.FC = () => {
   );
 };
 
-export default SuccessPage;
+export default withAuth(SuccessPage);

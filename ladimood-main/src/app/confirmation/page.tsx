@@ -11,6 +11,7 @@ import {
 import { OrderStatusEnum } from '../types/types';
 import Image from 'next/image';
 import AddressManager from '@/components/Account/AddressManager';
+import withAuth from "@/components/Authentication/HOC/withAuth";
 
 const ConfirmationPage: React.FC = () => {
   const router = useRouter();
@@ -198,4 +199,4 @@ const ConfirmationPage: React.FC = () => {
   );
 };
 
-export default ConfirmationPage;
+export default withAuth(ConfirmationPage);
