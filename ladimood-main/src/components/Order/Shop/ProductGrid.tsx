@@ -6,9 +6,9 @@ import { FaHeart } from 'react-icons/fa';
 import {
   Product as ProductType,
   ProductGridProps,
-  WishlistItem,
   Size,
   CartItem,
+  AddWishlistItemRequest
 } from '@/app/types/types';
 import {
   addToWishlist,
@@ -78,9 +78,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
     const selectedColor = selectedAttributes[id]?.color || availableColors[0];
     const selectedSize = selectedAttributes[id]?.size || availableSizes[0];
 
-    const wishlistItem: WishlistItem = {
-      id,
-      product,
+    const wishlistItem: AddWishlistItemRequest = {
+      product_id: id,
       color: selectedColor,
       size: selectedSize as Size,
     };

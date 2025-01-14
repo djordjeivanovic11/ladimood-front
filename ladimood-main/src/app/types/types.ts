@@ -228,6 +228,11 @@ export interface Wishlist {
   items: WishlistItem[];
 }
 
+export interface AddWishlistItemRequest {
+  product_id: number;
+  color: string;
+  size: Size;
+}
 // Sales Record Interfaces
 export interface SalesRecord {
   id: number; 
