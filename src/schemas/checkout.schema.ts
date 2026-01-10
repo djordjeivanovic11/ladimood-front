@@ -4,13 +4,8 @@ import { addressSchema } from './address.schema';
 export const guestCheckoutSchema = z.object({
   guest_email: z.string().email('Please enter a valid email'),
   guest_name: z.string().min(2, 'Name must be at least 2 characters'),
-  guest_phone: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || val.length >= 8,
-      'Phone number must be at least 8 characters if provided'
-    ),
+  guest_phone: z.string().min(8, 'Phone number must be at least 8 characters'),
+  delivery_note: z.string().max(200, 'Delivery note is too long').optional(),
   address: addressSchema,
 });
 

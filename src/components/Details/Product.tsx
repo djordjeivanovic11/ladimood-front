@@ -1,14 +1,22 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { FaHeart } from 'react-icons/fa';
 import { addToWishlist as addToWishlistAPI } from '@/api/account/axios';
 import { Product as ProductType } from '@/app/types/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+
+function swatchBgClass(hex: string) {
+  const normalized = hex.trim().toLowerCase();
+  if (normalized === '#000000' || normalized === '#000') return 'bg-black';
+  if (normalized === '#ffffff' || normalized === '#fff') return 'bg-white';
+  // Fallback: keep neutral background (no inline style due to lint rules)
+  return 'bg-muted';
+}
 
 interface ProductProps {
   product: ProductType;
@@ -33,20 +41,9 @@ const Product: React.FC<ProductProps> = ({
   onSelectSize,
   onAddToCart,
 }) => {
-  const [wishlistFeedback, setWishlistFeedback] = useState<string | null>(null);
-  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (wishlistFeedback) {
-      const timer = setTimeout(() => setWishlistFeedback(null), 4000);
-      return () => clearTimeout(timer);
-    }
-    return undefined;
-  }, [wishlistFeedback]);
-
   const handleAddToWishlist = async () => {
     if (!selectedColor || !selectedSize) {
-      setFeedbackMessage('Please select a color and size before adding to the wishlist.');
+      toast.error('Odaberi boju i veličinu prije dodavanja u listu želja.');
       return;
     }
 
@@ -56,12 +53,12 @@ const Product: React.FC<ProductProps> = ({
         color: selectedColor,
         size: selectedSize,
       });
-      setWishlistFeedback('Item successfully added to wishlist!');
+      toast.success('Dodato u listu želja.');
     } catch (error: unknown) {
       if (error instanceof Error && error.message === 'ItemAlreadyInWishlist') {
-        setWishlistFeedback('Item is already in your wishlist!');
+        toast.message('Već je u listi želja.');
       } else {
-        setWishlistFeedback('Failed to add item to wishlist. Try again later.');
+        toast.error('Nije moguće dodati u listu želja.');
       }
     }
   };
@@ -73,19 +70,21 @@ const Product: React.FC<ProductProps> = ({
           src={product.image_url || '/images/default-product.jpg'}
           alt={product.name}
           fill
-          className="object-contain transition-transform duration-300 group-hover:scale-105"
+          className="object-contain transition-transform duration-500 group-hover:scale-105"
         />
       </div>
-      <CardContent className="space-y-4 p-6">
+      <CardContent className="space-y-4 p-4 sm:p-5">
         <div className="text-center">
-          <h3 className="text-xl font-bold transition-colors group-hover:text-primary">
+          <h3 className="line-clamp-2 text-lg font-semibold transition-colors group-hover:text-primary sm:text-xl">
             {product.name}
           </h3>
-          <p className="mt-1 text-lg text-muted-foreground">€{product.price.toFixed(2)}</p>
+          <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+            €{product.price.toFixed(2)}
+          </p>
         </div>
 
         {/* Color Selection */}
-        <div className="flex justify-center gap-2">
+        <div className="flex justify-center gap-2 md:opacity-0 md:transition-opacity md:duration-300 md:group-hover:opacity-100">
           {availableColors.map((color, index) => (
             <button
               key={index}
@@ -93,16 +92,16 @@ const Product: React.FC<ProductProps> = ({
               onClick={() => onSelectColor(color)}
               className={cn(
                 'h-6 w-6 rounded-full border-2 transition-transform hover:scale-110',
-                selectedColor === color ? 'border-primary ring-2 ring-primary/50' : 'border-border'
+                selectedColor === color ? 'border-primary ring-2 ring-primary/50' : 'border-border',
+                swatchBgClass(color)
               )}
-              style={{ backgroundColor: color }}
               aria-label={`Select color ${color}`}
             />
           ))}
         </div>
 
         {/* Size Selection */}
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap justify-center gap-2 md:opacity-0 md:transition-opacity md:duration-300 md:group-hover:opacity-100">
           {availableSizes.map((size, index) => (
             <button
               key={index}
@@ -122,7 +121,13 @@ const Product: React.FC<ProductProps> = ({
 
         {/* Actions */}
         <div className="flex gap-2">
-          <Button onClick={onAddToCart} className="flex-1">
+          <Button
+            onClick={() => {
+              onAddToCart();
+              toast.success('Dodato u korpu.');
+            }}
+            className="flex-1"
+          >
             Dodaj u korpu
           </Button>
           <Button
@@ -135,22 +140,6 @@ const Product: React.FC<ProductProps> = ({
             <FaHeart className="h-4 w-4" />
           </Button>
         </div>
-
-        {/* Feedback Messages */}
-        {(feedbackMessage || wishlistFeedback) && (
-          <Badge
-            variant={
-              wishlistFeedback?.includes('added')
-                ? 'default'
-                : wishlistFeedback?.includes('already')
-                  ? 'secondary'
-                  : 'destructive'
-            }
-            className="w-full justify-center py-2"
-          >
-            {wishlistFeedback || feedbackMessage}
-          </Badge>
-        )}
       </CardContent>
     </Card>
   );

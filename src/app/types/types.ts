@@ -78,11 +78,48 @@ export interface Address extends AddressBase {
 }
 
 // Product Interfaces
+export type Gender = 'WOMEN' | 'MEN' | 'UNISEX';
+export type ProductStatus = 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
+
+export interface CollectionBase {
+  name: string;
+  slug: string;
+  description?: string | null;
+  hero_image_url?: string | null;
+}
+
+export interface Collection extends CollectionBase {
+  id: number;
+  created_at?: Date | string;
+  updated_at?: Date | string;
+}
+
+export interface ProductMedia {
+  id: number;
+  url: string;
+  alt_text?: string | null;
+  sort_order?: number;
+}
+
+export interface ProductVariant {
+  id: number;
+  sku?: string | null;
+  color_name: string;
+  color_hex: string;
+  size: Size;
+  inventory_qty: number;
+  is_active: boolean;
+  price_override?: number | null;
+}
+
 export interface ProductBase {
   name: string;
   description: string;
   price: number;
-  image_url: string;
+  image_url?: string | null;
+  slug?: string | null;
+  gender?: Gender | null;
+  status?: ProductStatus | null;
 }
 export interface ProductCreate extends ProductBase {
   category_id: number;
@@ -90,7 +127,10 @@ export interface ProductCreate extends ProductBase {
 
 export interface Product extends ProductBase {
   id: number;
-  category?: string | null;
+  category?: Category | null;
+  collection?: Collection | null;
+  media?: ProductMedia[];
+  variants?: ProductVariant[];
   created_at?: Date;
   updated_at?: Date;
 }
@@ -159,13 +199,14 @@ export interface OrderItemCreate {
   quantity: number;
   color: string;
   size: Size;
+  price: number;
 }
 
 // OrderCreate Interface
 export interface OrderCreate {
-  status: OrderStatusEnum;
-  total_price: number;
   items: OrderItemCreate[];
+  delivery_note?: string;
+  payment_method?: 'COD';
 }
 
 // Guest Order Create Interface
@@ -179,8 +220,9 @@ export interface GuestOrderCreate {
   }>;
   guest_email: string;
   guest_name: string;
-  guest_phone?: string;
+  guest_phone: string;
   address: AddressBase;
+  delivery_note?: string;
 }
 
 // OrderItem Interface
@@ -196,7 +238,7 @@ export interface OrderItem {
     id: number;
     name: string;
     description: string;
-    category?: string | null;
+    category?: Category | null;
     price: number;
     image_url?: string | null;
     created_at?: string | undefined;
@@ -344,7 +386,7 @@ export interface OrderResponse {
       id: number;
       name: string;
       description: string;
-      category?: string | null;
+      category?: Category | null;
       price: number;
       image_url?: string | null;
       created_at?: string | undefined;

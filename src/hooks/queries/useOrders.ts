@@ -48,6 +48,11 @@ export function useCreateGuestOrder() {
       clearCart();
       clearGuestSession();
       queryClient.invalidateQueries({ queryKey: orderKeys.all });
+      try {
+        localStorage.setItem('lastGuestOrder', JSON.stringify(order));
+      } catch {
+        // ignore
+      }
       toast.success(`Order #${order.id} placed successfully!`);
       return order;
     },

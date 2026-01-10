@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getProducts } from '@/api/account/axios';
-import type { Product } from '@/app/types/types';
+import { getCategories, getProducts } from '@/api/account/axios';
+import type { Category, Product } from '@/app/types/types';
 
 interface ProductFilters {
   category_id?: number;
@@ -17,7 +17,7 @@ export const productKeys = {
 export function useProducts(filters?: ProductFilters) {
   return useQuery({
     queryKey: productKeys.list(filters),
-    queryFn: () => getProducts(),
+    queryFn: () => getProducts(filters?.category_id, filters?.min_price, filters?.max_price),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
@@ -38,3 +38,19 @@ export function useProduct(productId: number) {
     staleTime: 5 * 60 * 1000,
   });
 }
+
+export const categoryKeys = {
+  all: ['categories'] as const,
+  list: () => [...categoryKeys.all, 'list'] as const,
+};
+
+export function useCategories() {
+  return useQuery<Category[]>({
+    queryKey: categoryKeys.list(),
+    queryFn: () => getCategories(),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+// Alias for backwards compatibility
+export const useCategoriesQuery = useCategories;

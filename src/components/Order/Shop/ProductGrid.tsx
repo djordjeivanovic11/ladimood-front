@@ -116,8 +116,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   };
 
   return (
-    <div className="mt-10">
-      <div className="grid grid-cols-1 gap-8 p-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+    <div>
+      <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-3">
         {products.map((product) => {
           const { id } = product;
           const selectedColor = selectedAttributes[id]?.color || availableColors[0];

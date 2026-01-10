@@ -9,6 +9,29 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
+type LastGuestOrder = {
+  id: string;
+  total_price: number;
+  payment_method?: string;
+  delivery_note?: string | null;
+  address?: {
+    street_address: string;
+    city: string;
+    state?: string | null;
+    postal_code: string;
+    country: string;
+  } | null;
+  items: Array<{
+    product_id: number;
+    product_name: string;
+    quantity: number;
+    price: number;
+    size?: string | null;
+    color?: string | null;
+    product_image_url?: string | null;
+  }>;
+};
+
 interface OrderItem {
   product_id: number;
   name: string;
@@ -49,14 +72,21 @@ function SuccessSkeleton() {
 export default function SuccessPage() {
   const router = useRouter();
   const [order, setOrder] = useState<OrderData | null>(null);
+  const [guestOrder, setGuestOrder] = useState<LastGuestOrder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const storedOrderData = localStorage.getItem('orderDetails');
     if (storedOrderData) {
       setOrder(JSON.parse(storedOrderData));
-    } else {
-      router.push('/');
+    }
+    const storedGuest = localStorage.getItem('lastGuestOrder');
+    if (storedGuest) {
+      try {
+        setGuestOrder(JSON.parse(storedGuest));
+      } catch {
+        // ignore
+      }
     }
     setIsLoading(false);
   }, [router]);
@@ -69,11 +99,24 @@ export default function SuccessPage() {
     );
   }
 
-  if (!order) {
+  if (!order && !guestOrder) {
     return (
       <div className="mt-10 text-center text-muted-foreground">Učitavanje vaše narudžbe...</div>
     );
   }
+
+  const total = guestOrder?.total_price ?? order?.total_price ?? 0;
+  const items =
+    guestOrder?.items?.map((it) => ({
+      product_id: it.product_id,
+      name: it.product_name,
+      quantity: it.quantity,
+      price: it.price,
+      size: it.size ?? '',
+      image: it.product_image_url ?? undefined,
+    })) ??
+    order?.items ??
+    [];
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted/50 p-6">
@@ -87,6 +130,21 @@ export default function SuccessPage() {
               <p className="mb-6 text-muted-foreground">
                 Srećni smo što ste odabrali Ladimood. Vaša porudžbina je uspješno zabilježena!
               </p>
+              <div className="mb-6 rounded-lg border bg-background p-4 text-sm">
+                <div className="font-medium">Plaćanje: pouzećem</div>
+                <div className="text-muted-foreground">Gotovina kuriru prilikom dostave.</div>
+                {guestOrder?.address && (
+                  <div className="mt-3 text-muted-foreground">
+                    Dostava: {guestOrder.address.street_address}, {guestOrder.address.city}{' '}
+                    {guestOrder.address.postal_code}, {guestOrder.address.country}
+                  </div>
+                )}
+                {guestOrder?.delivery_note && (
+                  <div className="mt-2 text-muted-foreground">
+                    Napomena: {guestOrder.delivery_note}
+                  </div>
+                )}
+              </div>
               <p className="mb-8 leading-relaxed text-muted-foreground">
                 Email sa detaljima porudžbine je poslat na vašu email adresu. U međuvremenu, ovdje
                 je rezime vaše kupovine:
@@ -97,7 +155,7 @@ export default function SuccessPage() {
             <div className="mb-8">
               <h3 className="mb-4 text-lg font-semibold text-primary">Vaši Artikli:</h3>
               <ul className="space-y-4">
-                {order.items.map((item, index) => (
+                {items.map((item, index) => (
                   <li
                     key={`${item.product_id}-${index}`}
                     className="flex items-center justify-between border-b pb-4"
@@ -121,7 +179,7 @@ export default function SuccessPage() {
                 ))}
               </ul>
               <div className="mt-6 flex justify-end">
-                <p className="text-lg font-bold">Total: €{order.total_price.toFixed(2)}</p>
+                <p className="text-lg font-bold">Total: €{total.toFixed(2)}</p>
               </div>
             </div>
           </div>

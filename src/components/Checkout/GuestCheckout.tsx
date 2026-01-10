@@ -34,6 +34,7 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
       guest_email: '',
       guest_name: '',
       guest_phone: '',
+      delivery_note: '',
       address: {
         street_address: '',
         city: '',
@@ -61,10 +62,13 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
         guest_email: data.guest_email,
         guest_name: data.guest_name,
         guest_phone: data.guest_phone,
+        delivery_note: data.delivery_note,
         address: data.address,
       },
       {
         onSuccess: (order) => {
+          // Store the latest guest order for the success page (since fetching orders requires auth)
+          localStorage.setItem('lastGuestOrder', JSON.stringify(order));
           if (onSuccess) {
             onSuccess(String(order.id));
           } else {
@@ -80,7 +84,7 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
   return (
     <Card className="mx-auto max-w-2xl">
       <CardHeader>
-        <CardTitle className="text-2xl">Guest Checkout</CardTitle>
+        <CardTitle className="text-2xl">Brza porudžbina</CardTitle>
       </CardHeader>
       <CardContent>
         {cartItems.length === 0 ? (
@@ -92,6 +96,11 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
+              Plaćanje je <span className="font-medium text-foreground">pouzećem</span> (gotovina
+              kuriru).
+            </div>
+
             {/* Contact Information */}
             <div>
               <h3 className="mb-4 text-lg font-semibold">Contact Information</h3>
@@ -116,7 +125,7 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
                   )}
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="guest_phone">Phone (optional)</Label>
+                  <Label htmlFor="guest_phone">Phone *</Label>
                   <Input
                     id="guest_phone"
                     type="tel"
@@ -179,6 +188,23 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
               </div>
             </div>
 
+            {/* Delivery note */}
+            <div className="space-y-2">
+              <Label htmlFor="delivery_note">Napomena za dostavu (opciono)</Label>
+              <textarea
+                id="delivery_note"
+                rows={3}
+                className={cn(
+                  'w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
+                )}
+                placeholder="Ulaz, sprat, interfon, vrijeme dostave..."
+                {...register('delivery_note')}
+              />
+              {errors.delivery_note && (
+                <p className="text-sm text-destructive">{errors.delivery_note.message}</p>
+              )}
+            </div>
+
             {/* Order Summary */}
             <div className="rounded-lg bg-muted p-4">
               <h3 className="mb-3 text-lg font-semibold">Order Summary</h3>
@@ -215,7 +241,7 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
                 disabled={isPending}
                 className={cn('flex-1', !onCancel && 'w-full')}
               >
-                {isPending ? 'Processing...' : 'Complete Order'}
+                {isPending ? 'Processing...' : 'Završi porudžbinu'}
               </Button>
             </div>
           </form>

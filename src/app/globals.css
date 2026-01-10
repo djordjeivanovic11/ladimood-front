@@ -4,32 +4,33 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 210 11% 15%;
+    /* Quiet luxury base: warm paper + espresso ink */
+    --background: 35 38% 98%;
+    --foreground: 24 17% 14%;
     --card: 0 0% 100%;
-    --card-foreground: 210 11% 15%;
+    --card-foreground: 24 17% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 11% 15%;
+    --popover-foreground: 24 17% 14%;
     /* Ladimood brand teal #0097B2 */
     --primary: 187 100% 35%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 11% 96%;
-    --secondary-foreground: 210 11% 15%;
-    --muted: 210 11% 96%;
-    --muted-foreground: 210 11% 45%;
+    --secondary: 35 28% 95%;
+    --secondary-foreground: 24 17% 14%;
+    --muted: 35 22% 95%;
+    --muted-foreground: 24 10% 40%;
     --accent: 187 100% 95%;
-    --accent-foreground: 187 100% 25%;
+    --accent-foreground: 187 100% 20%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 11% 90%;
-    --input: 210 11% 90%;
+    --border: 35 18% 88%;
+    --input: 35 18% 88%;
     --ring: 187 100% 35%;
     --chart-1: 187 100% 35%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --radius: 0.6rem;
   }
 
   .dark {
@@ -64,13 +65,28 @@
   * {
     @apply border-border;
   }
+  html {
+    @apply font-sans;
+  }
   body {
     @apply bg-background text-foreground;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-serif tracking-tight;
+  }
+  a {
+    @apply underline-offset-4 hover:underline;
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .text-muted {
+    @apply text-muted-foreground;
   }
 }

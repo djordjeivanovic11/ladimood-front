@@ -11,6 +11,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cdn.ladimood.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
     ],
   },
   async redirects() {

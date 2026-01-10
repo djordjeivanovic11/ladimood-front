@@ -4,7 +4,9 @@ import { useRouter } from 'next/navigation';
 import axiosInstance from '@/api/axiosInstance';
 import OrderManagement from '@/components/Management/OrderManagement';
 import SalesManagement from '@/components/Management/SalesManagement';
+import CatalogManagement from '@/components/Management/CatalogManagement';
 import { User } from '@/app/types/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function ManagementPage() {
   const [loading, setLoading] = useState(true);
@@ -12,7 +14,7 @@ export default function ManagementPage() {
 
   useEffect(() => {
     // Example: read token from localStorage (or cookies via document.cookie)
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('access_token');
     if (!token) {
       // No token => redirect to login
       router.replace('/auth/login');
@@ -21,7 +23,7 @@ export default function ManagementPage() {
 
     // Call your API to verify the user's details
     axiosInstance
-      .get<User>('/account/me')
+      .get<User>('/users/me')
       .then((res) => {
         const user = res.data;
         if (user?.role?.name !== 'ADMIN') {
@@ -50,13 +52,23 @@ export default function ManagementPage() {
       <header className="mb-8 text-center">
         <h1 className="text-4xl font-bold text-[#0097B2]">Management Dashboard</h1>
       </header>
-      <main className="space-y-8">
-        <section>
-          <OrderManagement />
-        </section>
-        <section>
-          <SalesManagement />
-        </section>
+      <main>
+        <Tabs defaultValue="orders" className="mx-auto max-w-screen-xl">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="orders">Orders</TabsTrigger>
+            <TabsTrigger value="sales">Sales</TabsTrigger>
+            <TabsTrigger value="catalog">Catalog</TabsTrigger>
+          </TabsList>
+          <TabsContent value="orders" className="mt-6">
+            <OrderManagement />
+          </TabsContent>
+          <TabsContent value="sales" className="mt-6">
+            <SalesManagement />
+          </TabsContent>
+          <TabsContent value="catalog" className="mt-6">
+            <CatalogManagement />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

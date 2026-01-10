@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { getCart, removeFromCart, createOrder } from '@/api/account/axios';
-import { OrderStatusEnum, Size } from '../types/types';
+import { getCart, createOrder } from '@/api/account/axios';
+import { Size } from '../types/types';
 import AddressManager from '@/components/Account/AddressManager';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
@@ -95,27 +95,23 @@ export default function ConfirmationPage() {
       const orderItems = cartItems.map((item) => ({
         product_id: item.product.id,
         quantity: item.quantity,
-        name: item.product.name,
         color: item.color,
         size: item.size,
         price: item.product.price,
-        image: item.product.image_url,
       }));
 
       const orderData = {
-        status: OrderStatusEnum.PENDING,
-        total_price: totalAmount,
         items: orderItems,
+        payment_method: 'COD' as const,
       };
 
       const createdOrder = await createOrder(orderData);
 
-      for (const item of cartItems) {
-        await removeFromCart(item.id, item.color, item.size);
-      }
-
       setCartItems([]);
-      localStorage.setItem('orderDetails', JSON.stringify(orderData));
+      localStorage.setItem(
+        'orderDetails',
+        JSON.stringify({ ...orderData, total_price: totalAmount })
+      );
       toast.success('Order placed successfully!');
       router.push(`/success/${createdOrder.id}`);
     } catch (err) {

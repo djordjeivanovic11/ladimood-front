@@ -1,13 +1,18 @@
 'use client';
 
 import React, { ReactNode } from 'react';
-import { Inter } from 'next/font/google';
+import { Inter, Cormorant_Garamond } from 'next/font/google';
 import Navbar from '@/components/Layout/Header/Navbar';
 import Footer from '@/components/Layout/Footer/Footer';
 import { Providers } from '@/components/Providers';
-import '../styles/globals.css';
+import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-serif',
+});
 
 interface RootLayoutProps {
   children: ReactNode;
@@ -15,7 +20,7 @@ interface RootLayoutProps {
 
 const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
   return (
-    <html lang="en" className={`${inter.className} h-full w-full`}>
+    <html lang="en" className={`${inter.variable} ${cormorant.variable} h-full w-full`}>
       <head>
         <title>Ladimood | Podgorički brend</title>
         <meta
@@ -45,12 +50,13 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://www.ladimood.com" />
         <link rel="icon" href="/images/icon2.svg" sizes="any" />
-        <link rel="icon" type="image/png" href="/favicon-32x32.png" />
       </head>
-      <body className="flex h-full w-full flex-col bg-gray-50">
+      <body className="flex min-h-dvh w-full flex-col bg-background text-foreground antialiased">
         <Providers>
           <Navbar />
-          <main className="w-full flex-grow bg-white">{children}</main>
+          <main className="w-full flex-grow bg-background pt-[120px] md:pt-[100px]">
+            {children}
+          </main>
           <Footer />
         </Providers>
       </body>

@@ -9,7 +9,7 @@ import {
 
 export const fetchSalesRecords = async (): Promise<SalesRecord[]> => {
   try {
-    const response = await axiosInstance.get<SalesRecord[]>('/management/sales');
+    const response = await axiosInstance.get<SalesRecord[]>('/admin/sales');
     return response.data;
   } catch (error: any) {
     console.error('Error fetching sales records:', error?.response?.data?.detail || error.message);
@@ -25,7 +25,7 @@ export const createSalesRecord = async (salesRecord: {
   price: number;
 }): Promise<SalesRecord | null> => {
   try {
-    const response = await axiosInstance.post<SalesRecord>('/management/sales', salesRecord);
+    const response = await axiosInstance.post<SalesRecord>('/admin/sales', salesRecord);
     return response.data;
   } catch (error: any) {
     // Check for the "already exists" case
@@ -45,7 +45,7 @@ export const createSalesRecord = async (salesRecord: {
 // Orders API
 export const fetchAllOrdersWithDetails = async (): Promise<OrderManagement[]> => {
   try {
-    const response = await axiosInstance.get<OrderManagement[]>('/management/orders');
+    const response = await axiosInstance.get<OrderManagement[]>('/admin/orders');
     return response.data;
   } catch (error: any) {
     console.error(
@@ -58,7 +58,7 @@ export const fetchAllOrdersWithDetails = async (): Promise<OrderManagement[]> =>
 
 export const fetchOrderDetailsById = async (orderId: number): Promise<OrderResponse> => {
   try {
-    const response = await axiosInstance.get<OrderResponse>(`/management/orders/${orderId}`);
+    const response = await axiosInstance.get<OrderResponse>(`/admin/orders/${orderId}`);
     return response.data;
   } catch (error: any) {
     console.error(
@@ -77,7 +77,7 @@ export const updateOrderStatus = async (
 ): Promise<Order> => {
   try {
     const response = await axiosInstance.put<Order>(
-      `/management/orders/${orderId}/status`,
+      `/admin/orders/${orderId}/status`,
       { status } // Correct payload structure
     );
     return response.data;
@@ -101,7 +101,7 @@ export const submitContactForm = async (contactData: {
 }): Promise<{ message: string }> => {
   try {
     const response = await axiosInstance.post<{ message: string }>(
-      '/management/contact',
+      '/notifications/contact',
       contactData
     );
     return response.data;

@@ -1,4 +1,4 @@
-import { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import api from '../axiosInstance';
 import type {
   User,
@@ -12,10 +12,21 @@ import type {
   CartItemCreate,
   AddressBase,
   Product,
+  Category,
   Referral,
   ReferralRequest,
   Size,
 } from '@/app/types/types';
+
+function getAxiosDetail(error: unknown): string | null {
+  if (!axios.isAxiosError(error)) return null;
+  const data = error.response?.data;
+  if (data && typeof data === 'object' && 'detail' in data) {
+    const detail = (data as { detail?: unknown }).detail;
+    if (typeof detail === 'string' && detail.trim()) return detail;
+  }
+  return null;
+}
 
 // Function to get all products with optional filters (category, price range)
 export const getProducts = async (
@@ -34,6 +45,17 @@ export const getProducts = async (
     return response.data;
   } catch (error) {
     console.error('Error fetching products:', error);
+    throw error;
+  }
+};
+
+// Function to get all categories
+export const getCategories = async (): Promise<Category[]> => {
+  try {
+    const response: AxiosResponse<Category[]> = await api.get('/catalog/categories');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching categories:', error);
     throw error;
   }
 };
@@ -140,9 +162,9 @@ export const getOrderById = async (orderId: string): Promise<Order> => {
   try {
     const response = await api.get<Order>(`/orders/${orderId}`);
     return response.data;
-  } catch (error: any) {
-    console.error('Error fetching order:', error.response?.data || error.message);
-    throw error.response?.data || new Error('Unable to fetch order');
+  } catch (error: unknown) {
+    console.error('Error fetching order:', getAxiosDetail(error) || error);
+    throw new Error(getAxiosDetail(error) || 'Unable to fetch order');
   }
 };
 
@@ -162,9 +184,9 @@ export const createOrder = async (order: OrderCreate): Promise<Order> => {
   try {
     const response = await api.post<Order>('/orders', order);
     return response.data;
-  } catch (error: any) {
-    console.error('Error creating order:', error.response?.data || error.message);
-    throw error.response?.data || new Error('Unable to create order');
+  } catch (error: unknown) {
+    console.error('Error creating order:', getAxiosDetail(error) || error);
+    throw new Error(getAxiosDetail(error) || 'Unable to create order');
   }
 };
 
@@ -172,9 +194,9 @@ export const createOrder = async (order: OrderCreate): Promise<Order> => {
 export const cancelOrder = async (orderId: string): Promise<void> => {
   try {
     await api.delete(`/orders/${orderId}`);
-  } catch (error: any) {
-    console.error('Error canceling order:', error.response?.data || error.message);
-    throw error.response?.data || new Error('Unable to cancel order');
+  } catch (error: unknown) {
+    console.error('Error canceling order:', getAxiosDetail(error) || error);
+    throw new Error(getAxiosDetail(error) || 'Unable to cancel order');
   }
 };
 //-----------------------------------//
@@ -193,19 +215,18 @@ export const addToWishlist = async (
   try {
     const response: AxiosResponse<WishlistItem> = await api.post('/wishlist', wishlistItem);
     return response.data;
-  } catch (error: any) {
-    if (error.response) {
-      const detail = error.response.data?.detail;
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const detail = getAxiosDetail(error);
       if (detail === 'Item already in wishlist') {
         throw new Error('ItemAlreadyInWishlist'); // Use a custom error identifier
       }
-      console.error('Server responded with an error:', error.response.data);
-    } else if (error.request) {
-      console.error('No response from server:', error.request);
+      console.error('Server responded with an error:', detail || error.message);
     } else {
-      console.error('Error setting up the request:', error.message);
+      console.error('Error adding to wishlist:', error);
     }
-    throw error; // Re-throw the error to handle it in the calling code
+
+    throw error;
   }
 };
 
@@ -306,11 +327,10 @@ export const clearCart = async (): Promise<MessageResponse> => {
       },
     });
 
-    console.log('Cart cleared successfully:', response.data.message);
     return response.data; // Message: "Cart cleared successfully"
-  } catch (error: any) {
-    console.error('Error clearing cart:', error.response?.data || error.message || error);
-    if (error.response?.status === 404) {
+  } catch (error: unknown) {
+    console.error('Error clearing cart:', getAxiosDetail(error) || error);
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
       console.warn('Cart is already empty.');
     }
     throw error;
@@ -420,17 +440,18 @@ export interface GuestOrderCreate {
   }>;
   guest_email: string;
   guest_name: string;
-  guest_phone?: string;
+  guest_phone: string;
   address: AddressBase;
+  delivery_note?: string;
 }
 
 export const createGuestOrder = async (orderData: GuestOrderCreate): Promise<Order> => {
   try {
     const response = await api.post<Order>('/orders/guest', orderData);
     return response.data;
-  } catch (error: any) {
-    console.error('Error creating guest order:', error.response?.data || error.message);
-    throw error.response?.data || new Error('Unable to create order');
+  } catch (error: unknown) {
+    console.error('Error creating guest order:', getAxiosDetail(error) || error);
+    throw new Error(getAxiosDetail(error) || 'Unable to create order');
   }
 };
 

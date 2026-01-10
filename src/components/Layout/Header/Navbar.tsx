@@ -53,7 +53,9 @@ const Navbar: React.FC = () => {
     <>
       <header
         className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-          isScrolled ? 'h-[100px] bg-white shadow-lg backdrop-blur-lg' : 'h-[120px] bg-transparent'
+          isScrolled
+            ? 'h-[100px] bg-white/85 shadow-lg backdrop-blur-lg'
+            : 'h-[120px] bg-white/60 shadow-sm backdrop-blur-md'
         }`}
       >
         <nav className="mx-auto flex h-full max-w-screen-xl items-center justify-between px-4 sm:px-6">
@@ -74,32 +76,32 @@ const Navbar: React.FC = () => {
           <div className="hidden items-center space-x-8 md:flex">
             <div
               onClick={handleShopLink}
-              className="cursor-pointer font-serif text-lg text-primary hover:text-primary/80"
+              className="cursor-pointer font-serif text-lg text-foreground hover:text-primary"
             >
               Shop
             </div>
             <div
               onClick={() => router.push('/contact')}
-              className="cursor-pointer font-serif text-lg text-primary hover:text-primary/80"
+              className="cursor-pointer font-serif text-lg text-foreground hover:text-primary"
             >
               Kontakt
             </div>
             {isAuthenticated ? (
               <FaUser
                 onClick={() => handleProtectedLink('/account')}
-                className="cursor-pointer text-lg text-primary hover:text-primary/80"
+                className="cursor-pointer text-lg text-foreground hover:text-primary"
               />
             ) : (
               <Link
                 href="/auth/login"
-                className="font-serif text-lg text-primary hover:text-primary/80"
+                className="font-serif text-lg text-foreground hover:text-primary"
               >
                 Login
               </Link>
             )}
             <button
               onClick={openCart}
-              className="relative cursor-pointer text-primary hover:text-primary/80"
+              className="relative cursor-pointer text-foreground hover:text-primary"
               aria-label="Open cart"
             >
               <FaShoppingCart className="text-lg" />
@@ -115,7 +117,7 @@ const Navbar: React.FC = () => {
           <div className="flex items-center md:hidden">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="text-2xl text-primary focus:outline-none"
+              className="text-2xl text-foreground focus:outline-none"
               aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             >
               {menuOpen ? <FaTimes /> : <FaBars />}
@@ -125,7 +127,7 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Menu */}
         <div
-          className={`fixed left-0 top-0 z-50 h-full w-64 transform bg-background shadow-lg ${
+          className={`fixed left-0 top-0 z-50 h-full w-64 transform bg-background shadow-lg border-r ${
             menuOpen ? 'translate-x-0' : '-translate-x-full'
           } transition-transform duration-300`}
         >
@@ -141,7 +143,7 @@ const Navbar: React.FC = () => {
             </Link>
             <div
               onClick={handleShopLink}
-              className="cursor-pointer font-serif text-lg text-primary"
+              className="cursor-pointer font-serif text-lg text-foreground"
             >
               Shop
             </div>
@@ -150,7 +152,7 @@ const Navbar: React.FC = () => {
                 router.push('/contact');
                 handleMenuClose();
               }}
-              className="cursor-pointer font-serif text-lg text-primary"
+              className="cursor-pointer font-serif text-lg text-foreground"
             >
               Kontakt
             </div>
@@ -160,12 +162,12 @@ const Navbar: React.FC = () => {
                   handleProtectedLink('/account');
                   handleMenuClose();
                 }}
-                className="cursor-pointer text-lg text-primary"
+                className="cursor-pointer text-lg text-foreground"
               />
             ) : (
               <Link
                 href="/auth/login"
-                className="font-serif text-lg text-primary"
+                className="font-serif text-lg text-foreground"
                 onClick={handleMenuClose}
               >
                 Login
@@ -176,7 +178,7 @@ const Navbar: React.FC = () => {
                 openCart();
                 handleMenuClose();
               }}
-              className="relative w-fit text-primary"
+              className="relative w-fit text-foreground"
               aria-label="Open cart"
             >
               <FaShoppingCart className="text-lg" />
