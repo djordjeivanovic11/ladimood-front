@@ -18,11 +18,7 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
+  background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb)))
     rgb(var(--background-start-rgb));
 }
 
@@ -36,12 +32,12 @@ body {
   position: fixed;
   top: 0;
   width: 100%;
-  z-index: 1000; 
-  height: 100px; 
+  z-index: 1000;
+  height: 100px;
 }
 
 main {
-  padding-top: 100px; 
+  padding-top: 100px;
 }
 
 body {
@@ -49,25 +45,22 @@ body {
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  background-color: #f0f0f0; 
+  background-color: #f0f0f0;
 }
 
-
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   overflow-x: hidden;
   background-color: #f0f0f0;
 }
 
-
 .custom-dropdown {
   background-color: white;
-  color: black; 
+  color: black;
 }
 
 .color-button {
-
   background-color: var(--button-color);
-
 }

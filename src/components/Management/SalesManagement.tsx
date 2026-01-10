@@ -7,9 +7,9 @@ const SalesManagement: React.FC = () => {
   const [filteredRecords, setFilteredRecords] = useState<SalesRecord[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchBuyerName, setSearchBuyerName] = useState<string>("");
-  const [searchOrderId, setSearchOrderId] = useState<string>("");
-  const [searchDate, setSearchDate] = useState<string>("");
+  const [searchBuyerName, setSearchBuyerName] = useState<string>('');
+  const [searchOrderId, setSearchOrderId] = useState<string>('');
+  const [searchDate, setSearchDate] = useState<string>('');
   const [itemsToShow, setItemsToShow] = useState<number>(15);
 
   const totalSales = filteredRecords.reduce((total, record) => total + record.price, 0);
@@ -21,7 +21,8 @@ const SalesManagement: React.FC = () => {
       try {
         const data = await fetchSalesRecords();
         const sortedData = data.sort(
-          (a: SalesRecord, b: SalesRecord) => new Date(b.date_of_sale).getTime() - new Date(a.date_of_sale).getTime()
+          (a: SalesRecord, b: SalesRecord) =>
+            new Date(b.date_of_sale).getTime() - new Date(a.date_of_sale).getTime()
         );
         setSalesRecords(sortedData);
         setFilteredRecords(sortedData);
@@ -38,18 +39,20 @@ const SalesManagement: React.FC = () => {
   const applyFilters = () => {
     let updatedRecords = [...salesRecords];
     if (searchBuyerName.trim()) {
-      updatedRecords = updatedRecords.filter(record =>
+      updatedRecords = updatedRecords.filter((record) =>
         record.buyer_name.toLowerCase().includes(searchBuyerName.toLowerCase().trim())
       );
     }
     if (searchOrderId.trim()) {
-      updatedRecords = updatedRecords.filter(record =>
-        record.order_id.toString() === searchOrderId.trim()
+      updatedRecords = updatedRecords.filter(
+        (record) => record.order_id.toString() === searchOrderId.trim()
       );
     }
     if (searchDate) {
-      updatedRecords = updatedRecords.filter(record =>
-        new Date(record.date_of_sale).toLocaleDateString() === new Date(searchDate).toLocaleDateString()
+      updatedRecords = updatedRecords.filter(
+        (record) =>
+          new Date(record.date_of_sale).toLocaleDateString() ===
+          new Date(searchDate).toLocaleDateString()
       );
     }
     setFilteredRecords(updatedRecords);
@@ -57,11 +60,11 @@ const SalesManagement: React.FC = () => {
   };
 
   const loadMore = () => {
-    setItemsToShow(prev => prev + 15);
+    setItemsToShow((prev) => prev + 15);
   };
 
   const loadLess = () => {
-    setItemsToShow(prev => (prev - 15 >= 15 ? prev - 15 : 15));
+    setItemsToShow((prev) => (prev - 15 >= 15 ? prev - 15 : 15));
   };
 
   return (
@@ -103,7 +106,7 @@ const SalesManagement: React.FC = () => {
           <div>
             <label className="block text-sm font-medium text-gray-700">Date of Sale</label>
             <input
-              placeholder='YYYY-MM-DD'
+              placeholder="YYYY-MM-DD"
               type="date"
               value={searchDate}
               onChange={(e) => setSearchDate(e.target.value)}
@@ -120,9 +123,9 @@ const SalesManagement: React.FC = () => {
           </button>
           <button
             onClick={() => {
-              setSearchBuyerName("");
-              setSearchOrderId("");
-              setSearchDate("");
+              setSearchBuyerName('');
+              setSearchOrderId('');
+              setSearchDate('');
               setFilteredRecords(salesRecords);
               setItemsToShow(15);
             }}
@@ -141,23 +144,33 @@ const SalesManagement: React.FC = () => {
             <table className="min-w-full bg-white border-collapse border border-gray-200">
               <thead>
                 <tr>
-                  {['Sale ID', 'Order ID', 'User ID', 'Buyer Name', 'Date of Sale', 'Price'].map((header) => (
-                    <th
-                      key={header}
-                      className="px-6 py-3 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-                    >
-                      {header}
-                    </th>
-                  ))}
+                  {['Sale ID', 'Order ID', 'User ID', 'Buyer Name', 'Date of Sale', 'Price'].map(
+                    (header) => (
+                      <th
+                        key={header}
+                        className="px-6 py-3 border-b border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                      >
+                        {header}
+                      </th>
+                    )
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {filteredRecords.slice(0, itemsToShow).map((record) => (
                   <tr key={record.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.order_id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.user_id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{record.buyer_name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {record.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {record.order_id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {record.user_id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {record.buyer_name}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {new Date(record.date_of_sale).toLocaleDateString()}
                     </td>

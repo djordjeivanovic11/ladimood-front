@@ -1,10 +1,11 @@
-"use client";
-import React from "react";
-import ShopFront from "@/components/Order/Shop/Shop";
-import withAuth from "@/components/Authentication/HOC/withAuth";
+'use client';
 
+import React from 'react';
+import ShopFront from '@/components/Order/Shop/Shop';
+
+// Shop is now accessible to all users (including anonymous/guests)
 const Shop: React.FC = () => {
   return <ShopFront />;
 };
 
-export default withAuth(Shop);
+export default Shop;

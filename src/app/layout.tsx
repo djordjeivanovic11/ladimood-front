@@ -1,12 +1,13 @@
-"use client";
-import React, { ReactNode } from "react";
-import { Inter } from "next/font/google";
-import Navbar from "@/components/Layout/Header/Navbar";
-import Footer from "@/components/Layout/Footer/Footer";
-import "../styles/globals.css";
-import { AuthProvider } from "@/components/Authentication/HOC/authContext";
+'use client';
 
-const inter = Inter({ subsets: ["latin"] });
+import React, { ReactNode } from 'react';
+import { Inter } from 'next/font/google';
+import Navbar from '@/components/Layout/Header/Navbar';
+import Footer from '@/components/Layout/Footer/Footer';
+import { Providers } from '@/components/Providers';
+import '../styles/globals.css';
+
+const inter = Inter({ subsets: ['latin'] });
 
 interface RootLayoutProps {
   children: ReactNode;
@@ -43,19 +44,15 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
         <meta name="twitter:image" content="/images/icon.png" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://www.ladimood.com" />
-        {/* Favicon */}
         <link rel="icon" href="/images/icon2.svg" sizes="any" />
         <link rel="icon" type="image/png" href="/favicon-32x32.png" />
       </head>
-      <body className="h-full w-full flex flex-col bg-gray-50">
-        {/* Navbar */}
-        <Navbar />
-
-        {/* Main Content */}
-        <main className="flex-grow w-full bg-white"><AuthProvider>{children}</AuthProvider></main>
-
-        {/* Footer */}
-        <Footer />
+      <body className="flex h-full w-full flex-col bg-gray-50">
+        <Providers>
+          <Navbar />
+          <main className="w-full flex-grow bg-white">{children}</main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

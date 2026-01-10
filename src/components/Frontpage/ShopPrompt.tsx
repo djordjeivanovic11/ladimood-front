@@ -7,8 +7,8 @@ const ShopPrompt = () => {
     <div className="relative bg-white text-gray-800 py-24 px-8 rounded-lg border border-[#0097B2] text-center mb-24 max-w-6xl mx-auto overflow-hidden shadow-lg">
       {/* Logo */}
       <div className="relative z-10 mx-auto mb-8">
-        <Image 
-          src="/images/LADIMOOD.svg"  
+        <Image
+          src="/images/LADIMOOD.svg"
           alt="Ladimood Logo"
           width={120}
           height={120}
@@ -20,21 +20,21 @@ const ShopPrompt = () => {
       <h2 className="relative z-10 text-4xl text-[#0097B2] md:text-5xl font-extrabold leading-tight mb-6 tracking-wide">
         Živi lagano
       </h2>
-      
+
       {/* Description */}
       <p className="relative z-10 text-lg md:text-2xl max-w-3xl mx-auto leading-relaxed mb-6 text-gray-700">
-        Ladimood nije za one koji jure kroz život. Ovo je za ekipu koja zna 
-        kako se uživa—kafica, sunce, dobra ekipa, i naravno, savršena majica. 
-        Ako nosiš Ladimood, zna se: opuštenost je tvoj stil, a osmijeh tvoj potpis.
+        Ladimood nije za one koji jure kroz život. Ovo je za ekipu koja zna kako se uživa—kafica,
+        sunce, dobra ekipa, i naravno, savršena majica. Ako nosiš Ladimood, zna se: opuštenost je
+        tvoj stil, a osmijeh tvoj potpis.
       </p>
       <p className="relative z-10 text-lg md:text-2xl max-w-3xl mx-auto leading-relaxed mb-6 text-gray-700">
-        Ovo nije moda koja se trudi. Ovo je moda koja prirodno ide uz tebe. 
-        Ako znaš šta znači &quot;meračenje&quot;, ovo je za tebe.
+        Ovo nije moda koja se trudi. Ovo je moda koja prirodno ide uz tebe. Ako znaš šta znači
+        &quot;meračenje&quot;, ovo je za tebe.
       </p>
 
       {/* Call-to-Action Button */}
       <div className="relative z-10 mt-8">
-        <Link 
+        <Link
           href="/shop"
           className="inline-block bg-[#0097B2] text-white font-bold py-4 px-12 rounded-full shadow-lg hover:bg-[#007B92] hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
         >

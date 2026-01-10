@@ -32,7 +32,6 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
   sortBy,
   setSortBy,
 }) => {
-  
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isPriceOpen, setIsPriceOpen] = useState(true);
   const [isColorOpen, setIsColorOpen] = useState(true);
@@ -137,7 +136,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               <div className="mt-4">
                 <div className="flex flex-col space-y-4">
                   <input
-                    placeholder='Min Price'
+                    placeholder="Min Price"
                     type="range"
                     min={0}
                     max={100}
@@ -193,12 +192,12 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
                 {sizes.map((size) => (
                   <label key={size} className="flex items-center space-x-2 text-gray-700">
                     <input
-                        type="checkbox"
-                        checked={selectedSizes.includes(size)}
-                        onChange={() => toggleSize(size)}
-                        className="form-checkbox text-[#0097B2] rounded focus:ring-[#0097B2]"
-                        title={`Select size ${size}`}
-                      />
+                      type="checkbox"
+                      checked={selectedSizes.includes(size)}
+                      onChange={() => toggleSize(size)}
+                      className="form-checkbox text-[#0097B2] rounded focus:ring-[#0097B2]"
+                      title={`Select size ${size}`}
+                    />
                     <span>{size}</span>
                   </label>
                 ))}

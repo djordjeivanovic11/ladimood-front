@@ -38,9 +38,7 @@ const OrderItem: React.FC<OrderItemProps> = ({ item }) => {
           </li>
           <li>
             <strong>Price:</strong>{' '}
-            <span className="text-green-600">
-              ${price ? price.toFixed(2) : '0.00'}
-            </span>
+            <span className="text-green-600">${price ? price.toFixed(2) : '0.00'}</span>
           </li>
         </ul>
       </div>

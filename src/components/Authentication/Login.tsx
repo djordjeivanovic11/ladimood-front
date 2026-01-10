@@ -1,132 +1,141 @@
-"use client";
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { getCurrentUser } from '@/api/account/axios';  
+import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
+import { useLogin } from '@/hooks/queries/useAuth';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [error, setError] = useState('');
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { mutate: login, isPending, error } = useLogin();
 
-    const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
-    
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/account');
+    }
+  }, [isAuthenticated, router]);
 
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
-
-    useEffect(() => {
-        const token = localStorage.getItem('access_token');
-        if (token) {
-          getCurrentUser()
-            .then((user) => {
-              if (user) {
-                setIsLoggedIn(true);
-                router.push('/account'); 
-              }
-            })
-            .catch(() => {
-              setIsLoggedIn(false);  
-            });
-        }
-      }, [router]);
-      
-    const handleSubmit = async (e: any) => {
-        e.preventDefault();
-        try {
-            const response = await fetch('http://localhost:8000/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({
-                    username: email,
-                    password,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                localStorage.setItem('access_token', data.access_token);
-                router.push('/account'); 
-                // page reload to update the user state
-                window.location.reload();   
-                
-            } else {
-                setError(data.detail || 'Login failed. Please check your credentials.');
-            }
-        } catch (error) {
-            setError('An unexpected error occurred');
-        }
-    };
-
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-blue-50 p-4">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl transform transition-all duration-500 hover:shadow-3xl">
-                <h1 className="text-4xl font-extrabold text-[#0097B2] text-center">Login</h1>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label className="block text-[#0097B2] font-semibold">Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-3 mt-2 border border-[#0097B2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0097B2] transition duration-300 text-black"
-                            placeholder="Enter your email"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-[#0097B2] font-semibold">Password</label>
-                        <div className="relative">
-                            <input
-                                type={showPassword ? 'text' : 'password'}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 mt-2 border border-[#0097B2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0097B2] transition duration-300 text-black"
-                                placeholder="Enter your password"
-                                required
-                            />
-                            <button
-                                type="button"
-                                onClick={togglePasswordVisibility}
-                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-600 focus:outline-none"
-                            >
-                                {showPassword ? <FaEyeSlash /> : <FaEye />}
-                            </button>
-                        </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <button
-                            onClick={() => router.push('/auth/forgot-password')}
-                            className="text-[#0097B2] hover:underline focus:outline-none"
-                        >
-                            Forgot Password?
-                        </button>
-                    </div>
-                    {error && <p className="text-red-500 text-center">{error}</p>}
-                    <button
-                        type="submit"
-                        className="w-full px-4 py-3 font-bold text-white bg-[#0097B2] rounded-lg hover:bg-[#007A90] focus:outline-none focus:ring-4 focus:ring-[#0097B2] transition duration-300 shadow-lg hover:shadow-xl"
-                    >
-                        Login
-                    </button>
-                </form>
-                <p className="text-center text-[#0097B2]">
-                    Don&apos;t have an account?{' '}
-                    <button
-                        onClick={() => router.push('/auth/register')}
-                        className="text-[#0097B2] hover:underline focus:outline-none"
-                    >
-                        Register
-                    </button>
-                </p>
-            </div>
-        </div>
+  const onSubmit = (data: LoginFormData) => {
+    login(
+      { email: data.email, password: data.password },
+      {
+        onSuccess: () => {
+          router.push('/account');
+        },
+      }
     );
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-accent/30 p-4">
+      <div className="w-full max-w-md transform space-y-6 rounded-2xl bg-card p-8 shadow-2xl transition-all duration-500">
+        <h1 className="text-center text-4xl font-extrabold text-primary">Login</h1>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" placeholder="Enter your email" {...register('email')} />
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter your password"
+                className="pr-10"
+                {...register('password')}
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password.message}</p>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => router.push('/auth/forgot-password')}
+              className="text-sm text-primary hover:underline focus:outline-none"
+            >
+              Forgot Password?
+            </button>
+          </div>
+
+          {error && (
+            <p className="text-center text-sm text-destructive">
+              {error instanceof Error ? error.message : 'Login failed'}
+            </p>
+          )}
+
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? (
+              <span className="flex items-center gap-2">
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                Logging in...
+              </span>
+            ) : (
+              'Login'
+            )}
+          </Button>
+        </form>
+
+        <p className="text-center text-muted-foreground">
+          Don&apos;t have an account?{' '}
+          <button
+            onClick={() => router.push('/auth/register')}
+            className="text-primary hover:underline focus:outline-none"
+          >
+            Register
+          </button>
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default Login;

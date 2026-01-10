@@ -1,6 +1,6 @@
-import axios, { AxiosResponse } from 'axios';
-import api from '../axiosInstance'; // Use your existing axios instance
-import {
+import { AxiosResponse } from 'axios';
+import api from '../axiosInstance';
+import type {
   User,
   Address,
   Cart,
@@ -9,13 +9,13 @@ import {
   WishlistItem,
   MessageResponse,
   CartItem,
+  CartItemCreate,
   AddressBase,
   Product,
   Referral,
   ReferralRequest,
   Size,
 } from '@/app/types/types';
-import { encodeOrderId, decodeOrderId } from '@/utils/OrderDecoder';
 
 // Function to get all products with optional filters (category, price range)
 export const getProducts = async (
@@ -29,8 +29,8 @@ export const getProducts = async (
       min_price: min_price || undefined,
       max_price: max_price || undefined,
     };
-    
-    const response: AxiosResponse<Product[]> = await api.get('/account/products', { params });
+
+    const response: AxiosResponse<Product[]> = await api.get('/catalog/products', { params });
     return response.data;
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -41,7 +41,7 @@ export const getProducts = async (
 // Function to get a single product by its ID
 export const getProductById = async (productId: number): Promise<Product> => {
   try {
-    const response: AxiosResponse<Product> = await api.get(`/account/products/${productId}`);
+    const response: AxiosResponse<Product> = await api.get(`/catalog/products/${productId}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching product with ID ${productId}:`, error);
@@ -65,7 +65,7 @@ export const setAuthToken = (token: string | null) => {
 // Get User Details
 export const getUserDetails = async (): Promise<User> => {
   try {
-    const response: AxiosResponse<User> = await api.get('/account/details');
+    const response: AxiosResponse<User> = await api.get('/users/me');
     return response.data;
   } catch (error) {
     console.error('Error fetching user details:', error);
@@ -75,10 +75,10 @@ export const getUserDetails = async (): Promise<User> => {
 
 export const fetchCurrentUser = async (): Promise<User> => {
   try {
-    const response: AxiosResponse<User> = await api.get("/account/me");
+    const response: AxiosResponse<User> = await api.get('/users/me');
     return response.data;
   } catch (error) {
-    console.error("Error fetching current user details:", error);
+    console.error('Error fetching current user details:', error);
     throw error;
   }
 };
@@ -90,7 +90,7 @@ export const fetchCurrentUser = async (): Promise<User> => {
 // Get User Address
 export const getAddress = async (): Promise<Address> => {
   try {
-    const response: AxiosResponse<Address> = await api.get('/account/address');
+    const response: AxiosResponse<Address> = await api.get('/users/address');
     return response.data;
   } catch (error) {
     console.error('Error fetching address:', error);
@@ -101,7 +101,7 @@ export const getAddress = async (): Promise<Address> => {
 // Add or Update Address
 export const setAddress = async (address: AddressBase): Promise<Address> => {
   try {
-    const response: AxiosResponse<Address> = await api.post('/account/address', address);
+    const response: AxiosResponse<Address> = await api.post('/users/address', address);
     return response.data;
   } catch (error) {
     console.error('Error setting address:', error);
@@ -112,7 +112,7 @@ export const setAddress = async (address: AddressBase): Promise<Address> => {
 // Delete Address
 export const deleteAddress = async (): Promise<MessageResponse> => {
   try {
-    const response: AxiosResponse<MessageResponse> = await api.delete('/account/address');
+    const response: AxiosResponse<MessageResponse> = await api.delete('/users/address');
     return response.data;
   } catch (error) {
     console.error('Error deleting address:', error);
@@ -127,7 +127,7 @@ export const deleteAddress = async (): Promise<MessageResponse> => {
 // Get All Orders
 export const getUserOrders = async (): Promise<Order[]> => {
   try {
-    const response: AxiosResponse<Order[]> = await api.get('/account/orders');
+    const response: AxiosResponse<Order[]> = await api.get('/orders');
     return response.data;
   } catch (error) {
     console.error('Error fetching orders:', error);
@@ -135,11 +135,10 @@ export const getUserOrders = async (): Promise<Order[]> => {
   }
 };
 
-
 // Get Specific Order using hashed order ID (string)
 export const getOrderById = async (orderId: string): Promise<Order> => {
   try {
-    const response = await api.get<Order>(`/account/orders/${orderId}`);
+    const response = await api.get<Order>(`/orders/${orderId}`);
     return response.data;
   } catch (error: any) {
     console.error('Error fetching order:', error.response?.data || error.message);
@@ -150,12 +149,7 @@ export const getOrderById = async (orderId: string): Promise<Order> => {
 // Get Order Details (Order, Items, and Address) using hashed order ID
 export const getOrderDetails = async (orderId: string): Promise<Order> => {
   try {
-    // Decode hashed order ID before making the request
-    const numericOrderId = decodeOrderId(orderId);
-    if (numericOrderId === null) {
-      throw new Error('Invalid order ID format');
-    }
-    const response: AxiosResponse<Order> = await api.get(`/account/order/${numericOrderId}/details`);
+    const response: AxiosResponse<Order> = await api.get(`/orders/${orderId}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching order details for order ID ${orderId}:`, error);
@@ -166,7 +160,7 @@ export const getOrderDetails = async (orderId: string): Promise<Order> => {
 // Create an order
 export const createOrder = async (order: OrderCreate): Promise<Order> => {
   try {
-    const response = await api.post<Order>('/account/orders', order);
+    const response = await api.post<Order>('/orders', order);
     return response.data;
   } catch (error: any) {
     console.error('Error creating order:', error.response?.data || error.message);
@@ -174,16 +168,10 @@ export const createOrder = async (order: OrderCreate): Promise<Order> => {
   }
 };
 
-
 // Function to cancel an order using hashed order ID
 export const cancelOrder = async (orderId: string): Promise<void> => {
   try {
-    // Decode hashed order ID before making the request
-    const numericOrderId = decodeOrderId(orderId);
-    if (numericOrderId === null) {
-      throw new Error('Invalid order ID format');
-    }
-    await api.delete(`/account/order/${numericOrderId}`);
+    await api.delete(`/orders/${orderId}`);
   } catch (error: any) {
     console.error('Error canceling order:', error.response?.data || error.message);
     throw error.response?.data || new Error('Unable to cancel order');
@@ -194,20 +182,22 @@ export const cancelOrder = async (orderId: string): Promise<void> => {
 //-----------------------------------//
 
 export interface AddWishlistItemRequest {
-  product_id: number; 
+  product_id: number;
   color: string;
   size: string;
 }
 
-export const addToWishlist = async (wishlistItem: AddWishlistItemRequest): Promise<WishlistItem> => {
+export const addToWishlist = async (
+  wishlistItem: AddWishlistItemRequest
+): Promise<WishlistItem> => {
   try {
-    const response: AxiosResponse<WishlistItem> = await api.post('/account/wishlist', wishlistItem);
+    const response: AxiosResponse<WishlistItem> = await api.post('/wishlist', wishlistItem);
     return response.data;
   } catch (error: any) {
     if (error.response) {
       const detail = error.response.data?.detail;
-      if (detail === "Item already in wishlist") {
-        throw new Error("ItemAlreadyInWishlist"); // Use a custom error identifier
+      if (detail === 'Item already in wishlist') {
+        throw new Error('ItemAlreadyInWishlist'); // Use a custom error identifier
       }
       console.error('Server responded with an error:', error.response.data);
     } else if (error.request) {
@@ -222,7 +212,7 @@ export const addToWishlist = async (wishlistItem: AddWishlistItemRequest): Promi
 // Get Wishlist (Frontend Axios Call)
 export const getWishlist = async (): Promise<WishlistItem[]> => {
   try {
-    const response: AxiosResponse<WishlistItem[]> = await api.get('/account/wishlist');
+    const response: AxiosResponse<WishlistItem[]> = await api.get('/wishlist');
     // Check if the wishlist is empty
     if (response.data.length === 0) {
       console.warn('Wishlist is empty');
@@ -234,12 +224,10 @@ export const getWishlist = async (): Promise<WishlistItem[]> => {
   }
 };
 
-
-
 // Remove Item from Wishlist
 export const removeFromWishlist = async (itemId: number): Promise<MessageResponse> => {
   try {
-    const response: AxiosResponse<MessageResponse> = await api.delete(`/account/wishlist/${itemId}`);
+    const response: AxiosResponse<MessageResponse> = await api.delete(`/wishlist/${itemId}`);
     return response.data;
   } catch (error) {
     console.error(`Error removing item from wishlist with ID ${itemId}:`, error);
@@ -254,7 +242,7 @@ export const removeFromWishlist = async (itemId: number): Promise<MessageRespons
 // Get Cart
 export const getCart = async (): Promise<Cart> => {
   try {
-    const response: AxiosResponse<Cart> = await api.get('/account/cart');
+    const response: AxiosResponse<Cart> = await api.get('/cart');
     return response.data;
   } catch (error) {
     console.error('Error fetching cart:', error);
@@ -265,7 +253,7 @@ export const getCart = async (): Promise<Cart> => {
 // Add Item to Cart
 export const addToCart = async (cartItem: CartItem): Promise<CartItem> => {
   try {
-    const response: AxiosResponse<CartItem> = await api.post('/account/cart', cartItem);
+    const response: AxiosResponse<CartItem> = await api.post('/cart/items', cartItem);
     return response.data;
   } catch (error) {
     console.error('Error adding item to cart:', error);
@@ -278,7 +266,11 @@ export const addToCart = async (cartItem: CartItem): Promise<CartItem> => {
 export const updateCartItem = async (cartItem: CartItem): Promise<CartItem> => {
   try {
     // Add the item_id to the URL path
-    const response: AxiosResponse<CartItem> = await api.put(`/account/cart/${cartItem.id}`, cartItem);
+    const response: AxiosResponse<CartItem> = await api.put(`/cart/items/${cartItem.id}`, {
+      quantity: cartItem.quantity,
+      color: cartItem.color,
+      size: cartItem.size,
+    });
     return response.data;
   } catch (error) {
     console.error('Error updating cart item:', error);
@@ -287,16 +279,19 @@ export const updateCartItem = async (cartItem: CartItem): Promise<CartItem> => {
 };
 
 // Remove Item from Cart
-export const removeFromCart = async (itemId: number, color: string, size: Size): Promise<MessageResponse> => {
+export const removeFromCart = async (
+  itemId: number,
+  _color: string,
+  _size: Size
+): Promise<MessageResponse> => {
   try {
-    const response: AxiosResponse<MessageResponse> = await api.delete(`/account/cart/${itemId}`);
+    const response: AxiosResponse<MessageResponse> = await api.delete(`/cart/items/${itemId}`);
     return response.data;
   } catch (error) {
     console.error(`Error removing item from cart with ID ${itemId}:`, error);
     throw error;
   }
 };
-
 
 export const clearCart = async (): Promise<MessageResponse> => {
   try {
@@ -305,7 +300,7 @@ export const clearCart = async (): Promise<MessageResponse> => {
       throw new Error('No access token found. Please log in.');
     }
 
-    const response: AxiosResponse<MessageResponse> = await api.delete('account/cart/clear', {
+    const response: AxiosResponse<MessageResponse> = await api.delete('/cart', {
       headers: {
         Authorization: `Bearer ${token}`, // Ensure token is sent in the Authorization header
       },
@@ -322,11 +317,127 @@ export const clearCart = async (): Promise<MessageResponse> => {
   }
 };
 
-export const addToNewsletter = async (email: string) => {
-  const response = await api.post('/account/add-to-newsletter', { email });
-  return response.data;
+//-----------------------------------//
+//         GUEST CART ROUTES          //
+//-----------------------------------//
+
+export const createGuestCart = async (): Promise<{ session_id: string; cart: Cart }> => {
+  try {
+    const response: AxiosResponse<{ session_id: string; cart: Cart }> =
+      await api.post('/cart/guest');
+    return response.data;
+  } catch (error) {
+    console.error('Error creating guest cart:', error);
+    throw error;
+  }
 };
 
+export const getGuestCart = async (sessionId: string): Promise<Cart> => {
+  try {
+    const response: AxiosResponse<Cart> = await api.get(`/cart/guest/${sessionId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching guest cart:', error);
+    throw error;
+  }
+};
+
+export const addToGuestCart = async (
+  sessionId: string,
+  item: CartItemCreate
+): Promise<CartItem> => {
+  try {
+    const response: AxiosResponse<CartItem> = await api.post(
+      `/cart/guest/${sessionId}/items`,
+      item
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error adding item to guest cart:', error);
+    throw error;
+  }
+};
+
+export const updateGuestCartItem = async (
+  sessionId: string,
+  itemId: number,
+  quantity: number,
+  color: string,
+  size: Size
+): Promise<CartItem> => {
+  try {
+    const response: AxiosResponse<CartItem> = await api.put(
+      `/cart/guest/${sessionId}/items/${itemId}`,
+      {
+        quantity,
+        color,
+        size,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error updating guest cart item:', error);
+    throw error;
+  }
+};
+
+export const removeFromGuestCart = async (
+  sessionId: string,
+  itemId: number
+): Promise<MessageResponse> => {
+  try {
+    const response: AxiosResponse<MessageResponse> = await api.delete(
+      `/cart/guest/${sessionId}/items/${itemId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error(`Error removing item from guest cart:`, error);
+    throw error;
+  }
+};
+
+export const clearGuestCart = async (sessionId: string): Promise<MessageResponse> => {
+  try {
+    const response: AxiosResponse<MessageResponse> = await api.delete(`/cart/guest/${sessionId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error clearing guest cart:', error);
+    throw error;
+  }
+};
+
+//-----------------------------------//
+//         GUEST ORDER ROUTES        //
+//-----------------------------------//
+
+export interface GuestOrderCreate {
+  items: Array<{
+    product_id: number;
+    quantity: number;
+    color: string;
+    size: Size;
+    price: number;
+  }>;
+  guest_email: string;
+  guest_name: string;
+  guest_phone?: string;
+  address: AddressBase;
+}
+
+export const createGuestOrder = async (orderData: GuestOrderCreate): Promise<Order> => {
+  try {
+    const response = await api.post<Order>('/orders/guest', orderData);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error creating guest order:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Unable to create order');
+  }
+};
+
+export const addToNewsletter = async (email: string) => {
+  const response = await api.post('/notifications/newsletter', { email });
+  return response.data;
+};
 
 export const getCurrentUser = async (): Promise<User> => {
   try {
@@ -335,24 +446,26 @@ export const getCurrentUser = async (): Promise<User> => {
       throw new Error('No access token found');
     }
 
-    const response = await api.get<User>('/account/details', {
+    const response = await api.get<User>('/users/me', {
       headers: {
-        'Authorization': `Bearer ${token}`,  // Include the token in the Authorization header
+        Authorization: `Bearer ${token}`, // Include the token in the Authorization header
       },
     });
 
     return response.data;
   } catch (error) {
     console.error('Error fetching current user:', error);
-    throw error;  // Propagate the error to be handled in the calling code
+    throw error; // Propagate the error to be handled in the calling code
   }
 };
-
 
 export const sendReferrals = async (referrals: Referral[]): Promise<MessageResponse> => {
   try {
     const referralRequest: ReferralRequest = { referrals };
-    const response: AxiosResponse<MessageResponse> = await api.post('/account/referrals', referralRequest);
+    const response: AxiosResponse<MessageResponse> = await api.post(
+      '/notifications/referrals',
+      referralRequest
+    );
     return response.data;
   } catch (error) {
     console.error('Error sending referrals:', error);

@@ -1,12 +1,12 @@
-import React from 'react'
-import ForgotPassword from '@/components/Authentication/ForgotPassword'
+import React from 'react';
+import ForgotPassword from '@/components/Authentication/ForgotPassword';
 
 const ForgotPasswordForm: React.FC = () => {
-    return (
-        <div>
-            <ForgotPassword/>
-        </div>
-    );
-}
+  return (
+    <div>
+      <ForgotPassword />
+    </div>
+  );
+};
 
-export default ForgotPasswordForm
+export default ForgotPasswordForm;

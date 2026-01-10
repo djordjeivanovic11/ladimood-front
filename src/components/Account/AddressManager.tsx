@@ -1,7 +1,7 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { getAddress, setAddress, deleteAddress } from "@/api/account/axios";
-import { Address } from "@/app/types/types";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { getAddress, setAddress, deleteAddress } from '@/api/account/axios';
+import { Address } from '@/app/types/types';
 
 interface AddressManagerProps {
   onAddressSaved?: (address: Address) => void;
@@ -10,11 +10,11 @@ interface AddressManagerProps {
 const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
   const [address, setAddressState] = useState<Address | null>(null);
   const [form, setForm] = useState({
-    street_address: "",
-    city: "",
-    state: "",
-    postal_code: "",
-    country: "",
+    street_address: '',
+    city: '',
+    state: '',
+    postal_code: '',
+    country: '',
   });
 
   useEffect(() => {
@@ -22,11 +22,11 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
       .then((data) => {
         setAddressState(data);
         setForm({
-          street_address: data.street_address || "",
-          city: data.city || "",
-          state: data.state || "",
-          postal_code: data.postal_code || "",
-          country: data.country || "",
+          street_address: data.street_address || '',
+          city: data.city || '',
+          state: data.state || '',
+          postal_code: data.postal_code || '',
+          country: data.country || '',
         });
       })
       .catch(() => setAddressState(null));
@@ -46,7 +46,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
         onAddressSaved(updatedAddress);
       }
     } catch (error) {
-      console.error("Failed to set address", error);
+      console.error('Failed to set address', error);
     }
   };
 
@@ -55,14 +55,14 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
       await deleteAddress();
       setAddressState(null);
       setForm({
-        street_address: "",
-        city: "",
-        state: "",
-        postal_code: "",
-        country: "",
+        street_address: '',
+        city: '',
+        state: '',
+        postal_code: '',
+        country: '',
       });
     } catch (error) {
-      console.error("Failed to delete address", error);
+      console.error('Failed to delete address', error);
     }
   };
 
@@ -72,12 +72,12 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
         {/* Header */}
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800">
-            {address ? "Manage Your Address" : "Add a New Address"}
+            {address ? 'Manage Your Address' : 'Add a New Address'}
           </h2>
           <p className="text-sm text-gray-500">
             {address
-              ? "Edit or delete your saved address below."
-              : "Fill in the form to save your address."}
+              ? 'Edit or delete your saved address below.'
+              : 'Fill in the form to save your address.'}
           </p>
         </div>
 
@@ -99,17 +99,14 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
             {[
-              { name: "street_address", label: "Street Address" },
-              { name: "city", label: "City" },
-              { name: "state", label: "State" },
-              { name: "postal_code", label: "Postal Code" },
-              { name: "country", label: "Country" },
+              { name: 'street_address', label: 'Street Address' },
+              { name: 'city', label: 'City' },
+              { name: 'state', label: 'State' },
+              { name: 'postal_code', label: 'Postal Code' },
+              { name: 'country', label: 'Country' },
             ].map(({ name, label }) => (
               <div key={name}>
-                <label
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                  htmlFor={name}
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor={name}>
                   {label}
                 </label>
                 <input
@@ -127,7 +124,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
               type="submit"
               className="w-full bg-[#0097B2] text-white py-3 rounded-lg shadow hover:bg-[#007A90] transition-all duration-300"
             >
-              {address ? "Update Address" : "Save Address"}
+              {address ? 'Update Address' : 'Save Address'}
             </button>
           </form>
         )}

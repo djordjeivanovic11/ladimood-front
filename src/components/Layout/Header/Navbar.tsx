@@ -1,64 +1,65 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { FaShoppingCart, FaUser, FaBars, FaTimes } from "react-icons/fa";
-import CartSidebar from "@/components/Order/Cart/CartSidebar";
-import { CartItem } from "@/app/types/types";
-import { getCart, getCurrentUser } from "@/api/account/axios";
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { FaShoppingCart, FaUser, FaBars, FaTimes } from 'react-icons/fa';
+import CartSidebar from '@/components/Order/Cart/CartSidebar';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useCartStore } from '@/stores/useCartStore';
+import { useCurrentUser } from '@/hooks/queries/useAuth';
+import { Badge } from '@/components/ui/badge';
 
 const Navbar: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      getCurrentUser()
-        .then((user) => setIsLoggedIn(!!user))
-        .catch(() => setIsLoggedIn(false));
-    }
-  }, []);
+  // Use Zustand stores
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isCartOpen = useCartStore((state) => state.isCartOpen);
+  const openCart = useCartStore((state) => state.openCart);
+  const closeCart = useCartStore((state) => state.closeCart);
+  const cartItems = useCartStore((state) => state.items);
 
-  useEffect(() => {
-    if (cartOpen) {
-      getCart()
-        .then((cartData) => setCartItems(cartData.items))
-        .catch((error) => console.error("Failed to load cart items:", error));
-    }
-  }, [cartOpen]);
+  // Fetch current user on mount if token exists
+  useCurrentUser();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 100);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleProtectedLink = (path: string) => {
-    if (isLoggedIn) router.push(path);
-    else router.push("/auth/login");
+    if (isAuthenticated) {
+      router.push(path);
+    } else {
+      router.push('/auth/login');
+    }
+  };
+
+  const handleShopLink = () => {
+    router.push('/shop');
+    setMenuOpen(false);
   };
 
   const handleMenuClose = () => setMenuOpen(false);
+
+  const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <>
       <header
         className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-          isScrolled
-            ? "bg-white shadow-lg h-[100px] backdrop-blur-lg"
-            : "bg-transparent h-[120px]"
+          isScrolled ? 'h-[100px] bg-white shadow-lg backdrop-blur-lg' : 'h-[120px] bg-transparent'
         }`}
       >
-        <nav className="max-w-screen-xl mx-auto flex items-center justify-between h-full px-4 sm:px-6">
+        <nav className="mx-auto flex h-full max-w-screen-xl items-center justify-between px-4 sm:px-6">
           {/* Logo */}
           <Link href="/" passHref>
-            <div className="flex items-center h-full cursor-pointer">
+            <div className="flex h-full cursor-pointer items-center">
               <Image
                 src="/images/logo.png"
                 alt="LADIMOOD logo"
@@ -70,43 +71,52 @@ const Navbar: React.FC = () => {
           </Link>
 
           {/* Navigation Links (Desktop) */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden items-center space-x-8 md:flex">
             <div
-              onClick={() => handleProtectedLink("/shop")}
-              className="cursor-pointer text-lg font-serif text-[#0097B2] hover:text-teal-200"
+              onClick={handleShopLink}
+              className="cursor-pointer font-serif text-lg text-primary hover:text-primary/80"
             >
               Shop
             </div>
             <div
-              onClick={() => router.push("/contact")}
-              className="cursor-pointer text-lg font-serif text-[#0097B2] hover:text-teal-200"
+              onClick={() => router.push('/contact')}
+              className="cursor-pointer font-serif text-lg text-primary hover:text-primary/80"
             >
               Kontakt
             </div>
-            {isLoggedIn ? (
+            {isAuthenticated ? (
               <FaUser
-                onClick={() => handleProtectedLink("/account")}
-                className="cursor-pointer text-lg text-[#0097B2] hover:text-teal-200"
+                onClick={() => handleProtectedLink('/account')}
+                className="cursor-pointer text-lg text-primary hover:text-primary/80"
               />
             ) : (
               <Link
                 href="/auth/login"
-                className="text-lg font-serif text-[#0097B2] hover:text-teal-200"
+                className="font-serif text-lg text-primary hover:text-primary/80"
               >
                 Login
               </Link>
             )}
-            <FaShoppingCart
-              onClick={() => setCartOpen(true)}
-              className="cursor-pointer text-lg text-[#0097B2] hover:text-teal-200"
-            />
+            <button
+              onClick={openCart}
+              className="relative cursor-pointer text-primary hover:text-primary/80"
+              aria-label="Open cart"
+            >
+              <FaShoppingCart className="text-lg" />
+              {cartItemCount > 0 && (
+                <Badge className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs">
+                  {cartItemCount}
+                </Badge>
+              )}
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
+          <div className="flex items-center md:hidden">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="text-[#0097B2] text-2xl focus:outline-none"
+              className="text-2xl text-primary focus:outline-none"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             >
               {menuOpen ? <FaTimes /> : <FaBars />}
             </button>
@@ -115,11 +125,11 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Menu */}
         <div
-          className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform ${
-            menuOpen ? "translate-x-0" : "-translate-x-full"
+          className={`fixed left-0 top-0 z-50 h-full w-64 transform bg-background shadow-lg ${
+            menuOpen ? 'translate-x-0' : '-translate-x-full'
           } transition-transform duration-300`}
         >
-          <div className="p-4 flex flex-col space-y-4">
+          <div className="flex flex-col space-y-4 p-4">
             <Link href="/" onClick={handleMenuClose}>
               <Image
                 src="/images/logo.png"
@@ -130,62 +140,58 @@ const Navbar: React.FC = () => {
               />
             </Link>
             <div
-              onClick={() => handleProtectedLink("/shop")}
-              className="cursor-pointer text-lg font-serif text-[#0097B2]"
+              onClick={handleShopLink}
+              className="cursor-pointer font-serif text-lg text-primary"
             >
-              Shoping
+              Shop
             </div>
             <div
-              onClick={() => router.push("/contact")}
-              className="cursor-pointer text-lg font-serif text-[#0097B2]"
+              onClick={() => {
+                router.push('/contact');
+                handleMenuClose();
+              }}
+              className="cursor-pointer font-serif text-lg text-primary"
             >
               Kontakt
             </div>
-            {isLoggedIn ? (
+            {isAuthenticated ? (
               <FaUser
-                onClick={() => handleProtectedLink("/account")}
-                className="cursor-pointer text-lg text-[#0097B2]"
+                onClick={() => {
+                  handleProtectedLink('/account');
+                  handleMenuClose();
+                }}
+                className="cursor-pointer text-lg text-primary"
               />
             ) : (
               <Link
                 href="/auth/login"
-                className="text-lg font-serif text-[#0097B2]"
+                className="font-serif text-lg text-primary"
                 onClick={handleMenuClose}
               >
                 Login
               </Link>
             )}
-            <FaShoppingCart
+            <button
               onClick={() => {
-                setCartOpen(true);
+                openCart();
                 handleMenuClose();
               }}
-              className="cursor-pointer text-lg text-[#0097B2]"
-            />
+              className="relative w-fit text-primary"
+              aria-label="Open cart"
+            >
+              <FaShoppingCart className="text-lg" />
+              {cartItemCount > 0 && (
+                <Badge className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full p-0 text-xs">
+                  {cartItemCount}
+                </Badge>
+              )}
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Cart Sidebar */}
-      {cartOpen && (
-        <CartSidebar
-          isOpen={cartOpen}
-          closeCart={() => setCartOpen(false)}
-          cartItems={cartItems}
-          removeFromCart={(itemId) => {
-            setCartItems(cartItems.filter((item) => item.id !== itemId));
-          }}
-          updateQuantity={(itemId, quantity) => {
-            setCartItems(
-              cartItems.map((item) =>
-                item.id === itemId
-                  ? { ...item, quantity: Number(quantity) }
-                  : item
-              )
-            );
-          }}
-        />
-      )}
+      {/* Cart Sidebar - now uses internal Zustand state */}
+      <CartSidebar isOpen={isCartOpen} closeCart={closeCart} />
     </>
   );
 };

@@ -4,7 +4,7 @@ import { sendReferrals } from '@/api/account/axios';
 import { MessageResponse } from '@/app/types/types';
 
 interface ReferralPopupProps {
-  onClose: () => void; 
+  onClose: () => void;
 }
 
 const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
@@ -24,7 +24,7 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
   const handleSubmit = async () => {
     try {
       // Filter out empty referral entries
-      const validReferrals = referrals.filter(referral => referral.name && referral.email);
+      const validReferrals = referrals.filter((referral) => referral.name && referral.email);
       if (validReferrals.length === 0) {
         setError('Molimo vas da unesete bar jednu preporuku.');
         return;
@@ -34,7 +34,7 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
       const response: MessageResponse = await sendReferrals(validReferrals);
 
       if (response.message === 'Referral emails sent successfully.') {
-        setSubmitted(true); 
+        setSubmitted(true);
         setError(null);
 
         setTimeout(() => {
@@ -101,9 +101,7 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
 
       {error && <p className="mt-4 text-red-500">{error}</p>}
       {submitted && (
-        <p className="mt-4 text-green-600 font-semibold">
-          Emailovi su poslati vašim prijateljima!
-        </p>
+        <p className="mt-4 text-green-600 font-semibold">Emailovi su poslati vašim prijateljima!</p>
       )}
     </div>
   );

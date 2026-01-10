@@ -1,8 +1,8 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { getCart, removeFromCart } from "@/api/account/axios";
-import { Cart as CartType, CartItem as CartItemType, Size } from "@/app/types/types";
-import Image from "next/image";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { getCart, removeFromCart } from '@/api/account/axios';
+import { Cart as CartType, CartItem as CartItemType, Size } from '@/app/types/types';
+import Image from 'next/image';
 
 const Cart: React.FC = () => {
   const [cart, setCart] = useState<CartType | null>(null);
@@ -17,12 +17,12 @@ const Cart: React.FC = () => {
       const updatedCart = await getCart();
       setCart(updatedCart);
     } catch (error) {
-      console.error("Failed to remove item from cart", error);
+      console.error('Failed to remove item from cart', error);
     }
   };
 
   const handleShop = () => {
-    window.location.href = "/shop";
+    window.location.href = '/shop';
   };
 
   return (
@@ -54,12 +54,8 @@ const Cart: React.FC = () => {
 
                 {/* Product Details */}
                 <div className="text-center">
-                  <p className="text-lg font-semibold text-gray-800">
-                    {item.product.name}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1 truncate">
-                    {item.product.description}
-                  </p>
+                  <p className="text-lg font-semibold text-gray-800">{item.product.name}</p>
+                  <p className="text-sm text-gray-600 mt-1 truncate">{item.product.description}</p>
                   <p className="text-sm text-gray-800 mt-2 font-medium">
                     Price: €{item.product.price.toFixed(2)}
                   </p>
@@ -77,9 +73,7 @@ const Cart: React.FC = () => {
                     </div>
                     <div className="flex items-center">
                       <span className="text-sm text-gray-600">Size:</span>
-                      <span className="text-sm text-black font-semibold ml-2">
-                        {item.size}
-                      </span>
+                      <span className="text-sm text-black font-semibold ml-2">{item.size}</span>
                     </div>
                   </div>
                 </div>
@@ -104,9 +98,7 @@ const Cart: React.FC = () => {
           </ul>
         </div>
       ) : (
-        <p className="text-center text-gray-500 text-lg mt-4">
-          Your cart is empty.
-        </p>
+        <p className="text-center text-gray-500 text-lg mt-4">Your cart is empty.</p>
       )}
     </div>
   );

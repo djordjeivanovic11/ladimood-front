@@ -1,64 +1,92 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
-import { FaTimes } from 'react-icons/fa';
-import { CartItem as CartItemType } from '@/app/types/types';
+import { FaTimes, FaMinus, FaPlus } from 'react-icons/fa';
+import { CartItem as CartItemType, Size } from '@/app/types/types';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 interface CartItemProps {
   item: CartItemType;
-  updateQuantity: (id: number, color: string, size: string, quantity: number) => void;
-  removeFromCart: (id: number, color: string, size: string) => void;
+  updateQuantity: (id: number, color: string, size: Size, quantity: number) => void;
+  removeFromCart: (id: number, color: string, size: Size) => void;
 }
 
 const CartItem: React.FC<CartItemProps> = ({ item, updateQuantity, removeFromCart }) => {
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value, 10);
-    if (!isNaN(value) && value > 0) {
-      updateQuantity(item.id, item.color, item.size, value);
+  const handleIncrement = () => {
+    updateQuantity(item.id, item.color, item.size as Size, item.quantity + 1);
+  };
+
+  const handleDecrement = () => {
+    if (item.quantity > 1) {
+      updateQuantity(item.id, item.color, item.size as Size, item.quantity - 1);
     }
   };
 
+  const handleRemove = () => {
+    removeFromCart(item.id, item.color, item.size as Size);
+  };
+
   return (
-    <div className="flex items-center p-4 border-b">
-      <div className="w-16 h-16 mr-4">
-        <Image
-          src={item.product.image_url ?? '/placeholder.jpg'}
-          alt={item.product.name}
-          width={64}
-          height={64}
-          className="rounded-lg object-cover"
-        />
-      </div>
-
-      <div className="flex-1">
-        <h3 className="text-lg font-semibold text-gray-800">{item.product.name}</h3>
-        <div className="flex items-center space-x-2 mt-1">
-          <div className="w-5 h-5 rounded-full border" style={{ backgroundColor: item.color }} />
-          <span className="text-sm text-gray-600">Size: {item.size}</span>
-        </div>
-      </div>
-
-      <div className="flex flex-col items-center space-y-2">
-        <p className="text-lg font-bold text-gray-800">€{item.product.price}</p>
-        <div className="flex items-center">
-          <input
-            type="number"
-            min="1"
-            value={item.quantity}
-            onChange={handleQuantityChange}
-            className="w-12 text-center text-black border border-gray-300"
-            title="Quantity"
+    <Card className="relative overflow-hidden">
+      <div className="flex items-center gap-4 p-4">
+        {/* Product Image */}
+        <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
+          <Image
+            src={item.product.image_url ?? '/images/default-product.jpg'}
+            alt={item.product.name}
+            fill
+            className="object-cover"
           />
         </div>
-      </div>
 
-      <button
-        onClick={() => removeFromCart(item.id, item.color, item.size)}
-        className="ml-4 text-red-600 hover:text-red-800"
-        title="Remove item from cart"
-      >
-        <FaTimes size={16} />
-      </button>
-    </div>
+        {/* Product Details */}
+        <div className="flex-1 space-y-1">
+          <h3 className="font-semibold">{item.product.name}</h3>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="h-4 w-4 rounded-full border" style={{ backgroundColor: item.color }} />
+            <span>Size: {item.size}</span>
+          </div>
+          <p className="font-bold text-primary">€{item.product.price.toFixed(2)}</p>
+        </div>
+
+        {/* Quantity Controls */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={handleDecrement}
+            disabled={item.quantity <= 1}
+            aria-label="Decrease quantity"
+          >
+            <FaMinus className="h-3 w-3" />
+          </Button>
+          <span className="w-8 text-center font-medium">{item.quantity}</span>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={handleIncrement}
+            aria-label="Increase quantity"
+          >
+            <FaPlus className="h-3 w-3" />
+          </Button>
+        </div>
+
+        {/* Remove Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          onClick={handleRemove}
+          aria-label="Remove item from cart"
+        >
+          <FaTimes className="h-4 w-4" />
+        </Button>
+      </div>
+    </Card>
   );
 };
 

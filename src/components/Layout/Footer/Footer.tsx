@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import {  FaInstagram } from 'react-icons/fa';
+import { FaInstagram } from 'react-icons/fa';
 
 const Footer: React.FC = () => {
   return (
@@ -40,8 +40,10 @@ const Footer: React.FC = () => {
             <h5 className="font-bold mb-2">Kontaktiraj nas</h5>
             <p className="text-sm">
               Ulica 13.jula 2<br />
-              Podgorica, 81000<br />
-              Phone: +38269851872<br />
+              Podgorica, 81000
+              <br />
+              Phone: +38269851872
+              <br />
               Email: contact@ladimood.com
             </p>
           </div>

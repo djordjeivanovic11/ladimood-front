@@ -49,7 +49,7 @@ export interface UserCreate extends UserBase {
 export interface User extends UserBase {
   id: number;
   is_active: boolean;
-  role?: RoleBase; 
+  role?: RoleBase;
   created_at: Date;
   updated_at: Date;
 }
@@ -95,14 +95,10 @@ export interface Product extends ProductBase {
   updated_at?: Date;
 }
 
-
-
 export interface ProductComponentProps {
   product: Product;
   handleAddToCart: (selectedColor: string, selectedSize: string) => Promise<void>;
 }
-
-
 
 export interface ProductGridProps {
   products: Product[];
@@ -112,21 +108,28 @@ export interface ProductGridProps {
 // Category Interfaces
 export interface CategoryBase {
   name: string;
-  description?: string; 
+  description?: string;
 }
 
 export interface Category extends CategoryBase {
   id: number;
-  products?: Product[]; 
+  products?: Product[];
 }
 
 // Cart and Cart Item Interfaces
 export interface CartItem {
   id: number;
-  product: Product; 
+  product: Product;
   quantity: number;
   color: string;
   size: SizeType;
+}
+
+export interface CartItemCreate {
+  product_id: number;
+  quantity: number;
+  color: string;
+  size: Size;
 }
 
 // Cart Interface
@@ -140,18 +143,16 @@ export interface Cart {
 export interface CartSidebarProps {
   isOpen: boolean;
   closeCart: () => void;
-  cartItems: CartItem[]; 
+  cartItems: CartItem[];
   removeFromCart: (id: number, color: string, size: string) => void;
   updateQuantity: (id: number, color: string, size: string, quantity: number) => void;
-
 }
 
 export interface CallToOrderProps {
   cartItems: CartItem[];
-  onOrder?: () => void; 
+  onOrder?: () => void;
   onCancel: () => void;
 }
-
 
 export interface OrderItemCreate {
   product_id: number;
@@ -165,6 +166,21 @@ export interface OrderCreate {
   status: OrderStatusEnum;
   total_price: number;
   items: OrderItemCreate[];
+}
+
+// Guest Order Create Interface
+export interface GuestOrderCreate {
+  items: Array<{
+    product_id: number;
+    quantity: number;
+    color: string;
+    size: Size;
+    price: number;
+  }>;
+  guest_email: string;
+  guest_name: string;
+  guest_phone?: string;
+  address: AddressBase;
 }
 
 // OrderItem Interface
@@ -188,24 +204,21 @@ export interface OrderItem {
   };
 }
 
-
 // OrderBase Interface
 export interface OrderBase {
   status: OrderStatusEnum;
   total_price: number;
 }
 
-
 // Order Interface
 export interface Order extends OrderBase {
-  id: number; 
+  id: number;
   user_id: number;
   plain_id: string;
-  items: OrderItem[]; 
+  items: OrderItem[];
   created_at: Date;
   updated_at: Date;
 }
-
 
 // Order Details Props
 export interface OrderDetailsProps {
@@ -213,12 +226,11 @@ export interface OrderDetailsProps {
   onClose: () => void;
 }
 
-
 // Wishlist Interfaces
 export interface WishlistItem {
   id: number;
   product: Product;
-  color: string; 
+  color: string;
   size: Size;
 }
 
@@ -235,37 +247,36 @@ export interface AddWishlistItemRequest {
 }
 // Sales Record Interfaces
 export interface SalesRecord {
-  id: number; 
-  user_id: number; 
-  order_id: number; 
-  date_of_sale: string; 
-  buyer_name: string; 
-  price: number; 
+  id: number;
+  user_id: number;
+  order_id: number;
+  date_of_sale: string;
+  buyer_name: string;
+  price: number;
 }
-
 
 // Enum Interfaces
-export enum Size{
-  XS = "XS",
-  S = "S",
-  M = "M",
-  L = "L",
-  XL = "XL",
-  XXL = "XXL",
+export enum Size {
+  XS = 'XS',
+  S = 'S',
+  M = 'M',
+  L = 'L',
+  XL = 'XL',
+  XXL = 'XXL',
 }
 
-export type SizeType = "XS" | "S" | "M" | "L" | "XL" | "XXL";
+export type SizeType = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL';
 
 export enum OrderStatusEnum {
-  CREATED = "CREATED",
-  PENDING = "PENDING",
-  SHIPPED = "SHIPPED",
-  DELIVERED = "DELIVERED",
-  CANCELLED = "CANCELLED",
+  CREATED = 'CREATED',
+  PENDING = 'PENDING',
+  SHIPPED = 'SHIPPED',
+  DELIVERED = 'DELIVERED',
+  CANCELLED = 'CANCELLED',
 }
 
 export interface DiscountPopupProps {
-  onClose: () => void; 
+  onClose: () => void;
 }
 
 export interface Referral {
@@ -305,7 +316,7 @@ export interface OrderManage {
 // OrderResponse Interface (from your backend)
 export interface OrderResponse {
   id: number;
-  status: string; 
+  status: string;
   created_at: string;
   updated_at: string;
   user: {
@@ -342,7 +353,6 @@ export interface OrderResponse {
   }>;
 }
 
-
 export interface AddressManagement {
   street_address: string;
   city: string;
@@ -358,9 +368,7 @@ export interface UserManagement {
   phone_number?: string | null;
 }
 
-
 interface OrderItemManagement {
-
   id: number;
 
   product_id: number;
@@ -376,10 +384,7 @@ interface OrderItemManagement {
   price: number;
 
   product: Product;
-
 }
-
-
 
 export interface OrderByIdProps {
   orderId: number;
@@ -390,11 +395,10 @@ export interface OrderManagement {
   id: number;
   user_id: number;
   user?: UserBase;
-  address?: AddressManagement; 
+  address?: AddressManagement;
   status: OrderStatusEnum;
   total_price: number;
   items: OrderItemManagement[];
   created_at: string;
   updated_at: string;
 }
-

@@ -1,5 +1,11 @@
 import axiosInstance from '../axiosInstance';
-import { Order, SalesRecord, OrderStatusEnum, OrderManagement, OrderResponse} from '@/app/types/types';
+import {
+  Order,
+  SalesRecord,
+  OrderStatusEnum,
+  OrderManagement,
+  OrderResponse,
+} from '@/app/types/types';
 
 export const fetchSalesRecords = async (): Promise<SalesRecord[]> => {
   try {
@@ -9,7 +15,7 @@ export const fetchSalesRecords = async (): Promise<SalesRecord[]> => {
     console.error('Error fetching sales records:', error?.response?.data?.detail || error.message);
     throw new Error(error?.response?.data?.detail || 'Failed to fetch sales records.');
   }
-}
+};
 
 export const createSalesRecord = async (salesRecord: {
   user_id: number;
@@ -25,8 +31,10 @@ export const createSalesRecord = async (salesRecord: {
     // Check for the "already exists" case
     if (error?.response?.status === 400 && error?.response?.data?.detail) {
       if (error.response.data.detail.includes('already exists')) {
-        console.warn('A sales record for this order already exists. Returning null instead of throwing.');
-        return null; 
+        console.warn(
+          'A sales record for this order already exists. Returning null instead of throwing.'
+        );
+        return null;
       }
     }
     console.error('Error creating sales record:', error?.response?.data?.detail || error.message);
@@ -34,15 +42,16 @@ export const createSalesRecord = async (salesRecord: {
   }
 };
 
-
-
 // Orders API
 export const fetchAllOrdersWithDetails = async (): Promise<OrderManagement[]> => {
   try {
     const response = await axiosInstance.get<OrderManagement[]>('/management/orders');
     return response.data;
   } catch (error: any) {
-    console.error('Error fetching orders with details:', error?.response?.data?.detail || error.message);
+    console.error(
+      'Error fetching orders with details:',
+      error?.response?.data?.detail || error.message
+    );
     throw new Error(error?.response?.data?.detail || 'Failed to fetch orders with details.');
   }
 };
@@ -52,8 +61,13 @@ export const fetchOrderDetailsById = async (orderId: number): Promise<OrderRespo
     const response = await axiosInstance.get<OrderResponse>(`/management/orders/${orderId}`);
     return response.data;
   } catch (error: any) {
-    console.error(`Error fetching order details with ID ${orderId}:`, error?.response?.data?.detail || error.message);
-    throw new Error(error?.response?.data?.detail || `Failed to fetch order details with ID ${orderId}.`);
+    console.error(
+      `Error fetching order details with ID ${orderId}:`,
+      error?.response?.data?.detail || error.message
+    );
+    throw new Error(
+      error?.response?.data?.detail || `Failed to fetch order details with ID ${orderId}.`
+    );
   }
 };
 
@@ -73,12 +87,10 @@ export const updateOrderStatus = async (
       error?.response?.data?.detail || error.message
     );
     throw new Error(
-      error?.response?.data?.detail ||
-        `Failed to update order status for ID ${orderId}.`
+      error?.response?.data?.detail || `Failed to update order status for ID ${orderId}.`
     );
   }
 };
-
 
 export const submitContactForm = async (contactData: {
   name: string;
@@ -88,7 +100,10 @@ export const submitContactForm = async (contactData: {
   inquiry_type: string;
 }): Promise<{ message: string }> => {
   try {
-    const response = await axiosInstance.post<{ message: string }>('/management/contact', contactData);
+    const response = await axiosInstance.post<{ message: string }>(
+      '/management/contact',
+      contactData
+    );
     return response.data;
   } catch (error: any) {
     console.error(`Error submitting contact form:`, error?.response?.data?.detail || error.message);

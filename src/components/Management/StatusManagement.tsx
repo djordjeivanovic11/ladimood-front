@@ -7,7 +7,11 @@ interface StatusManagementProps {
   onStatusChange: (orderId: number, newStatus: OrderStatusEnum) => Promise<void>;
 }
 
-const StatusManagement: React.FC<StatusManagementProps> = ({ orderId, currentStatus, onStatusChange }) => {
+const StatusManagement: React.FC<StatusManagementProps> = ({
+  orderId,
+  currentStatus,
+  onStatusChange,
+}) => {
   const [status, setStatus] = useState<OrderStatusEnum>(currentStatus);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

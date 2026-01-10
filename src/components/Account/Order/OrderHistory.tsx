@@ -1,113 +1,127 @@
-import React, { useEffect, useState } from "react";
-import { getUserOrders } from "@/api/account/axios";
-import { Order, OrderItem } from "@/app/types/types";
+'use client';
+
+import React, { useState } from 'react';
+import { useUserOrdersQuery } from '@/hooks/queries/useOrders';
+import { OrderItem } from '@/app/types/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+
+function OrderHistorySkeleton() {
+  return (
+    <div className="space-y-6">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Card key={i}>
+          <CardContent className="space-y-4 p-6">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-20 w-full" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
 
 const OrderHistory: React.FC = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [visibleOrders, setVisibleOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
-  const [showMore, setShowMore] = useState<boolean>(false);
+  const { data: orders = [], isLoading, error } = useUserOrdersQuery();
+  const [visibleCount, setVisibleCount] = useState(3);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const data = await getUserOrders();
-        
-        const sortedOrders = data.sort(
-          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-        setOrders(sortedOrders);
-        setVisibleOrders(sortedOrders.slice(0, 3));
-      } catch (err) {
-        setError("Failed to fetch order history.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, []);
+  const sortedOrders = [...orders].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+  const visibleOrders = sortedOrders.slice(0, visibleCount);
+  const hasMore = visibleCount < orders.length;
 
   const handleLoadMore = () => {
-    const nextOrders = orders.slice(visibleOrders.length, visibleOrders.length + 5);
-    setVisibleOrders([...visibleOrders, ...nextOrders]);
-    if (visibleOrders.length + nextOrders.length >= orders.length) {
-      setShowMore(false);
-    }
+    setVisibleCount((prev) => prev + 5);
   };
 
-  if (loading) {
-    return <div className="text-center text-sm text-gray-400">Loading your orders...</div>;
+  if (isLoading) {
+    return (
+      <div className="mx-auto my-10 max-w-3xl px-4">
+        <h2 className="mb-6 text-center text-3xl font-bold">Order History</h2>
+        <OrderHistorySkeleton />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-red-500 text-center">{error}</div>;
+    return (
+      <div className="mx-auto my-10 max-w-3xl px-4 text-center">
+        <p className="text-destructive">Failed to fetch order history.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 shadow-lg rounded-xl p-6 sm:p-8 border border-gray-200 max-w-3xl mx-auto my-10">
-      <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">Order History</h2>
+    <div className="mx-auto my-10 max-w-3xl px-4">
+      <h2 className="mb-6 text-center text-3xl font-bold">Order History</h2>
+
       {visibleOrders.length > 0 ? (
         <div className="space-y-6">
           {visibleOrders.map((order) => (
-            <div
-              key={order.id}
-              className="bg-white border border-gray-200 rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow"
-            >
-
-              <div className="flex justify-between items-start mb-4">
-                <div className="space-y-1">
-                  <p className="text-lg font-semibold text-[#0097B2]">Order #{order.id}</p>
-                  <p className="text-sm text-gray-500">
-                    Placed on: {new Date(order.created_at).toLocaleDateString()}
-                  </p>
-                  <p className="text-sm text-gray-700">Total: €{order.total_price.toFixed(2)}</p>
+            <Card key={order.id} className="transition-shadow hover:shadow-md">
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <CardTitle className="text-lg text-primary">
+                      Order #{order.plain_id || order.id}
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                      Placed on: {new Date(order.created_at).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm font-medium">Total: €{order.total_price.toFixed(2)}</p>
+                  </div>
+                  <Badge variant={order.status === 'DELIVERED' ? 'default' : 'secondary'}>
+                    {order.status}
+                  </Badge>
                 </div>
-              </div>
-              <div>
-                <h3 className="text-base font-medium text-gray-800 mb-3">Items</h3>
+              </CardHeader>
+              <CardContent>
+                <h3 className="mb-3 text-base font-medium">Items</h3>
                 <ul className="space-y-3">
                   {order.items.map((item: OrderItem) => (
                     <li
                       key={item.id}
-                      className="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-200"
+                      className="flex items-center justify-between rounded-lg border bg-muted/50 p-3"
                     >
                       <div>
-                        <p className="text-sm font-medium text-gray-800">{item.product.name}</p>
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm font-medium">{item.product.name}</p>
+                        <p className="text-sm text-muted-foreground">
                           Qty: {item.quantity}
                           <span className="ml-4">Size: {item.size}</span>
                         </p>
-                        <div className="flex items-center mt-1">
-                          <p className="text-sm text-gray-600">Color:</p>
+                        <div className="mt-1 flex items-center text-sm text-muted-foreground">
+                          <span>Color:</span>
                           <span
-                            className="w-4 h-4 rounded-full ml-2 border border-gray-300"
-                            style={{ backgroundColor: item.color || "#FFFFFF" }}
-                          ></span>
+                            className="ml-2 h-4 w-4 rounded-full border"
+                            style={{ backgroundColor: item.color || '#FFFFFF' }}
+                          />
                         </div>
                       </div>
-                      <p className="text-sm font-semibold text-gray-800">€{item.price.toFixed(2)}</p>
+                      <p className="text-sm font-semibold">€{item.price.toFixed(2)}</p>
                     </li>
                   ))}
                 </ul>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       ) : (
-        <p className="text-center text-[#0097B2] text-base font-medium">
-          You have no orders yet. Start shopping and make your first purchase!
-        </p>
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-primary">
+              You have no orders yet. Start shopping and make your first purchase!
+            </p>
+          </CardContent>
+        </Card>
       )}
-      {visibleOrders.length < orders.length && (
-        <div className="flex justify-center mt-6">
-          <button
-            onClick={handleLoadMore}
-            className="px-6 py-2 text-sm font-medium text-white bg-[#0097B2] rounded-full hover:bg-[#007a90] transition-colors"
-          >
-            Load More
-          </button>
+
+      {hasMore && (
+        <div className="mt-6 flex justify-center">
+          <Button onClick={handleLoadMore}>Load More</Button>
         </div>
       )}
     </div>

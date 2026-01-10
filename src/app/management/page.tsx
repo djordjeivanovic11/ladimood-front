@@ -1,10 +1,10 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import axiosInstance from "@/api/axiosInstance";
-import OrderManagement from "@/components/Management/OrderManagement";
-import SalesManagement from "@/components/Management/SalesManagement";
-import { User } from "@/app/types/types";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import axiosInstance from '@/api/axiosInstance';
+import OrderManagement from '@/components/Management/OrderManagement';
+import SalesManagement from '@/components/Management/SalesManagement';
+import { User } from '@/app/types/types';
 
 export default function ManagementPage() {
   const [loading, setLoading] = useState(true);
@@ -12,30 +12,30 @@ export default function ManagementPage() {
 
   useEffect(() => {
     // Example: read token from localStorage (or cookies via document.cookie)
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
     if (!token) {
       // No token => redirect to login
-      router.replace("/auth/login");
+      router.replace('/auth/login');
       return;
     }
 
     // Call your API to verify the user's details
     axiosInstance
-      .get<User>("/account/me") 
+      .get<User>('/account/me')
       .then((res) => {
         const user = res.data;
-        if (user?.role?.name !== "ADMIN") {
+        if (user?.role?.name !== 'ADMIN') {
           // return to previous page
           router.back();
-          alert("You are not authorized to access this page.");
+          alert('You are not authorized to access this page.');
         } else {
           setLoading(false);
         }
       })
       .catch((error) => {
-        console.error("Error fetching user:", error);
+        console.error('Error fetching user:', error);
         // On error, go to login
-        router.replace("/auth/login");
+        router.replace('/auth/login');
       });
   }, [router]);
 

@@ -1,180 +1,150 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { OrderResponse, OrderStatusEnum } from '@/app/types/types';
-import { fetchOrderDetailsById } from '@/api/management/axios';
+import React from 'react';
+import { OrderStatusEnum } from '@/app/types/types';
 import { FaUser, FaTruck, FaBoxOpen } from 'react-icons/fa';
 import OrderItem from './OrderItem';
+import { useOrderByIdQuery } from '@/hooks/queries/useOrders';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface OrderByIdProps {
-  orderId: number;
+  orderId: string;
+}
+
+function OrderSkeleton() {
+  return (
+    <Card>
+      <CardContent className="space-y-8 p-8 md:p-12">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-8 w-24 rounded-full" />
+        </div>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-40 rounded-lg" />
+          ))}
+        </div>
+        <div className="space-y-4">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-lg" />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
-  const [order, setOrder] = useState<OrderResponse | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: order, isLoading, error } = useOrderByIdQuery(orderId);
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const fetchedOrder = await fetchOrderDetailsById(orderId);
-        setOrder({
-          ...fetchedOrder,
-          created_at: new Date(fetchedOrder.created_at).toISOString(),
-          updated_at: new Date(fetchedOrder.updated_at).toISOString(),
-          items: fetchedOrder.items.map((item: any) => ({
-            id: item.id,
-            product_id: item.product_id,
-            product_name: item.product_name || 'Unknown Product',
-            quantity: item.quantity,
-            color: item.color || 'Unknown Color',
-            size: item.size || 'Unknown Size',
-            price: item.price || 0,
-            product: {
-              id: item.product?.id || -1,
-              name: item.product?.name || 'Unknown Name',
-              description: item.product?.description || 'No Description',
-              category: item.product?.category || 'Uncategorized',
-              price: item.product?.price || 0,
-              image_url: item.product?.image_url || null,
-              created_at: item.product?.created_at
-                ? new Date(item.product.created_at).toISOString() // Conversion to ISO string
-                : undefined,
-              updated_at: item.product?.updated_at
-                ? new Date(item.product.updated_at).toISOString() // Conversion to ISO string
-                : undefined,
-            },
-          })),
-          
-        });
-      } catch (err: any) {
-        setError(err.message || 'Failed to fetch order details.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrder();
-  }, [orderId]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-gray-600 text-lg">Loading order details...</p>
-      </div>
-    );
+  if (isLoading) {
+    return <OrderSkeleton />;
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-red-500 text-lg">{error}</p>
-      </div>
+      <Card>
+        <CardContent className="flex h-64 items-center justify-center">
+          <p className="text-destructive">
+            {error instanceof Error ? error.message : 'Failed to fetch order details.'}
+          </p>
+        </CardContent>
+      </Card>
     );
   }
 
   if (!order) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-gray-600 text-lg">Order not found.</p>
-      </div>
+      <Card>
+        <CardContent className="flex h-64 items-center justify-center">
+          <p className="text-muted-foreground">Order not found.</p>
+        </CardContent>
+      </Card>
     );
   }
 
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case OrderStatusEnum.DELIVERED:
+        return 'default';
+      case OrderStatusEnum.SHIPPED:
+        return 'secondary';
+      case OrderStatusEnum.CANCELLED:
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
+
   return (
-    <div className="bg-gray-50 rounded-xl shadow-lg p-8 md:p-12">
-      {/* Order Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-10">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Order #{order.id}
-        </h1>
-        <span
-          className={`mt-4 md:mt-0 px-6 py-2 rounded-full font-semibold text-sm ${
-            order.status === OrderStatusEnum.DELIVERED
-              ? 'bg-green-100 text-green-800'
-              : order.status === OrderStatusEnum.SHIPPED
-              ? 'bg-blue-100 text-blue-800'
-              : order.status === OrderStatusEnum.PENDING
-              ? 'bg-yellow-100 text-yellow-800'
-              : order.status === OrderStatusEnum.CANCELLED
-              ? 'bg-red-100 text-red-800'
-              : 'bg-gray-200 text-gray-800'
-          }`}
-        >
-          {order.status}
-        </span>
-      </div>
+    <Card>
+      <CardContent className="p-8 md:p-12">
+        {/* Order Header */}
+        <div className="mb-10 flex flex-col items-center justify-between md:flex-row">
+          <h1 className="text-3xl font-bold">Order #{order.plain_id || order.id}</h1>
+          <Badge variant={getStatusVariant(order.status)} className="mt-4 px-4 py-2 md:mt-0">
+            {order.status}
+          </Badge>
+        </div>
 
-      {/* Order Details Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* User Information */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-bold mb-4 flex items-center text-gray-800">
-            <FaUser className="mr-2 text-blue-500" /> User Information
-          </h2>
-          {order.user && (
-            <>
-              <p className="text-gray-600">
-                <strong>Name:</strong> {order.user.full_name}
+        {/* Order Details Grid */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          {/* User Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-lg">
+                <FaUser className="mr-2 text-primary" /> User Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-muted-foreground">
+              {order.user_id ? <p>User ID: {order.user_id}</p> : <p>Guest Order</p>}
+            </CardContent>
+          </Card>
+
+          {/* Shipping Address */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-lg">
+                <FaTruck className="mr-2 text-green-500" /> Shipping Address
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 text-muted-foreground">
+              <p>Address details available in order confirmation</p>
+            </CardContent>
+          </Card>
+
+          {/* Order Meta */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center text-lg">
+                <FaBoxOpen className="mr-2 text-yellow-500" /> Order Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-muted-foreground">
+              <p>
+                <strong>Created:</strong> {new Date(order.created_at).toLocaleString()}
               </p>
-              <p className="text-gray-600">
-                <strong>Email:</strong> {order.user.email}
+              <p>
+                <strong>Total:</strong>{' '}
+                <span className="font-semibold text-primary">€{order.total_price.toFixed(2)}</span>
               </p>
-              {order.user.phone_number && (
-                <p className="text-gray-600">
-                  <strong>Phone:</strong> {order.user.phone_number}
-                </p>
-              )}
-            </>
-          )}
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Shipping Address */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-bold mb-4 flex items-center text-gray-800">
-            <FaTruck className="mr-2 text-green-500" /> Shipping Address
-          </h2>
-          {order.address && (
-            <>
-              <p className="text-gray-600">{order.address.street_address}</p>
-              <p className="text-gray-600">
-                {order.address.city}, {order.address.state || ''}{' '}
-                {order.address.postal_code}
-              </p>
-              <p className="text-gray-600">{order.address.country}</p>
-            </>
-          )}
+        {/* Order Items */}
+        <div className="mt-12">
+          <h2 className="mb-6 text-2xl font-bold">Items</h2>
+          <div className="space-y-6">
+            {order.items.map((item) => (
+              <OrderItem key={item.id} item={item} />
+            ))}
+          </div>
         </div>
-
-        {/* Order Meta */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-bold mb-4 flex items-center text-gray-800">
-            <FaBoxOpen className="mr-2 text-yellow-500" /> Order Details
-          </h2>
-          <p className="text-gray-600">
-            <strong className="">Created At:</strong>{' '}
-            {new Date(order.created_at).toLocaleString()}
-          </p>
-          <p className="text-gray-600">
-            <strong>Total Price:</strong>{' '}
-            <span className="text-green-600 font-semibold">
-              ${order.total_price.toFixed(2)}
-            </span>
-          </p>
-        </div>
-      </div>
-
-      {/* Order Items */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Items</h2>
-        <div className="space-y-6">
-          {order.items.map((item) => (
-            <OrderItem key={item.id} item={item} />
-          ))}
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

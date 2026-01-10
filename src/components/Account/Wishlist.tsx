@@ -1,8 +1,8 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { getWishlist, removeFromWishlist } from "@/api/account/axios";
-import { WishlistItem } from "@/app/types/types";
-import Image from "next/image";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { getWishlist, removeFromWishlist } from '@/api/account/axios';
+import { WishlistItem } from '@/app/types/types';
+import Image from 'next/image';
 
 const Wishlist: React.FC = () => {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
@@ -16,7 +16,7 @@ const Wishlist: React.FC = () => {
       await removeFromWishlist(itemId);
       setWishlist(wishlist.filter((item) => item.id !== itemId));
     } catch (error) {
-      console.error("Failed to remove item from wishlist", error);
+      console.error('Failed to remove item from wishlist', error);
     }
   };
 
@@ -53,12 +53,8 @@ const Wishlist: React.FC = () => {
 
                 {/* Product Details */}
                 <div className="text-center">
-                  <p className="text-lg font-semibold text-gray-800">
-                    {item.product.name}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1 truncate">
-                    {item.product.description}
-                  </p>
+                  <p className="text-lg font-semibold text-gray-800">{item.product.name}</p>
+                  <p className="text-sm text-gray-600 mt-1 truncate">{item.product.description}</p>
                   <p className="text-sm text-gray-800 mt-2 font-medium">
                     Price: €{item.product.price.toFixed(2)}
                   </p>
@@ -73,9 +69,7 @@ const Wishlist: React.FC = () => {
                     </div>
                     <div className="flex items-center">
                       <span className="text-sm text-gray-600">Size:</span>
-                      <span className="text-sm text-black font-semibold ml-2">
-                        {item.size}
-                      </span>
+                      <span className="text-sm text-black font-semibold ml-2">{item.size}</span>
                     </div>
                   </div>
                 </div>
@@ -100,9 +94,7 @@ const Wishlist: React.FC = () => {
           </ul>
         </div>
       ) : (
-        <p className="text-center text-gray-500 text-lg mt-4">
-          Your wishlist is empty.
-        </p>
+        <p className="text-center text-gray-500 text-lg mt-4">Your wishlist is empty.</p>
       )}
     </div>
   );

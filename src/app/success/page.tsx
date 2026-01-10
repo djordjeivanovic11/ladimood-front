@@ -12,7 +12,7 @@ const SuccessPage: React.FC = () => {
       router.push('/shop');
     }, 3000);
 
-    return () => clearTimeout(redirectToShop); 
+    return () => clearTimeout(redirectToShop);
   }, [router]);
 
   return (

@@ -3,8 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FaHeart } from 'react-icons/fa';
-import { addToWishlist as addToWishlistAPI } from "@/api/account/axios";
+import { addToWishlist as addToWishlistAPI } from '@/api/account/axios';
 import { Product as ProductType } from '@/app/types/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface ProductProps {
   product: ProductType;
@@ -16,7 +20,7 @@ interface ProductProps {
   onSelectColor: (color: string) => void;
   onSelectSize: (size: string) => void;
   onAddToCart: () => void;
-  onAddToWishlist: () => void;
+  onAddToWishlist?: () => void;
 }
 
 const Product: React.FC<ProductProps> = ({
@@ -28,7 +32,6 @@ const Product: React.FC<ProductProps> = ({
   onSelectColor,
   onSelectSize,
   onAddToCart,
-  onAddToWishlist,
 }) => {
   const [wishlistFeedback, setWishlistFeedback] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
@@ -38,115 +41,118 @@ const Product: React.FC<ProductProps> = ({
       const timer = setTimeout(() => setWishlistFeedback(null), 4000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [wishlistFeedback]);
 
   const handleAddToWishlist = async () => {
     if (!selectedColor || !selectedSize) {
-      setFeedbackMessage("Please select a color and size before adding to the wishlist.");
+      setFeedbackMessage('Please select a color and size before adding to the wishlist.');
       return;
     }
-  
+
     try {
       await addToWishlistAPI({
         product_id: product.id,
         color: selectedColor,
         size: selectedSize,
       });
-      setWishlistFeedback("Item successfully added to wishlist!");
-    } catch (error: any) {
-      if (error.message === "ItemAlreadyInWishlist") {
-        setWishlistFeedback("Item is already in your wishlist!");
+      setWishlistFeedback('Item successfully added to wishlist!');
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === 'ItemAlreadyInWishlist') {
+        setWishlistFeedback('Item is already in your wishlist!');
       } else {
-        setWishlistFeedback("Failed to add item to wishlist. Try again later.");
+        setWishlistFeedback('Failed to add item to wishlist. Try again later.');
       }
     }
   };
-  
-  
+
   return (
-    <div className="productCard group bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 transform hover:-translate-y-1">
-      <div className="relative w-full h-64">
+    <Card className="group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+      <div className="relative aspect-square w-full overflow-hidden bg-muted">
         <Image
           src={product.image_url || '/images/default-product.jpg'}
           alt={product.name}
           fill
-          className="object-contain transition-transform transform group-hover:scale-105 duration-300"
+          className="object-contain transition-transform duration-300 group-hover:scale-105"
         />
       </div>
-      <div className="p-6 text-center flex-grow">
-        <h3 className="text-xl font-bold text-gray-800 transition-colors group-hover:text-[#0097B2]">
-          {product.name}
-        </h3>
-        <p className="text-lg text-gray-600 mb-4">€{product.price.toFixed(2)}</p>
-        <div className="flex justify-center items-center mb-4">
+      <CardContent className="space-y-4 p-6">
+        <div className="text-center">
+          <h3 className="text-xl font-bold transition-colors group-hover:text-primary">
+            {product.name}
+          </h3>
+          <p className="mt-1 text-lg text-muted-foreground">€{product.price.toFixed(2)}</p>
+        </div>
+
+        {/* Color Selection */}
+        <div className="flex justify-center gap-2">
           {availableColors.map((color, index) => (
             <button
               key={index}
-              title={`Odaberite boju ${color}`}
+              title={`Select color ${color}`}
               onClick={() => onSelectColor(color)}
-              className={`w-6 h-6 m-1 rounded-full border transition-transform transform hover:scale-110 focus:outline-none ${
-                selectedColor === color
-                  ? 'border-teal-300 border-2'
-                  : 'border-gray-300'
-              }`}
+              className={cn(
+                'h-6 w-6 rounded-full border-2 transition-transform hover:scale-110',
+                selectedColor === color ? 'border-primary ring-2 ring-primary/50' : 'border-border'
+              )}
               style={{ backgroundColor: color }}
-              aria-label={`Odaberite boju ${color}`}
+              aria-label={`Select color ${color}`}
             />
           ))}
         </div>
-        <div className="flex justify-center items-center space-x-2 mb-4">
+
+        {/* Size Selection */}
+        <div className="flex flex-wrap justify-center gap-2">
           {availableSizes.map((size, index) => (
             <button
               key={index}
               onClick={() => onSelectSize(size)}
-              className={`text-sm font-semibold px-3 py-1 border rounded-full cursor-pointer transition-all 
-                ${
-                  selectedSize === size
-                    ? 'bg-[#0097B2] text-white border-[#0097B2]'
-                    : 'border-gray-300 text-gray-800 hover:bg-gray-200'
-                }`}
-              aria-label={`Odaberite veličinu ${size}`}
+              className={cn(
+                'rounded-full border px-3 py-1 text-sm font-semibold transition-all',
+                selectedSize === size
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border hover:bg-muted'
+              )}
+              aria-label={`Select size ${size}`}
             >
               {size}
             </button>
           ))}
         </div>
-      </div>
-      <div className="flex justify-between items-center p-4">
-        <button
-          onClick={onAddToCart}
-          className="flex-1 bg-[#0097B2] text-white text-lg font-semibold py-2 px-4 rounded-md transition-all mr-2 hover:bg-[#007B92] shadow-md hover:shadow-lg"
-        >
-          Dodaj u korpu
-        </button>
-        <button
-          onClick={handleAddToWishlist}
-          className="flex items-center justify-center bg-transparent border border-[#0097B2] text-[#0097B2] p-2 rounded-md transition-all hover:bg-[#0097B2] hover:text-white shadow-md hover:shadow-lg"
-          title="Dodaj u listu želja"
-          aria-label="Dodaj u listu želja"
-        >
-          <FaHeart className="text-lg" />
-        </button>
-      </div>
-      {(feedbackMessage || wishlistFeedback) && (
-        <div
-        className={`p-2 mt-2 text-center text-sm rounded ${
-          wishlistFeedback
-            ? wishlistFeedback.includes('added') // Success
-              ? 'bg-green-100 text-green-700'
-              : wishlistFeedback.includes('already') // Already exists
-              ? 'bg-yellow-100 text-yellow-700'
-              : 'bg-red-100 text-red-700' // Failure
-            : feedbackMessage // Default feedback message
-            ? 'bg-red-100 text-red-700'
-            : ''
-        }`}
-      >
-        {wishlistFeedback || feedbackMessage}
-      </div>
-      
-      )}
-    </div>
+
+        {/* Actions */}
+        <div className="flex gap-2">
+          <Button onClick={onAddToCart} className="flex-1">
+            Dodaj u korpu
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleAddToWishlist}
+            title="Dodaj u listu želja"
+            aria-label="Dodaj u listu želja"
+          >
+            <FaHeart className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Feedback Messages */}
+        {(feedbackMessage || wishlistFeedback) && (
+          <Badge
+            variant={
+              wishlistFeedback?.includes('added')
+                ? 'default'
+                : wishlistFeedback?.includes('already')
+                  ? 'secondary'
+                  : 'destructive'
+            }
+            className="w-full justify-center py-2"
+          >
+            {wishlistFeedback || feedbackMessage}
+          </Badge>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

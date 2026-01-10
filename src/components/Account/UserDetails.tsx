@@ -1,34 +1,29 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { getUserDetails } from "@/api/account/axios";
-import { logoutUser } from "@/api/auth/axios";
-import { User } from "@/app/types/types";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getUserDetails } from '@/api/account/axios';
+import { logoutUser } from '@/api/auth/axios';
+import { User } from '@/app/types/types';
 
 const UserDetails: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    getUserDetails()
-      .then(setUser)
-      .catch(console.error);
+    getUserDetails().then(setUser).catch(console.error);
   }, []);
 
   const handleLogout = async () => {
     try {
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (refreshToken) {
-        await logoutUser(refreshToken);
-      }
+      await logoutUser();
       // Clear tokens
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       window.location.reload();
-      router.replace("/");
+      router.replace('/');
     } catch (error) {
-      alert("Failed to log out. Please try again.");
-      console.error("Logout failed", error);
+      alert('Failed to log out. Please try again.');
+      console.error('Logout failed', error);
     }
   };
 

@@ -1,14 +1,16 @@
-// CallToOrder.tsx
-import React, { useState } from 'react';
+'use client';
+
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { CallToOrderProps } from '@/app/types/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 const CallToOrder: React.FC<CallToOrderProps> = ({ cartItems, onCancel, onOrder }) => {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
 
   if (!cartItems || cartItems.length === 0) {
-    return <div className="text-center text-gray-600">Your cart is empty.</div>;
+    return <div className="text-center text-muted-foreground">Your cart is empty.</div>;
   }
 
   const totalAmount = cartItems.reduce((total, item) => {
@@ -28,7 +30,7 @@ const CallToOrder: React.FC<CallToOrderProps> = ({ cartItems, onCancel, onOrder 
           description: item.product.description,
           created_at: item.product.created_at,
           updated_at: item.product.updated_at,
-          category: item.product.category
+          category: item.product.category,
         },
         quantity: item.quantity,
         color: item.color,
@@ -44,33 +46,21 @@ const CallToOrder: React.FC<CallToOrderProps> = ({ cartItems, onCancel, onOrder 
   };
 
   return (
-    <div className="p-4 bg-white shadow-md">
-      <div className="flex justify-between items-center">
+    <Card className="mt-4">
+      <CardContent className="flex items-center justify-between p-4">
         <div>
           <h2 className="text-xl font-semibold">Ready to Order?</h2>
-          <p className="text-gray-600">You have {cartItems.length} items in your cart.</p>
-          <p className="text-gray-800 font-bold">Total: €{totalAmount.toFixed(2)}</p>
+          <p className="text-muted-foreground">You have {cartItems.length} items in your cart.</p>
+          <p className="font-bold text-primary">Total: €{totalAmount.toFixed(2)}</p>
         </div>
-        <div className="flex space-x-4">
-          <button
-            onClick={handleProceedToConfirmation}
-            disabled={isLoading}
-            className={`px-4 py-2 bg-[#0097B2] text-white rounded-md hover:bg-teal-500 ${
-              isLoading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            Proceed to Confirmation
-          </button>
-          <button
-            onClick={onCancel}
-            disabled={isLoading}
-            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-          >
+        <div className="flex gap-2">
+          <Button onClick={handleProceedToConfirmation}>Proceed to Confirmation</Button>
+          <Button variant="outline" onClick={onCancel}>
             Cancel
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

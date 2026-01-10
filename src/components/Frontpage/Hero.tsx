@@ -1,8 +1,8 @@
-"use client";
-import React, { useEffect } from "react";
-import AOS from "aos";
-import "aos/dist/aos.css";
-import Link from "next/link";
+'use client';
+import React, { useEffect } from 'react';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import Link from 'next/link';
 
 const Hero: React.FC = () => {
   useEffect(() => {
@@ -25,10 +25,7 @@ const Hero: React.FC = () => {
 
       {/* Hero Content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-black bg-opacity-40 z-10">
-        <h1
-          className="text-white text-4xl md:text-6xl font-bold drop-shadow-lg"
-          data-aos="fade-up"
-        >
+        <h1 className="text-white text-4xl md:text-6xl font-bold drop-shadow-lg" data-aos="fade-up">
           WORK HARD, PLAY HARDER
           <br />
           UZ LADIMOOD

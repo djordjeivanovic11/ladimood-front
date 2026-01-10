@@ -2,28 +2,71 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background: 0 0% 100%;
+    --foreground: 210 11% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 11% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 11% 15%;
+    /* Ladimood brand teal #0097B2 */
+    --primary: 187 100% 35%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 11% 96%;
+    --secondary-foreground: 210 11% 15%;
+    --muted: 210 11% 96%;
+    --muted-foreground: 210 11% 45%;
+    --accent: 187 100% 95%;
+    --accent-foreground: 187 100% 25%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 11% 90%;
+    --input: 210 11% 90%;
+    --ring: 187 100% 35%;
+    --chart-1: 187 100% 35%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 210 11% 10%;
+    --foreground: 0 0% 98%;
+    --card: 210 11% 12%;
+    --card-foreground: 0 0% 98%;
+    --popover: 210 11% 12%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 187 100% 45%;
+    --primary-foreground: 210 11% 10%;
+    --secondary: 210 11% 20%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 210 11% 20%;
+    --muted-foreground: 210 11% 65%;
+    --accent: 187 100% 20%;
+    --accent-foreground: 187 100% 80%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 11% 20%;
+    --input: 210 11% 20%;
+    --ring: 187 100% 45%;
+    --chart-1: 187 100% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 @layer utilities {
