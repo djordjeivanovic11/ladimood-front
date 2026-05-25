@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import axios from 'axios';
+import Image from 'next/image';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type Resolver, useForm } from 'react-hook-form';
@@ -12,7 +13,6 @@ import {
   adminAddVariant,
   adminCreateCategory,
   adminCreateCollection,
-  adminCreateStorageUploadUrl,
   adminCreateProduct,
   adminDeleteMedia,
   adminDeleteProduct,
@@ -23,8 +23,15 @@ import {
   adminUpdateCategory,
   adminUpdateCollection,
   adminUpdateProduct,
+  adminUpdateVariant,
 } from '@/api/admin/catalog';
+import { adminUploadStorageFile } from '@/api/admin/storage';
 import { getCategories } from '@/api/account/axios';
+import { AdminEntityListItem } from '@/components/Management/catalog/AdminEntityListItem';
+import { AdminProductDetailPanel } from '@/components/Management/catalog/AdminProductDetailPanel';
+import { AdminStatusBadge } from '@/components/Management/catalog/AdminStatusBadge';
+import { AdminThumbnail } from '@/components/Management/catalog/AdminThumbnail';
+import { getPrimaryProductImageUrl } from '@/components/Management/catalog/catalog-image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -44,7 +51,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 
 const productSchema = z.object({
@@ -133,7 +139,6 @@ export default function CatalogManagement() {
     [products, selectedProductId]
   );
 
-  const selectedProductImageCount = selectedProduct?.media?.length ?? 0;
   const newProductImagePreviewUrls = useMemo(
     () => newProductImages.map((file) => URL.createObjectURL(file)),
     [newProductImages]
@@ -157,18 +162,7 @@ export default function CatalogManagement() {
     file: File,
     target: { product_id?: number; collection_id?: number; category_id?: number }
   ) => {
-    const upload = await adminCreateStorageUploadUrl({
-      filename: file.name,
-      ...target,
-    });
-    const uploadRes = await fetch(upload.signed_upload_url, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type || 'application/octet-stream' },
-      body: file,
-    });
-    if (!uploadRes.ok) {
-      throw new Error('Supabase upload failed');
-    }
+    const upload = await adminUploadStorageFile(file, target);
     return upload.public_url;
   };
 
@@ -269,16 +263,16 @@ export default function CatalogManagement() {
     }
   };
 
-  const onAddVariant = async () => {
+  const onAddVariant = async (payload: {
+    color_name: string;
+    color_hex: string;
+    size: Size;
+    inventory_qty: number;
+    is_active: boolean;
+  }) => {
     if (!selectedProduct) return;
     try {
-      await adminAddVariant(selectedProduct.id, {
-        color_name: 'Black',
-        color_hex: '#000000',
-        size: Size.M,
-        inventory_qty: 10,
-        is_active: true,
-      });
+      await adminAddVariant(selectedProduct.id, payload);
       toast.success('Varijanta je dodata.');
       await refresh();
     } catch (e: unknown) {
@@ -294,6 +288,28 @@ export default function CatalogManagement() {
       await refresh();
     } catch (e: unknown) {
       toast.error(getApiErrorMessage(e, 'Brisanje varijante nije uspjelo.'));
+    }
+  };
+
+  const onUpdateVariant = async (
+    variantId: number,
+    patch: Partial<{
+      color_name: string;
+      color_hex: string;
+      size: Size;
+      inventory_qty: number;
+      is_active: boolean;
+      sku: string | null;
+      price_override: number | null;
+    }>
+  ) => {
+    if (!selectedProduct) return;
+    try {
+      await adminUpdateVariant(selectedProduct.id, variantId, patch);
+      toast.success('Varijanta je ažurirana.');
+      await refresh();
+    } catch (e: unknown) {
+      toast.error(getApiErrorMessage(e, 'Ažuriranje varijante nije uspjelo.'));
     }
   };
 
@@ -602,9 +618,12 @@ export default function CatalogManagement() {
                           <div className="grid grid-cols-5 gap-2">
                             {newProductImagePreviewUrls.map((url, idx) => (
                               <div key={url} className="relative rounded-md border p-1">
-                                <img
+                                <Image
                                   src={url}
                                   alt={`Nova slika ${idx + 1}`}
+                                  width={320}
+                                  height={80}
+                                  unoptimized
                                   className="h-20 w-full rounded object-cover"
                                 />
                                 <Button
@@ -630,9 +649,12 @@ export default function CatalogManagement() {
                     </CardHeader>
                     <CardContent className="space-y-3">
                       {newProductImagePreviewUrls[0] ? (
-                        <img
+                        <Image
                           src={newProductImagePreviewUrls[0]}
                           alt={form.watch('name') || 'Preview'}
+                          width={960}
+                          height={560}
+                          unoptimized
                           className="h-56 w-full rounded-md border object-cover"
                         />
                       ) : (
@@ -688,25 +710,28 @@ export default function CatalogManagement() {
             {products.length === 0 ? (
               <p className="text-sm text-muted-foreground">Još nema proizvoda.</p>
             ) : (
-              <div className="space-y-2">
+              <div className="max-h-[min(70vh,640px)] space-y-2 overflow-y-auto pr-1">
                 {products.map((p) => (
-                  <button
+                  <AdminEntityListItem
                     key={p.id}
+                    selected={selectedProductId === p.id}
                     onClick={() => setSelectedProductId(p.id)}
-                    className={`w-full rounded-md border px-3 py-2 text-left text-sm transition-colors ${
-                      selectedProductId === p.id
-                        ? 'bg-accent text-accent-foreground'
-                        : 'hover:bg-muted'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{p.name}</span>
-                      <span className="text-muted-foreground">€{p.price.toFixed(2)}</span>
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {p.status ?? 'ACTIVE'} {p.gender ? `• ${p.gender}` : ''}
-                    </div>
-                  </button>
+                    title={p.name}
+                    leading={
+                      <AdminThumbnail src={getPrimaryProductImageUrl(p)} alt={p.name} size="md" />
+                    }
+                    subtitle={
+                      <div className="flex items-center gap-2">
+                        <AdminStatusBadge status={p.status} />
+                        <span>{p.gender ?? 'UNISEX'}</span>
+                      </div>
+                    }
+                    trailing={
+                      <span className="text-sm font-medium text-muted-foreground">
+                        €{p.price.toFixed(2)}
+                      </span>
+                    }
+                  />
                 ))}
               </div>
             )}
@@ -723,120 +748,19 @@ export default function CatalogManagement() {
                 Odaberite proizvod za upravljanje varijantama i slikama.
               </p>
             ) : (
-              <div className="space-y-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-xl font-semibold">{selectedProduct.name}</h3>
-                    <p className="text-muted-foreground">€{selectedProduct.price.toFixed(2)}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={() => void onUpdateProduct(selectedProduct.id, { status: 'DRAFT' })}
-                    >
-                      Postavi nacrt
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => void onDeleteProduct(selectedProduct.id)}
-                    >
-                      Obriši
-                    </Button>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold">Varijante</h4>
-                    <Button variant="outline" onClick={() => void onAddVariant()}>
-                      Dodaj varijantu
-                    </Button>
-                  </div>
-                  {selectedProduct.variants?.length ? (
-                    <div className="space-y-2">
-                      {selectedProduct.variants.map((v) => (
-                        <div
-                          key={v.id}
-                          className="flex items-center justify-between rounded-md border p-3 text-sm"
-                        >
-                          <div>
-                            <div className="font-medium">
-                              {v.color_name} • {v.size}
-                            </div>
-                            <div className="text-muted-foreground">
-                              Zaliha: {v.inventory_qty} {v.is_active ? '' : '• neaktivno'}
-                            </div>
-                          </div>
-                          <Button variant="outline" onClick={() => void onDeleteVariant(v.id)}>
-                            Ukloni
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Još nema varijanti. Dodajte barem jednu veličinu/boju.
-                    </p>
-                  )}
-                </div>
-
-                <Separator />
-
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold">
-                      Slike ({selectedProductImageCount}/{MAX_PRODUCT_IMAGES})
-                    </h4>
-                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm hover:bg-muted">
-                      Otpremi / zamijeni
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        aria-label="Otpremi slike postojećeg proizvoda"
-                        title="Otpremi slike"
-                        className="hidden"
-                        onChange={(e) => {
-                          void onUploadImage(e.target.files);
-                          e.currentTarget.value = '';
-                        }}
-                      />
-                    </label>
-                  </div>
-                  {selectedProduct.media?.length ? (
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {selectedProduct.media.map((m) => (
-                        <div key={m.id} className="space-y-2 rounded-md border p-3 text-sm">
-                          <img
-                            src={m.url}
-                            alt={m.alt_text ?? selectedProduct.name}
-                            className="h-36 w-full rounded-md object-cover"
-                          />
-                          <div className="flex items-center justify-between gap-2">
-                            <a
-                              href={m.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="truncate text-primary underline-offset-4 hover:underline"
-                            >
-                              Otvori original
-                            </a>
-                            <Button variant="outline" onClick={() => void onDeleteMedia(m.id)}>
-                              Ukloni
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      Još nema slika. Otpremite u Supabase Storage.
-                    </p>
-                  )}
-                </div>
-              </div>
+              <AdminProductDetailPanel
+                product={selectedProduct}
+                maxProductImages={MAX_PRODUCT_IMAGES}
+                onSetDraft={() => void onUpdateProduct(selectedProduct.id, { status: 'DRAFT' })}
+                onDeleteProduct={() => void onDeleteProduct(selectedProduct.id)}
+                onAddVariant={(payload) => void onAddVariant(payload)}
+                onUpdateVariant={(variantId, patch) => void onUpdateVariant(variantId, patch)}
+                onDeleteVariant={(variantId) => void onDeleteVariant(variantId)}
+                onUploadImage={(files) => {
+                  void onUploadImage(files);
+                }}
+                onDeleteMedia={(mediaId) => void onDeleteMedia(mediaId)}
+              />
             )}
           </CardContent>
         </Card>

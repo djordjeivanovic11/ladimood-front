@@ -17,6 +17,7 @@ const siteDescription =
   'Ladimood vam donosi visokokvalitetne majice i odjeću inspirisanu crnogorskom kulturom. Nosi svoje korijene s ponosom i izrazi svoj jedinstveni stil.';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.ladimood.com'),
   title: 'Ladimood | Podgorički brend',
   description: siteDescription,
   keywords: [
@@ -41,9 +42,6 @@ export const metadata: Metadata = {
   robots: 'index, follow',
   alternates: {
     canonical: 'https://www.ladimood.com',
-  },
-  icons: {
-    icon: [{ url: '/images/icon.svg', type: 'image/svg+xml' }],
   },
   openGraph: {
     title: 'Ladimood | Podgorički brend',

@@ -127,6 +127,8 @@ export interface ProductCreate extends ProductBase {
 
 export interface Product extends ProductBase {
   id: number;
+  category_id?: number | null;
+  collection_id?: number | null;
   category?: Category | null;
   collection?: Collection | null;
   media?: ProductMedia[];

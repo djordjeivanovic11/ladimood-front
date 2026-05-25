@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "clean": "rm -rf .next",
+    "dev:clean": "pkill -f 'ladimood-front/node_modules/.bin/next dev' 2>/dev/null || true; rm -rf .next && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
