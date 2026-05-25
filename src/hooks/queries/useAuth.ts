@@ -82,10 +82,15 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: async (userData: UserCreate) => {
+      const emailRedirectTo =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/auth/verified?next=/confirmation`
+          : undefined;
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
         options: {
+          emailRedirectTo,
           data: {
             full_name: userData.full_name,
             phone_number: normalizePhoneNumber(userData.phone_number),

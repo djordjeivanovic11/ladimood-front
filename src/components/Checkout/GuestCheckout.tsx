@@ -1,15 +1,19 @@
 'use client';
 
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { guestCheckoutSchema, type GuestCheckoutFormData } from '@/schemas/checkout.schema';
 import { useCreateGuestOrder } from '@/hooks/queries/useOrders';
 import { useCartStore } from '@/stores/useCartStore';
+import { getPrimaryProductImageUrl } from '@/components/Management/catalog/catalog-image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { PhoneNumberInput } from '@/components/ui/phone-input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { shouldUnoptimizeImage } from '@/lib/image';
 import { cn } from '@/lib/utils';
 import type { Size } from '@/app/types/types';
 
@@ -27,6 +31,7 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<GuestCheckoutFormData>({
     resolver: zodResolver(guestCheckoutSchema),
@@ -80,6 +85,40 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
   };
 
   const totalPrice = getTotalPrice();
+  const normalizeHex = (value: string) => value.trim().toLowerCase();
+  const colorNameFromHex: Record<string, string> = {
+    '#ffffff': 'Bijela',
+    '#fff': 'Bijela',
+    '#000000': 'Crna',
+    '#000': 'Crna',
+    '#ff0000': 'Crvena',
+    '#00ff00': 'Zelena',
+    '#0000ff': 'Plava',
+    '#ffff00': 'Žuta',
+    '#ffa500': 'Narandžasta',
+    '#800080': 'Ljubičasta',
+    '#808080': 'Siva',
+    '#a52a2a': 'Braon',
+    '#ffc0cb': 'Roze',
+    '#f5f5dc': 'Bež',
+  };
+
+  const getColorLabel = (colorHex: string, itemProduct: (typeof cartItems)[number]['product']) => {
+    const normalized = normalizeHex(colorHex);
+    const variantMatch = itemProduct.variants?.find(
+      (variant) => normalizeHex(variant.color_hex) === normalized
+    );
+
+    if (variantMatch?.color_name && !variantMatch.color_name.trim().startsWith('#')) {
+      return variantMatch.color_name;
+    }
+
+    if (normalized in colorNameFromHex) {
+      return colorNameFromHex[normalized];
+    }
+
+    return 'Odabrana boja';
+  };
 
   return (
     <Card className="mx-auto max-w-2xl">
@@ -126,11 +165,10 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
                 </div>
                 <div className="space-y-2 sm:col-span-2">
                   <Label htmlFor="guest_phone">Telefon *</Label>
-                  <Input
-                    id="guest_phone"
-                    type="tel"
-                    placeholder="+382 67 123 456"
-                    {...register('guest_phone')}
+                  <PhoneNumberInput
+                    inputProps={{ id: 'guest_phone', name: 'guest_phone' }}
+                    onChange={(phone) => setValue('guest_phone', phone, { shouldValidate: true })}
+                    hasError={!!errors.guest_phone}
                   />
                   {errors.guest_phone && (
                     <p className="text-sm text-destructive">{errors.guest_phone.message}</p>
@@ -147,7 +185,7 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
                   <Label htmlFor="street_address">Ulica i broj *</Label>
                   <Input
                     id="street_address"
-                    placeholder="npr. Ulica 13. jula 2"
+                    placeholder="npr. Ulica X"
                     {...register('address.street_address')}
                   />
                   {errors.address?.street_address && (
@@ -208,15 +246,39 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
             {/* Order Summary */}
             <div className="rounded-lg bg-muted p-4">
               <h3 className="mb-3 text-lg font-semibold">Pregled porudžbine</h3>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {cartItems.map((item) => (
                   <div
                     key={`${item.id}-${item.color}-${item.size}`}
-                    className="flex justify-between text-sm"
+                    className="flex items-center justify-between gap-3 text-sm"
                   >
-                    <span className="text-muted-foreground">
-                      {item.product.name} ({item.color}, {item.size}) x{item.quantity}
-                    </span>
+                    <div className="flex min-w-0 items-center gap-3">
+                      {getPrimaryProductImageUrl(item.product) ? (
+                        <Image
+                          src={getPrimaryProductImageUrl(item.product) as string}
+                          alt={item.product.name}
+                          width={44}
+                          height={44}
+                          className="h-11 w-11 rounded-md border object-cover"
+                          unoptimized={shouldUnoptimizeImage(
+                            getPrimaryProductImageUrl(item.product) as string
+                          )}
+                        />
+                      ) : null}
+                      <div className="min-w-0">
+                        <p className="truncate text-foreground">{item.product.name}</p>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span>
+                            {getColorLabel(item.color, item.product)}, {item.size} x{item.quantity}
+                          </span>
+                          <span
+                            className="h-3.5 w-3.5 rounded-full border border-border"
+                            style={{ backgroundColor: item.color }}
+                            title={item.color}
+                          />
+                        </div>
+                      </div>
+                    </div>
                     <span className="font-medium">
                       €{(item.product.price * item.quantity).toFixed(2)}
                     </span>

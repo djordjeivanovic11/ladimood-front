@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import UserDetails from '@/components/Account/UserDetails';
 import AddressManager from '@/components/Account/AddressManager';
@@ -11,6 +12,7 @@ import Newsletter from '@/components/Frontpage/Newsletter';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCurrentUser } from '@/hooks/queries/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 function AccountSkeleton() {
   return (
@@ -46,6 +48,8 @@ export default function AccountPage() {
     return null;
   }
 
+  const isVerified = !!user?.email_verified;
+
   return (
     <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8">
       <h1 className="m-5 mb-10 text-center font-serif text-3xl font-semibold tracking-tight text-primary sm:mb-12 sm:text-4xl md:text-5xl">
@@ -53,18 +57,37 @@ export default function AccountPage() {
       </h1>
 
       <div className="mx-auto max-w-6xl space-y-8 sm:space-y-12">
-        {/* User Details and Address */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
-          <UserDetails />
-          <AddressManager />
-        </div>
+        {!isVerified ? (
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-6 text-amber-900">
+            <h2 className="text-xl font-semibold">Potvrdite e-mail za pristup nalogu</h2>
+            <p className="mt-2">
+              Porudžbine i dalje možete završiti bez prepreka, ali detalji naloga, adrese i istorija
+              porudžbina su dostupni tek nakon verifikacije e-mail adrese.
+            </p>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <Button asChild>
+                <Link href="/confirmation">Nastavi na porudžbinu</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/auth/verified?next=/account">Provjeri verifikaciju</Link>
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+              <UserDetails />
+              <AddressManager />
+            </div>
 
-        <OrderHistory />
+            <OrderHistory />
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
-          <Wishlist />
-          <Cart />
-        </div>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+              <Wishlist />
+              <Cart />
+            </div>
+          </>
+        )}
       </div>
 
       <div className="mt-10 sm:mt-16">

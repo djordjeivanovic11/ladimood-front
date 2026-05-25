@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { getCart, createOrder } from '@/api/account/axios';
+import { GuestCheckout } from '@/components/Checkout/GuestCheckout';
 import { getPrimaryProductImageUrl } from '@/components/Management/catalog/catalog-image';
 import { shouldUnoptimizeImage } from '@/lib/image';
 import { Size } from '../types/types';
@@ -42,7 +43,9 @@ function ConfirmationSkeleton() {
 export default function ConfirmationPage() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
   const authLoading = useAuthStore((state) => state.isLoading);
+  const isVerifiedAccountCheckout = isAuthenticated && !!user?.email_verified;
 
   const [cartItems, setCartItems] = useState<CartItemData[]>([]);
   const [totalAmount, setTotalAmount] = useState<number>(0);
@@ -52,8 +55,8 @@ export default function ConfirmationPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!isAuthenticated) {
-      router.push('/auth/login');
+    if (!isVerifiedAccountCheckout) {
+      setIsLoading(false);
       return;
     }
 
@@ -80,7 +83,7 @@ export default function ConfirmationPage() {
     };
 
     fetchCartItems();
-  }, [authLoading, router, isAuthenticated]);
+  }, [authLoading, router, isVerifiedAccountCheckout]);
 
   const handleFinalizeOrder = async () => {
     setIsSubmitting(true);
@@ -119,10 +122,18 @@ export default function ConfirmationPage() {
     }
   };
 
-  if (isLoading || authLoading) {
+  if (authLoading || (isVerifiedAccountCheckout && isLoading)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
         <ConfirmationSkeleton />
+      </div>
+    );
+  }
+
+  if (!isVerifiedAccountCheckout) {
+    return (
+      <div className="min-h-screen bg-muted/50 p-4">
+        <GuestCheckout onCancel={() => router.push('/shop')} />
       </div>
     );
   }

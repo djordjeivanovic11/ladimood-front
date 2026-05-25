@@ -15,11 +15,27 @@ interface AddressManagerProps {
 }
 
 const ADDRESS_FIELDS = [
-  { name: 'street_address' as const, label: 'Ulica i broj', placeholder: 'npr. Ulica X' },
-  { name: 'city' as const, label: 'Grad', placeholder: 'npr. Podgorica' },
-  { name: 'state' as const, label: 'Opština', placeholder: 'npr. Podgorica' },
-  { name: 'postal_code' as const, label: 'Poštanski broj', placeholder: 'npr. 81000' },
-  { name: 'country' as const, label: 'Država', placeholder: 'npr. Crna Gora' },
+  {
+    name: 'street_address' as const,
+    label: 'Ulica i broj',
+    placeholder: 'npr. Ulica X',
+    required: true,
+  },
+  { name: 'city' as const, label: 'Grad', placeholder: 'npr. Podgorica', required: true },
+  { name: 'state' as const, label: 'Opština', placeholder: 'npr. Podgorica', required: false },
+  {
+    name: 'postal_code' as const,
+    label: 'Poštanski broj',
+    placeholder: 'npr. 81000',
+    required: true,
+  },
+  { name: 'country' as const, label: 'Država', placeholder: 'npr. Crna Gora', required: true },
+  {
+    name: 'delivery_note' as const,
+    label: 'Napomena za dostavu (opciono)',
+    placeholder: 'Ulaz, sprat, interfon, vrijeme dostave...',
+    required: false,
+  },
 ];
 
 const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
@@ -30,6 +46,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
     state: '',
     postal_code: '',
     country: '',
+    delivery_note: '',
   });
 
   useEffect(() => {
@@ -42,6 +59,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
           state: data.state || '',
           postal_code: data.postal_code || '',
           country: data.country || '',
+          delivery_note: data.delivery_note || '',
         });
       })
       .catch(() => setAddressState(null));
@@ -72,6 +90,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
         state: '',
         postal_code: '',
         country: '',
+        delivery_note: '',
       });
     } catch (error) {
       console.error('Failed to delete address', error);
@@ -96,6 +115,11 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
                 {address.street_address}, {address.city}, {address.state}, {address.postal_code},{' '}
                 {address.country}
               </p>
+              {address.delivery_note ? (
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Napomena: {address.delivery_note}
+                </p>
+              ) : null}
             </div>
             <div className="flex justify-end">
               <Button
@@ -112,7 +136,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            {ADDRESS_FIELDS.map(({ name, label, placeholder }) => (
+            {ADDRESS_FIELDS.map(({ name, label, placeholder, required }) => (
               <div key={name} className="space-y-2">
                 <Label htmlFor={name}>{label}</Label>
                 <Input
@@ -121,7 +145,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
                   value={form[name]}
                   onChange={handleChange}
                   placeholder={placeholder}
-                  required
+                  required={required}
                 />
               </div>
             ))}

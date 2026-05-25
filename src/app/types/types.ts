@@ -49,6 +49,7 @@ export interface UserCreate extends UserBase {
 export interface User extends UserBase {
   id: number;
   is_active: boolean;
+  email_verified: boolean;
   role?: RoleBase;
   created_at: Date;
   updated_at: Date;
@@ -70,6 +71,7 @@ export interface AddressBase {
   state?: string; // Optional state
   postal_code: string;
   country: string;
+  delivery_note?: string;
 }
 
 export interface Address extends AddressBase {
