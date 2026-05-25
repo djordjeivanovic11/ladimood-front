@@ -5,6 +5,7 @@ import { OrderStatusEnum } from '@/app/types/types';
 import { FaUser, FaTruck, FaBoxOpen } from 'react-icons/fa';
 import OrderItem from './OrderItem';
 import { useOrderByIdQuery } from '@/hooks/queries/useOrders';
+import { getOrderDisplayNumber } from '@/lib/order-display';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -90,9 +91,7 @@ const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
     <Card>
       <CardContent className="p-8 md:p-12">
         <div className="mb-10 flex flex-col items-center justify-between md:flex-row">
-          <h1 className="text-3xl font-bold">
-            Porudžbina #{order.order_number ?? order.plain_id ?? order.id}
-          </h1>
+          <h1 className="text-3xl font-bold">Porudžbina #{getOrderDisplayNumber(order)}</h1>
           <Badge variant={getStatusVariant(order.status)} className="mt-4 px-4 py-2 md:mt-0">
             {statusLabels[order.status] ?? order.status}
           </Badge>

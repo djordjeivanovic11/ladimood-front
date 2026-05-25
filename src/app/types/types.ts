@@ -368,6 +368,7 @@ export interface OrderManage {
 // OrderResponse Interface (from your backend)
 export interface OrderResponse {
   id: number;
+  order_number?: number;
   status: string;
   created_at: string;
   updated_at: string;
@@ -392,6 +393,7 @@ export interface OrderResponse {
     color?: string | null;
     size?: string | null;
     price: number;
+    product_image_url?: string | null;
     product: {
       id: number;
       name: string;

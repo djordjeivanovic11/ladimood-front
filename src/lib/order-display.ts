@@ -7,6 +7,15 @@ export type SuccessOrderLineItem = {
   image?: string;
 };
 
+export function formatOrderCode(value: number | string | undefined | null): string {
+  if (value == null) return '';
+  const numeric = Number(value);
+  if (Number.isFinite(numeric) && numeric > 0) {
+    return String(Math.trunc(numeric)).padStart(6, '0');
+  }
+  return String(value);
+}
+
 type OrderItemLike = {
   product_id: number;
   product_name?: string;
@@ -25,12 +34,12 @@ export function getOrderDisplayNumber(order: {
   id?: string | number;
 }): string {
   if (order.order_number != null) {
-    return String(order.order_number);
+    return formatOrderCode(order.order_number);
   }
   if (order.plain_id) {
     return order.plain_id;
   }
-  return String(order.id ?? '');
+  return formatOrderCode(order.id);
 }
 
 export function mapOrderItemsToDisplay(items: OrderItemLike[]): SuccessOrderLineItem[] {

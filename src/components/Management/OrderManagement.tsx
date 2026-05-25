@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   fetchAllOrdersWithDetails,
   updateOrderStatus,
@@ -22,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { OrderLineImage } from '@/components/Order/OrderLineImage';
+import { formatOrderCode } from '@/lib/order-display';
 
 type SaleFinalizedStatus = 'none' | 'finalized' | 'exists' | 'failed';
 
@@ -34,6 +36,7 @@ const orderStatusLabels: Record<OrderStatusEnum, string> = {
 };
 
 const OrdersManagement: React.FC = () => {
+  const router = useRouter();
   const [orders, setOrders] = useState<OrderManagement[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<OrderManagement[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -146,9 +149,10 @@ const OrdersManagement: React.FC = () => {
       );
     }
     if (searchOrderId) {
-      updatedFilteredOrders = updatedFilteredOrders.filter(
-        (order) => order.id.toString() === searchOrderId.trim()
-      );
+      updatedFilteredOrders = updatedFilteredOrders.filter((order) => {
+        const needle = searchOrderId.trim();
+        return order.id.toString() === needle || formatOrderCode(order.id) === needle;
+      });
     }
     if (searchOrderName) {
       updatedFilteredOrders = updatedFilteredOrders.filter((order) =>
@@ -169,7 +173,7 @@ const OrdersManagement: React.FC = () => {
   };
 
   const handleViewOrderClick = (orderId: number) => {
-    window.location.href = `/order/${orderId}`;
+    router.push(`/management/orders/${orderId}`);
   };
 
   return (
@@ -266,7 +270,7 @@ const OrdersManagement: React.FC = () => {
             <Card key={order.id}>
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <CardTitle className="text-xl">Porudžbina #{order.id}</CardTitle>
+                  <CardTitle className="text-xl">Porudžbina #{formatOrderCode(order.id)}</CardTitle>
                   <StatusManagement
                     orderId={order.id}
                     currentStatus={order.status}

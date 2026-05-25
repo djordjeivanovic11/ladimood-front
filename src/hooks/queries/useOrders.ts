@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useCartStore } from '@/stores/useCartStore';
 import { toast } from '@/lib/toast';
 import { isUnauthorizedError } from '@/lib/http-error';
+import { getOrderDisplayNumber } from '@/lib/order-display';
 import type { GuestOrderCreate } from '@/api/account/axios';
 
 export const orderKeys = {
@@ -60,7 +61,7 @@ export function useCreateGuestOrder() {
       } catch {
         // ignore
       }
-      toast.success(`Porudžbina #${order.id} je uspješno poslata!`);
+      toast.success(`Porudžbina #${getOrderDisplayNumber(order)} je uspješno poslata!`);
       return order;
     },
     onError: (error: Error) => {
