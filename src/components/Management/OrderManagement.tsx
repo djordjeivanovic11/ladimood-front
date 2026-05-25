@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { OrderLineImage } from '@/components/Order/OrderLineImage';
 
 type SaleFinalizedStatus = 'none' | 'finalized' | 'exists' | 'failed';
 
@@ -265,7 +266,7 @@ const OrdersManagement: React.FC = () => {
             <Card key={order.id}>
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <CardTitle className="text-xl">ID porudžbine: {order.id}</CardTitle>
+                  <CardTitle className="text-xl">Porudžbina #{order.id}</CardTitle>
                   <StatusManagement
                     orderId={order.id}
                     currentStatus={order.status}
@@ -309,18 +310,25 @@ const OrdersManagement: React.FC = () => {
                     {order.items.map((item) => (
                       <li
                         key={item.id}
-                        className="flex items-center gap-2 rounded-lg bg-muted/50 p-2"
+                        className="flex items-center gap-3 rounded-lg bg-muted/50 p-2"
                       >
-                        <span>{item.product_name}</span>
-                        <span className="text-muted-foreground">
-                          - {item.quantity} x €{item.price.toFixed(2)}
-                        </span>
-                        <span
-                          className="h-5 w-5 rounded-full border"
-                          style={{ backgroundColor: item.color || '#FFFFFF' }}
-                          title={item.color || 'N/A'}
+                        <OrderLineImage
+                          src={item.product_image_url ?? item.product?.image_url}
+                          alt={item.product_name}
+                          size="sm"
                         />
-                        <span className="text-muted-foreground">{item.size || 'N/A'}</span>
+                        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+                          <span className="font-medium">{item.product_name}</span>
+                          <span className="text-muted-foreground">
+                            {item.quantity} × €{item.price.toFixed(2)}
+                          </span>
+                          <span
+                            className="h-5 w-5 rounded-full border"
+                            style={{ backgroundColor: item.color || '#FFFFFF' }}
+                            title={item.color || 'N/A'}
+                          />
+                          <span className="text-muted-foreground">{item.size || 'N/A'}</span>
+                        </div>
                       </li>
                     ))}
                   </ul>

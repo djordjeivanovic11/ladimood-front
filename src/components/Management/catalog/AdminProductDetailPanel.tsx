@@ -1,10 +1,13 @@
 import React from 'react';
 import { Size, type Product, type ProductVariant } from '@/app/types/types';
 import { AdminImageGallery } from '@/components/Management/catalog/AdminImageGallery';
-import { AdminRemoteImage } from '@/components/Management/catalog/AdminRemoteImage';
+import { FramedImage } from '@/components/Management/catalog/FramedImage';
 import { AdminSection } from '@/components/Management/catalog/AdminSection';
 import { AdminStatusBadge } from '@/components/Management/catalog/AdminStatusBadge';
-import { getPrimaryProductImageUrl } from '@/components/Management/catalog/catalog-image';
+import {
+  getPrimaryProductImageUrl,
+  getPrimaryProductMedia,
+} from '@/components/Management/catalog/catalog-image';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -53,6 +56,10 @@ type AdminProductDetailPanelProps = {
   onDeleteVariant: (variantId: number) => void;
   onUploadImage: (files: FileList | null) => void;
   onDeleteMedia: (mediaId: number) => void;
+  onSaveMediaFraming: (
+    mediaId: number,
+    patch: { focal_x: number; focal_y: number; zoom: number }
+  ) => void;
 };
 
 export function AdminProductDetailPanel({
@@ -65,6 +72,7 @@ export function AdminProductDetailPanel({
   onDeleteVariant,
   onUploadImage,
   onDeleteMedia,
+  onSaveMediaFraming,
 }: AdminProductDetailPanelProps) {
   const [isAddVariantOpen, setIsAddVariantOpen] = React.useState(false);
   const [editingVariant, setEditingVariant] = React.useState<ProductVariant | null>(null);
@@ -74,7 +82,8 @@ export function AdminProductDetailPanel({
   const [variantInventory, setVariantInventory] = React.useState(10);
   const [variantIsActive, setVariantIsActive] = React.useState(true);
   const selectedProductImageCount = product.media?.length ?? 0;
-  const primaryImage = getPrimaryProductImageUrl(product);
+  const primaryMedia = getPrimaryProductMedia(product);
+  const primaryImage = primaryMedia?.url ?? getPrimaryProductImageUrl(product);
   const sizeOptions = Object.values(Size);
 
   const submitVariant = () => {
@@ -120,14 +129,18 @@ export function AdminProductDetailPanel({
   return (
     <div className="space-y-6">
       <div className="grid gap-4 lg:grid-cols-[240px_1fr]">
-        <AdminRemoteImage
-          src={primaryImage}
-          alt={product.name}
-          width={720}
-          height={720}
-          className="h-48 w-full rounded-lg border object-cover"
-          fallbackClassName="h-48 w-full rounded-lg border border-dashed"
-        />
+        {primaryImage ? (
+          <FramedImage
+            src={primaryImage}
+            alt={product.name}
+            framing={primaryMedia ?? undefined}
+            containerClassName="h-48 w-full rounded-lg border"
+          />
+        ) : (
+          <div className="flex h-48 w-full items-center justify-center rounded-lg border border-dashed bg-muted text-xs text-muted-foreground">
+            N/A
+          </div>
+        )}
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -363,6 +376,7 @@ export function AdminProductDetailPanel({
           media={product.media ?? []}
           productName={product.name}
           onRemove={onDeleteMedia}
+          onSaveFraming={onSaveMediaFraming}
         />
       </AdminSection>
     </div>

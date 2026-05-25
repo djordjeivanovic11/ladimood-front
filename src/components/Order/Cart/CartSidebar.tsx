@@ -4,7 +4,6 @@ import React from 'react';
 import { FaTimes } from 'react-icons/fa';
 import CartItemComponent from './CartItem';
 import CallToOrder from '@/components/Order/Cart/CallToOrder';
-import { useCartStore } from '@/stores/useCartStore';
 import { useRemoveFromCart, useUpdateCartItem, useCartQuery } from '@/hooks/queries/useCart';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -33,8 +32,8 @@ function CartSkeleton() {
 }
 
 const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
-  const cartItems = useCartStore((state) => state.items);
-  const { isLoading, refetch } = useCartQuery();
+  const { data: cart, isLoading, refetch } = useCartQuery();
+  const cartItems = cart?.items ?? [];
   const { mutate: removeFromCart } = useRemoveFromCart();
   const { mutate: updateCartItem } = useUpdateCartItem();
 

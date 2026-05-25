@@ -99,6 +99,9 @@ export interface ProductMedia {
   url: string;
   alt_text?: string | null;
   sort_order?: number;
+  focal_x?: number;
+  focal_y?: number;
+  zoom?: number;
 }
 
 export interface ProductVariant {
@@ -237,6 +240,7 @@ export interface OrderItem {
   color?: string | null;
   size?: string | null;
   price: number;
+  product_image_url?: string | null;
   product: {
     id: number;
     name: string;
@@ -257,9 +261,10 @@ export interface OrderBase {
 
 // Order Interface
 export interface Order extends OrderBase {
-  id: number;
+  id: string | number;
+  order_number?: number;
   user_id: number;
-  plain_id: string;
+  plain_id?: string;
   items: OrderItem[];
   created_at: Date;
   updated_at: Date;
@@ -415,19 +420,13 @@ export interface UserManagement {
 
 interface OrderItemManagement {
   id: number;
-
   product_id: number;
-
   product_name: string;
-
   quantity: number;
-
   color: string | null;
-
   size: string | null;
-
   price: number;
-
+  product_image_url?: string | null;
   product: Product;
 }
 

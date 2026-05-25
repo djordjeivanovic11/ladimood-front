@@ -9,6 +9,12 @@ export const authKeys = {
   user: ['auth', 'user'] as const,
 };
 
+function normalizePhoneNumber(phone?: string): string {
+  const trimmed = phone?.trim();
+  if (!trimmed) return '';
+  return trimmed.startsWith('+') ? trimmed : `+${trimmed}`;
+}
+
 export function useCurrentUser() {
   const authLoading = useAuthStore((state) => state.isLoading);
   const setAuthSession = useAuthStore((state) => state.setAuthSession);
@@ -82,7 +88,7 @@ export function useRegister() {
         options: {
           data: {
             full_name: userData.full_name,
-            phone_number: userData.phone_number,
+            phone_number: normalizePhoneNumber(userData.phone_number),
           },
         },
       });

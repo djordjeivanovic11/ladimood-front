@@ -97,7 +97,14 @@ export async function adminDeleteVariant(productId: number, variantId: number): 
 
 export async function adminAddMedia(
   productId: number,
-  payload: { url: string; alt_text?: string | null; sort_order?: number }
+  payload: {
+    url: string;
+    alt_text?: string | null;
+    sort_order?: number;
+    focal_x?: number;
+    focal_y?: number;
+    zoom?: number;
+  }
 ): Promise<ProductMedia> {
   const res = await axiosInstance.post<ProductMedia>(`/admin/products/${productId}/media`, payload);
   return res.data;
@@ -106,7 +113,14 @@ export async function adminAddMedia(
 export async function adminUpdateMedia(
   productId: number,
   mediaId: number,
-  payload: Partial<{ url: string; alt_text: string | null; sort_order: number }>
+  payload: Partial<{
+    url: string;
+    alt_text: string | null;
+    sort_order: number;
+    focal_x: number;
+    focal_y: number;
+    zoom: number;
+  }>
 ): Promise<ProductMedia> {
   const res = await axiosInstance.put<ProductMedia>(
     `/admin/products/${productId}/media/${mediaId}`,

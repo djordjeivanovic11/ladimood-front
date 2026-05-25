@@ -2,7 +2,10 @@ import type { Product } from '@/app/types/types';
 import { AdminEntityListItem } from '@/components/Management/catalog/AdminEntityListItem';
 import { AdminStatusBadge } from '@/components/Management/catalog/AdminStatusBadge';
 import { AdminThumbnail } from '@/components/Management/catalog/AdminThumbnail';
-import { getPrimaryProductImageUrl } from '@/components/Management/catalog/catalog-image';
+import {
+  getPrimaryProductImageUrl,
+  getPrimaryProductMedia,
+} from '@/components/Management/catalog/catalog-image';
 
 type AssociatedProductsListProps = {
   products: Product[];
@@ -22,7 +25,12 @@ export function AssociatedProductsList({ products, emptyLabel }: AssociatedProdu
           selected={false}
           title={product.name}
           leading={
-            <AdminThumbnail src={getPrimaryProductImageUrl(product)} alt={product.name} size="md" />
+            <AdminThumbnail
+              src={getPrimaryProductImageUrl(product)}
+              framing={getPrimaryProductMedia(product)}
+              alt={product.name}
+              size="md"
+            />
           }
           subtitle={
             <div className="flex items-center gap-2">

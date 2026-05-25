@@ -15,9 +15,11 @@ const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 interface ProductGridProps {
   products: ProductType[];
+  /** Shop layout: cards grow to fill the product column (fewer empty gaps). */
+  variant?: 'home' | 'shop';
 }
 
-const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
+const ProductGrid: React.FC<ProductGridProps> = ({ products, variant = 'home' }) => {
   const [selectedAttributes, setSelectedAttributes] = useState<{
     [productId: number]: { color: string; size: string };
   }>({});
@@ -117,7 +119,13 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-3">
+      <div
+        className={
+          variant === 'shop'
+            ? 'grid w-full grid-cols-1 justify-start gap-6 sm:grid-cols-[repeat(auto-fit,minmax(15.5rem,22rem))] lg:grid-cols-[repeat(auto-fit,minmax(17.5rem,24rem))]'
+            : 'grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-3'
+        }
+      >
         {products.map((product) => {
           const { id } = product;
           const selectedColor = selectedAttributes[id]?.color || availableColors[0];

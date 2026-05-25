@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCategoriesQuery } from '@/hooks/queries/useProducts';
+import { shouldUnoptimizeImage } from '@/lib/image';
 
 const fallbackCards = [
   '/images/categories/hoodies.png',
@@ -45,6 +46,7 @@ const CategoryComponent = () => {
                 src={category.imageSrc}
                 alt={category.title}
                 fill
+                unoptimized={shouldUnoptimizeImage(category.imageSrc)}
                 className="rounded-xl object-cover opacity-90 transition-opacity duration-300 group-hover:opacity-100"
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 p-6 text-white opacity-0 transition-opacity duration-300 group-hover:opacity-100">

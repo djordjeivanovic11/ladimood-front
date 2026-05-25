@@ -1,10 +1,15 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 import { FaHeart } from 'react-icons/fa';
 import { addToWishlist as addToWishlistAPI } from '@/api/account/axios';
 import { Product as ProductType } from '@/app/types/types';
+import { FramedImage } from '@/components/Management/catalog/FramedImage';
+import {
+  getPrimaryProductImageUrl,
+  getPrimaryProductMedia,
+} from '@/components/Management/catalog/catalog-image';
+import { shouldUnoptimizeImage } from '@/lib/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -14,7 +19,6 @@ function swatchBgClass(hex: string) {
   const normalized = hex.trim().toLowerCase();
   if (normalized === '#000000' || normalized === '#000') return 'bg-black';
   if (normalized === '#ffffff' || normalized === '#fff') return 'bg-white';
-  // Fallback: keep neutral background (no inline style due to lint rules)
   return 'bg-muted';
 }
 
@@ -63,14 +67,19 @@ const Product: React.FC<ProductProps> = ({
     }
   };
 
+  const primaryMedia = getPrimaryProductMedia(product);
+  const imageSrc =
+    getPrimaryProductImageUrl(product) || primaryMedia?.url || '/images/default-product.jpg';
+
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       <div className="relative aspect-square w-full overflow-hidden bg-muted">
-        <Image
-          src={product.image_url || '/images/default-product.jpg'}
+        <FramedImage
+          src={imageSrc}
           alt={product.name}
-          fill
-          className="object-contain transition-transform duration-500 group-hover:scale-105"
+          framing={primaryMedia}
+          containerClassName="h-full w-full transition-transform duration-500 group-hover:scale-[1.02]"
+          unoptimized={shouldUnoptimizeImage(imageSrc)}
         />
       </div>
       <CardContent className="space-y-4 p-4 sm:p-5">
@@ -83,11 +92,11 @@ const Product: React.FC<ProductProps> = ({
           </p>
         </div>
 
-        {/* Color Selection */}
         <div className="flex justify-center gap-2 md:opacity-0 md:transition-opacity md:duration-300 md:group-hover:opacity-100">
           {availableColors.map((color, index) => (
             <button
               key={index}
+              type="button"
               title={`Odaberi boju ${color}`}
               onClick={() => onSelectColor(color)}
               className={cn(
@@ -100,11 +109,11 @@ const Product: React.FC<ProductProps> = ({
           ))}
         </div>
 
-        {/* Size Selection */}
         <div className="flex flex-wrap justify-center gap-2 md:opacity-0 md:transition-opacity md:duration-300 md:group-hover:opacity-100">
           {availableSizes.map((size, index) => (
             <button
               key={index}
+              type="button"
               onClick={() => onSelectSize(size)}
               className={cn(
                 'rounded-full border px-3 py-1 text-sm font-semibold transition-all',
@@ -119,7 +128,6 @@ const Product: React.FC<ProductProps> = ({
           ))}
         </div>
 
-        {/* Actions */}
         <div className="flex gap-2">
           <Button
             onClick={() => {

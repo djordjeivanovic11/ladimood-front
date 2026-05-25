@@ -4,6 +4,8 @@ import React from 'react';
 import Image from 'next/image';
 import { FaTimes, FaMinus, FaPlus } from 'react-icons/fa';
 import { CartItem as CartItemType, Size } from '@/app/types/types';
+import { getPrimaryProductImageUrl } from '@/components/Management/catalog/catalog-image';
+import { shouldUnoptimizeImage } from '@/lib/image';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -14,6 +16,10 @@ interface CartItemProps {
 }
 
 const CartItem: React.FC<CartItemProps> = ({ item, updateQuantity, removeFromCart }) => {
+  const imageSrc =
+    getPrimaryProductImageUrl(item.product) ??
+    item.product.image_url ??
+    '/images/default-product.jpg';
   const handleIncrement = () => {
     updateQuantity(item.id, item.color, item.size as Size, item.quantity + 1);
   };
@@ -34,9 +40,10 @@ const CartItem: React.FC<CartItemProps> = ({ item, updateQuantity, removeFromCar
         {/* Product Image */}
         <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
           <Image
-            src={item.product.image_url ?? '/images/default-product.jpg'}
+            src={imageSrc}
             alt={item.product.name}
             fill
+            unoptimized={shouldUnoptimizeImage(imageSrc)}
             className="object-cover"
           />
         </div>

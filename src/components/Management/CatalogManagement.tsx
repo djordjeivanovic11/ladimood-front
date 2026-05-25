@@ -22,6 +22,7 @@ import {
   adminListProducts,
   adminUpdateCategory,
   adminUpdateCollection,
+  adminUpdateMedia,
   adminUpdateProduct,
   adminUpdateVariant,
 } from '@/api/admin/catalog';
@@ -31,7 +32,10 @@ import { AdminEntityListItem } from '@/components/Management/catalog/AdminEntity
 import { AdminProductDetailPanel } from '@/components/Management/catalog/AdminProductDetailPanel';
 import { AdminStatusBadge } from '@/components/Management/catalog/AdminStatusBadge';
 import { AdminThumbnail } from '@/components/Management/catalog/AdminThumbnail';
-import { getPrimaryProductImageUrl } from '@/components/Management/catalog/catalog-image';
+import {
+  getPrimaryProductImageUrl,
+  getPrimaryProductMedia,
+} from '@/components/Management/catalog/catalog-image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -348,6 +352,20 @@ export default function CatalogManagement() {
       await refresh();
     } catch (e: unknown) {
       toast.error(getApiErrorMessage(e, 'Uklanjanje slike nije uspjelo.'));
+    }
+  };
+
+  const onSaveMediaFraming = async (
+    mediaId: number,
+    patch: { focal_x: number; focal_y: number; zoom: number }
+  ) => {
+    if (!selectedProduct) return;
+    try {
+      await adminUpdateMedia(selectedProduct.id, mediaId, patch);
+      toast.success('Prikaz slike je sačuvan.');
+      await refresh();
+    } catch (e: unknown) {
+      toast.error(getApiErrorMessage(e, 'Spremanje prikaza slike nije uspjelo.'));
     }
   };
 
@@ -718,7 +736,12 @@ export default function CatalogManagement() {
                     onClick={() => setSelectedProductId(p.id)}
                     title={p.name}
                     leading={
-                      <AdminThumbnail src={getPrimaryProductImageUrl(p)} alt={p.name} size="md" />
+                      <AdminThumbnail
+                        src={getPrimaryProductImageUrl(p)}
+                        framing={getPrimaryProductMedia(p)}
+                        alt={p.name}
+                        size="md"
+                      />
                     }
                     subtitle={
                       <div className="flex items-center gap-2">
@@ -760,6 +783,7 @@ export default function CatalogManagement() {
                   void onUploadImage(files);
                 }}
                 onDeleteMedia={(mediaId) => void onDeleteMedia(mediaId)}
+                onSaveMediaFraming={(mediaId, patch) => void onSaveMediaFraming(mediaId, patch)}
               />
             )}
           </CardContent>

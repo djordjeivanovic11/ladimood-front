@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 
 function ShopLoadingSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-8 p-8 sm:grid-cols-2 md:grid-cols-3">
+    <div className="grid w-full grid-cols-1 justify-start gap-6 sm:grid-cols-[repeat(auto-fit,minmax(15.5rem,22rem))] lg:grid-cols-[repeat(auto-fit,minmax(17.5rem,24rem))]">
       {Array.from({ length: 9 }).map((_, i) => (
         <div key={i} className="space-y-4">
           <Skeleton className="aspect-square w-full rounded-lg" />
@@ -120,9 +120,9 @@ const ShopContent: React.FC = () => {
     !!selectedCategoryId || selectedPriceRange[1] !== DEFAULT_MAX_PRICE || sortBy !== 'relevance';
 
   return (
-    <div className="mx-auto flex max-w-screen-xl flex-col gap-6 px-4 py-8 md:flex-row md:px-6">
+    <div className="mx-auto flex max-w-screen-2xl flex-col gap-6 px-4 py-8 md:flex-row md:px-6">
       {/* Filters */}
-      <div className="md:w-80">
+      <div className="w-full shrink-0 md:w-72 lg:w-64">
         <ProductFilter
           categories={categories}
           selectedCategoryId={selectedCategoryId}
@@ -135,7 +135,7 @@ const ShopContent: React.FC = () => {
       </div>
 
       {/* Products */}
-      <div className="flex-1">
+      <div className="min-w-0 w-full flex-1">
         {/* Active filter chips */}
         {hasActiveFilters && (
           <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -183,7 +183,7 @@ const ShopContent: React.FC = () => {
         {isLoading ? (
           <ShopLoadingSkeleton />
         ) : sortedProducts.length > 0 ? (
-          <ProductGrid products={sortedProducts} />
+          <ProductGrid products={sortedProducts} variant="shop" />
         ) : (
           <div className="flex h-full min-h-[400px] items-center justify-center">
             <p className="text-muted-foreground">

@@ -55,6 +55,7 @@ export function useCreateGuestOrder() {
       clearGuestSession();
       queryClient.invalidateQueries({ queryKey: orderKeys.all });
       try {
+        localStorage.setItem('lastOrder', JSON.stringify(order));
         localStorage.setItem('lastGuestOrder', JSON.stringify(order));
       } catch {
         // ignore

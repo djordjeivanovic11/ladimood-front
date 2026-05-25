@@ -1,16 +1,20 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import { FaCheckCircle } from 'react-icons/fa';
-import Image from 'next/image';
 import ReferralPopup from '@/components/Order/Order/ReferralPopup';
+import { OrderLineImage } from '@/components/Order/OrderLineImage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useOrderQuery } from '@/hooks/queries/useOrders';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { mapOrderItemsToDisplay } from '@/lib/order-display';
 
-type LastGuestOrder = {
-  id: string;
+type StoredOrder = {
+  order_number?: number;
+  id?: string;
   total_price: number;
   payment_method?: string;
   delivery_note?: string | null;
@@ -23,28 +27,15 @@ type LastGuestOrder = {
   } | null;
   items: Array<{
     product_id: number;
-    product_name: string;
+    product_name?: string;
+    name?: string;
     quantity: number;
     price: number;
     size?: string | null;
-    color?: string | null;
     product_image_url?: string | null;
+    image?: string;
   }>;
 };
-
-interface OrderItem {
-  product_id: number;
-  name: string;
-  quantity: number;
-  price: number;
-  size: string;
-  image?: string;
-}
-
-interface OrderData {
-  items: OrderItem[];
-  total_price: number;
-}
 
 function SuccessSkeleton() {
   return (
@@ -69,27 +60,52 @@ function SuccessSkeleton() {
   );
 }
 
+function readStoredOrder(key: string): StoredOrder | null {
+  if (typeof window === 'undefined') return null;
+  const raw = localStorage.getItem(key);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as StoredOrder;
+  } catch {
+    return null;
+  }
+}
+
 export default function SuccessPage() {
   const router = useRouter();
-  const [order, setOrder] = useState<OrderData | null>(null);
-  const [guestOrder, setGuestOrder] = useState<LastGuestOrder | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const params = useParams();
+  const orderId = typeof params.orderId === 'string' ? params.orderId : '';
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const authLoading = useAuthStore((state) => state.isLoading);
+
+  const [storedOrder, setStoredOrder] = useState<StoredOrder | null>(null);
+  const [legacyOrder, setLegacyOrder] = useState<StoredOrder | null>(null);
+  const [guestOrder, setGuestOrder] = useState<StoredOrder | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  const { data: fetchedOrder, isLoading: isFetchingOrder } = useOrderQuery(orderId);
 
   useEffect(() => {
-    const storedOrderData = localStorage.getItem('orderDetails');
-    if (storedOrderData) {
-      setOrder(JSON.parse(storedOrderData));
-    }
-    const storedGuest = localStorage.getItem('lastGuestOrder');
-    if (storedGuest) {
-      try {
-        setGuestOrder(JSON.parse(storedGuest));
-      } catch {
-        // ignore
-      }
-    }
-    setIsLoading(false);
-  }, [router]);
+    setStoredOrder(readStoredOrder('lastOrder'));
+    setGuestOrder(readStoredOrder('lastGuestOrder'));
+    setLegacyOrder(readStoredOrder('orderDetails'));
+    setHydrated(true);
+  }, []);
+
+  const resolved = useMemo(() => {
+    const apiOrder = fetchedOrder as StoredOrder | undefined;
+    const source = apiOrder ?? storedOrder ?? guestOrder ?? legacyOrder;
+    if (!source?.items?.length) return null;
+
+    return {
+      total: source.total_price ?? 0,
+      address: source.address ?? null,
+      delivery_note: source.delivery_note ?? null,
+      items: mapOrderItemsToDisplay(source.items),
+    };
+  }, [fetchedOrder, storedOrder, guestOrder, legacyOrder]);
+
+  const isLoading = !hydrated || (isAuthenticated && !authLoading && isFetchingOrder && !resolved);
 
   if (isLoading) {
     return (
@@ -99,30 +115,16 @@ export default function SuccessPage() {
     );
   }
 
-  if (!order && !guestOrder) {
+  if (!resolved) {
     return (
       <div className="mt-10 text-center text-muted-foreground">Učitavanje vaše narudžbe...</div>
     );
   }
 
-  const total = guestOrder?.total_price ?? order?.total_price ?? 0;
-  const items =
-    guestOrder?.items?.map((it) => ({
-      product_id: it.product_id,
-      name: it.product_name,
-      quantity: it.quantity,
-      price: it.price,
-      size: it.size ?? '',
-      image: it.product_image_url ?? undefined,
-    })) ??
-    order?.items ??
-    [];
-
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted/50 p-6">
       <Card className="w-full max-w-4xl">
         <CardContent className="flex flex-col gap-8 p-10 lg:flex-row">
-          {/* Thank You Section */}
           <div className="lg:w-1/2">
             <div className="text-center lg:text-left">
               <FaCheckCircle className="mx-auto mb-6 text-6xl text-primary lg:mx-0" />
@@ -133,15 +135,15 @@ export default function SuccessPage() {
               <div className="mb-6 rounded-lg border bg-background p-4 text-sm">
                 <div className="font-medium">Plaćanje: pouzećem</div>
                 <div className="text-muted-foreground">Gotovina kuriru prilikom dostave.</div>
-                {guestOrder?.address && (
+                {resolved.address && (
                   <div className="mt-3 text-muted-foreground">
-                    Dostava: {guestOrder.address.street_address}, {guestOrder.address.city}{' '}
-                    {guestOrder.address.postal_code}, {guestOrder.address.country}
+                    Dostava: {resolved.address.street_address}, {resolved.address.city}{' '}
+                    {resolved.address.postal_code}, {resolved.address.country}
                   </div>
                 )}
-                {guestOrder?.delivery_note && (
+                {resolved.delivery_note && (
                   <div className="mt-2 text-muted-foreground">
-                    Napomena: {guestOrder.delivery_note}
+                    Napomena: {resolved.delivery_note}
                   </div>
                 )}
               </div>
@@ -151,23 +153,16 @@ export default function SuccessPage() {
               </p>
             </div>
 
-            {/* Order Summary */}
             <div className="mb-8">
               <h3 className="mb-4 text-lg font-semibold text-primary">Vaši Artikli:</h3>
               <ul className="space-y-4">
-                {items.map((item, index) => (
+                {resolved.items.map((item, index) => (
                   <li
                     key={`${item.product_id}-${index}`}
                     className="flex items-center justify-between border-b pb-4"
                   >
                     <div className="flex items-center gap-4">
-                      <Image
-                        src={item.image || '/images/default-product.jpg'}
-                        alt={item.name || 'Proizvod'}
-                        className="rounded-md border object-cover"
-                        width={64}
-                        height={64}
-                      />
+                      <OrderLineImage src={item.image} alt={item.name} size="md" />
                       <div>
                         <p className="font-medium">{item.name}</p>
                         <p className="text-sm text-muted-foreground">
@@ -179,19 +174,17 @@ export default function SuccessPage() {
                 ))}
               </ul>
               <div className="mt-6 flex justify-end">
-                <p className="text-lg font-bold">Ukupno: €{total.toFixed(2)}</p>
+                <p className="text-lg font-bold">Ukupno: €{resolved.total.toFixed(2)}</p>
               </div>
             </div>
           </div>
 
-          {/* Referral Section */}
           <div className="rounded-lg lg:w-1/2">
             <ReferralPopup onClose={() => {}} />
           </div>
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
       <div className="mt-8 flex gap-4">
         <Button onClick={() => router.push('/account')}>Idi na Profil</Button>
         <Button variant="outline" onClick={() => router.push('/')}>

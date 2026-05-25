@@ -8,6 +8,7 @@ import { FaShoppingCart, FaUser, FaBars, FaTimes } from 'react-icons/fa';
 import CartSidebar from '@/components/Order/Cart/CartSidebar';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCartStore } from '@/stores/useCartStore';
+import { useCartQuery } from '@/hooks/queries/useCart';
 import { useCurrentUser } from '@/hooks/queries/useAuth';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -24,7 +25,8 @@ const Navbar: React.FC = () => {
   const isCartOpen = useCartStore((state) => state.isCartOpen);
   const openCart = useCartStore((state) => state.openCart);
   const closeCart = useCartStore((state) => state.closeCart);
-  const cartItems = useCartStore((state) => state.items);
+  const { data: cart } = useCartQuery();
+  const cartItems = cart?.items ?? [];
 
   useCurrentUser();
 

@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation';
 import { ClipboardList, Package } from 'lucide-react';
 import { useUserOrdersQuery } from '@/hooks/queries/useOrders';
 import { OrderItem } from '@/app/types/types';
+import { OrderLineImage } from '@/components/Order/OrderLineImage';
 import { AccountSectionHeader } from '@/components/Account/AccountSectionHeader';
+import { getOrderDisplayNumber } from '@/lib/order-display';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,13 +31,12 @@ function OrderHistorySkeleton() {
   );
 }
 
-function getOrderDisplayId(order: { plain_id?: string; id: number | string }) {
-  if (order.plain_id) return order.plain_id;
-  return String(order.id);
-}
-
 function getItemProductName(item: OrderItem): string {
   return item.product?.name ?? item.product_name ?? 'Artikal';
+}
+
+function getItemImageUrl(item: OrderItem): string | undefined {
+  return item.product_image_url ?? item.product?.image_url ?? undefined;
 }
 
 const ORDER_STATUS_LABELS: Record<string, string> = {
@@ -67,7 +68,7 @@ const OrderHistory: React.FC = () => {
       <CardContent className="space-y-6 p-6">
         <AccountSectionHeader
           icon={ClipboardList}
-          title="Historija porudžbina"
+          title="Istorija porudžbina"
           description="Pregled vaših prethodnih narudžbina"
         />
 
@@ -117,7 +118,7 @@ const OrderHistory: React.FC = () => {
                     <div className="flex items-start justify-between gap-4">
                       <div className="space-y-1">
                         <p className="font-serif text-lg font-semibold text-primary">
-                          Porudžbina #{getOrderDisplayId(order)}
+                          Porudžbina #{getOrderDisplayNumber(order)}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           Datum:{' '}
@@ -142,25 +143,32 @@ const OrderHistory: React.FC = () => {
                       {order.items.map((item: OrderItem) => (
                         <li
                           key={item.id}
-                          className="flex items-center justify-between rounded-lg border border-border/40 bg-background/80 px-3 py-3"
+                          className="flex items-center justify-between gap-3 rounded-lg border border-border/40 bg-background/80 px-3 py-3"
                         >
-                          <div>
-                            <p className="text-sm font-medium">{getItemProductName(item)}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Kol: {item.quantity}
-                              {item.size ? (
-                                <span className="ml-3">Veličina: {item.size}</span>
-                              ) : null}
-                            </p>
-                            <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-                              <span>Boja:</span>
-                              <span
-                                className="h-4 w-4 rounded-full border border-border"
-                                style={{ backgroundColor: item.color || '#FFFFFF' }}
-                              />
+                          <div className="flex min-w-0 flex-1 items-center gap-3">
+                            <OrderLineImage
+                              src={getItemImageUrl(item)}
+                              alt={getItemProductName(item)}
+                              size="md"
+                            />
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium">{getItemProductName(item)}</p>
+                              <p className="text-sm text-muted-foreground">
+                                Kol: {item.quantity}
+                                {item.size ? (
+                                  <span className="ml-3">Veličina: {item.size}</span>
+                                ) : null}
+                              </p>
+                              <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                                <span>Boja:</span>
+                                <span
+                                  className="h-4 w-4 rounded-full border border-border"
+                                  style={{ backgroundColor: item.color || '#FFFFFF' }}
+                                />
+                              </div>
                             </div>
                           </div>
-                          <p className="text-sm font-semibold">€{item.price.toFixed(2)}</p>
+                          <p className="shrink-0 text-sm font-semibold">€{item.price.toFixed(2)}</p>
                         </li>
                       ))}
                     </ul>

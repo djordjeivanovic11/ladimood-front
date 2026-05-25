@@ -90,7 +90,9 @@ const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
     <Card>
       <CardContent className="p-8 md:p-12">
         <div className="mb-10 flex flex-col items-center justify-between md:flex-row">
-          <h1 className="text-3xl font-bold">Porudžbina #{order.plain_id || order.id}</h1>
+          <h1 className="text-3xl font-bold">
+            Porudžbina #{order.order_number ?? order.plain_id ?? order.id}
+          </h1>
           <Badge variant={getStatusVariant(order.status)} className="mt-4 px-4 py-2 md:mt-0">
             {statusLabels[order.status] ?? order.status}
           </Badge>

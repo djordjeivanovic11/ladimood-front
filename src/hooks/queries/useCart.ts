@@ -59,8 +59,8 @@ export function useAddToCart() {
       }
       throw new Error('Sesija korpe nije dostupna');
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: cartKeys.all });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: cartKeys.all });
       toast.success('Added to cart!');
     },
     onError: () => {

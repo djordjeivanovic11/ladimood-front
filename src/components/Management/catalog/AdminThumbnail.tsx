@@ -1,9 +1,11 @@
-import { AdminRemoteImage } from '@/components/Management/catalog/AdminRemoteImage';
+import type { MediaFraming } from '@/components/Management/catalog/media-frame';
+import { FramedImage } from '@/components/Management/catalog/FramedImage';
 import { cn } from '@/lib/utils';
 
 type AdminThumbnailProps = {
   src: string | null | undefined;
   alt: string;
+  framing?: MediaFraming | null;
   size?: 'sm' | 'md';
   className?: string;
 };
@@ -13,20 +15,27 @@ const sizeClassMap = {
   md: 'h-12 w-12',
 } as const;
 
-export function AdminThumbnail({ src, alt, size = 'md', className }: AdminThumbnailProps) {
+export function AdminThumbnail({ src, alt, framing, size = 'md', className }: AdminThumbnailProps) {
+  if (!src?.trim()) {
+    return (
+      <div
+        className={cn(
+          'flex shrink-0 items-center justify-center rounded-md border border-dashed bg-muted text-[10px] font-medium text-muted-foreground',
+          sizeClassMap[size],
+          className
+        )}
+      >
+        —
+      </div>
+    );
+  }
+
   return (
-    <AdminRemoteImage
+    <FramedImage
       src={src}
       alt={alt}
-      width={96}
-      height={96}
-      className={cn('shrink-0 rounded-md object-cover', sizeClassMap[size], className)}
-      fallbackClassName={cn(
-        'shrink-0 rounded-md border border-dashed text-[10px] font-medium',
-        sizeClassMap[size],
-        className
-      )}
-      fallbackLabel="—"
+      framing={framing}
+      containerClassName={cn('shrink-0 rounded-md', sizeClassMap[size], className)}
     />
   );
 }

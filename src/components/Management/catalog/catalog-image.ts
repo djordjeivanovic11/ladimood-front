@@ -7,10 +7,13 @@ function bySortOrder(a: ProductMedia, b: ProductMedia) {
   return a.id - b.id;
 }
 
-export function getPrimaryProductImageUrl(product: Product): string | null {
+export function getPrimaryProductMedia(product: Product) {
   const sortedMedia = [...(product.media ?? [])].sort(bySortOrder);
-  const mediaUrl = sortedMedia.find((item) => item.url?.trim())?.url ?? null;
-  return mediaUrl ?? product.image_url ?? null;
+  return sortedMedia.find((item) => item.url?.trim()) ?? null;
+}
+
+export function getPrimaryProductImageUrl(product: Product): string | null {
+  return getPrimaryProductMedia(product)?.url ?? product.image_url ?? null;
 }
 
 export function getCategoryImageUrl(category: Category): string | null {

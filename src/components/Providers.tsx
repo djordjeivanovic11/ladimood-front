@@ -6,12 +6,31 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'sonner';
 import { getQueryClient } from '@/lib/query-client';
+import { getOrCreateGuestSession } from '@/lib/storage';
 import { fetchCurrentUser } from '@/api/auth/axios';
 import { supabase } from '@/lib/supabase';
+import { useCartSync } from '@/hooks/useCartSync';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useCartStore } from '@/stores/useCartStore';
 
 interface ProvidersProps {
   children: React.ReactNode;
+}
+
+function CartBootstrap() {
+  useCartSync();
+  const authLoading = useAuthStore((state) => state.isLoading);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const setGuestSession = useCartStore((state) => state.setGuestSession);
+
+  useEffect(() => {
+    if (authLoading || isAuthenticated) return;
+    void getOrCreateGuestSession()
+      .then(setGuestSession)
+      .catch(() => {});
+  }, [authLoading, isAuthenticated, setGuestSession]);
+
+  return null;
 }
 
 export function Providers({ children }: ProvidersProps) {
@@ -94,6 +113,7 @@ export function Providers({ children }: ProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <CartBootstrap />
       {children}
       <Toaster
         position="top-right"

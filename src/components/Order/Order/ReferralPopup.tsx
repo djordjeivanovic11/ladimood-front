@@ -92,12 +92,6 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
       >
         Pošaljite Preporuke
       </button>
-      <button
-        onClick={onClose}
-        className="mt-4 w-full text-[#0097B2] py-2 rounded-lg hover:underline transition duration-300"
-      >
-        Preskoči
-      </button>
 
       {error && <p className="mt-4 text-red-500">{error}</p>}
       {submitted && (

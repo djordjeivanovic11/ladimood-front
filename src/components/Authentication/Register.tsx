@@ -42,7 +42,7 @@ export default function Register() {
       email: data.email,
       password: data.password,
       full_name: data.full_name,
-      phone_number: data.phone_number || '',
+      phone_number: data.phone_number?.trim() || '',
     });
   };
 

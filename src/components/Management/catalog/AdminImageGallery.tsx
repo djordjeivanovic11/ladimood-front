@@ -1,6 +1,9 @@
+'use client';
+
 import React from 'react';
 import type { ProductMedia } from '@/app/types/types';
-import { AdminRemoteImage } from '@/components/Management/catalog/AdminRemoteImage';
+import { AdminImageFramingEditor } from '@/components/Management/catalog/AdminImageFramingEditor';
+import { FramedImage } from '@/components/Management/catalog/FramedImage';
 import { Button } from '@/components/ui/button';
 
 type AdminImageGalleryProps = {
@@ -8,9 +11,19 @@ type AdminImageGalleryProps = {
   media: ProductMedia[];
   productName: string;
   onRemove: (mediaId: number) => void;
+  onSaveFraming: (
+    mediaId: number,
+    patch: { focal_x: number; focal_y: number; zoom: number }
+  ) => void;
 };
 
-export function AdminImageGallery({ title, media, productName, onRemove }: AdminImageGalleryProps) {
+export function AdminImageGallery({
+  title,
+  media,
+  productName,
+  onRemove,
+  onSaveFraming,
+}: AdminImageGalleryProps) {
   const [activeMediaId, setActiveMediaId] = React.useState<number | null>(media[0]?.id ?? null);
 
   React.useEffect(() => {
@@ -32,14 +45,14 @@ export function AdminImageGallery({ title, media, productName, onRemove }: Admin
 
   return (
     <div className="space-y-3">
-      <AdminRemoteImage
-        src={activeMedia?.url}
-        alt={activeMedia?.alt_text ?? productName}
-        width={1280}
-        height={720}
-        className="h-64 w-full rounded-lg border object-cover"
-        fallbackClassName="h-64 w-full rounded-lg border border-dashed"
-      />
+      {activeMedia ? (
+        <AdminImageFramingEditor
+          media={activeMedia}
+          productName={productName}
+          onSave={(patch) => onSaveFraming(activeMedia.id, patch)}
+        />
+      ) : null}
+
       <div className="flex gap-2 overflow-x-auto pb-1">
         {media.map((item) => {
           const active = item.id === activeMedia?.id;
@@ -50,13 +63,11 @@ export function AdminImageGallery({ title, media, productName, onRemove }: Admin
               onClick={() => setActiveMediaId(item.id)}
               className={`rounded-md border p-1 transition-colors ${active ? 'border-primary' : 'border-border'}`}
             >
-              <AdminRemoteImage
+              <FramedImage
                 src={item.url}
                 alt={item.alt_text ?? productName}
-                width={200}
-                height={120}
-                className="h-16 w-24 rounded object-cover"
-                fallbackClassName="h-16 w-24 rounded border border-dashed"
+                framing={item}
+                containerClassName="h-16 w-24 rounded"
               />
             </button>
           );

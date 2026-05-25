@@ -154,8 +154,11 @@
 
   .ladimood-phone-input.react-tel-input .ladimood-phone-input__dropdown {
     @apply !z-50 !rounded-md !border !border-input !bg-popover !text-popover-foreground !shadow-md;
-    width: 100% !important;
-    max-width: 100%;
+    /* Dropdown is positioned inside the narrow flag button; do not use width: 100% */
+    width: 300px !important;
+    min-width: 280px;
+    left: 0 !important;
+    margin-left: 0 !important;
   }
 
   @media (max-width: 640px) {
