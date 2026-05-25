@@ -1,8 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { resetPassword } from '@/api/auth/axios';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { supabase } from '@/lib/supabase';
 
 const ChangePassword = () => {
   const [newPassword, setNewPassword] = useState('');
@@ -11,7 +12,36 @@ const ChangePassword = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [sessionReady, setSessionReady] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const prepareRecoverySession = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+
+      if (code) {
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+        if (exchangeError) {
+          setError(exchangeError.message);
+          return;
+        }
+      }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        setError('Link za reset je nevažeći ili je istekao.');
+        return;
+      }
+
+      setSessionReady(true);
+    };
+
+    void prepareRecoverySession();
+  }, []);
 
   const toggleNewPasswordVisibility = () => {
     setShowNewPassword(!showNewPassword);
@@ -25,7 +55,7 @@ const ChangePassword = () => {
     e.preventDefault();
 
     if (newPassword !== confirmNewPassword) {
-      setError('New passwords do not match.');
+      setError('Nove lozinke se ne poklapaju.');
       return;
     }
 
@@ -33,23 +63,14 @@ const ChangePassword = () => {
     setSuccess('');
 
     try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
-
-      if (!token) {
-        setError('Invalid or missing reset token.');
-        return;
-      }
-
-      const data = await resetPassword({ token, new_password: newPassword });
-      console.log(data);
-      setSuccess('Password reset successfully!');
+      await resetPassword(newPassword);
+      setSuccess('Lozinka je uspješno promijenjena!');
       setTimeout(() => {
         router.push('/auth/login');
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage =
-        error.response?.data?.detail || 'Failed to reset password. Please try again.';
+        error instanceof Error ? error.message : 'Reset lozinke nije uspio. Pokušajte ponovo.';
       setError(errorMessage);
     }
   };
@@ -57,17 +78,17 @@ const ChangePassword = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue-50 p-4">
       <div className="w-full max-w-md p-8 space-y-6 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl">
-        <h1 className="text-4xl font-extrabold text-[#0097B2] text-center">Reset Password</h1>
+        <h1 className="text-4xl font-extrabold text-[#0097B2] text-center">Nova lozinka</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-[#0097B2] font-semibold">New Password</label>
+            <label className="block text-[#0097B2] font-semibold">Nova lozinka</label>
             <div className="relative">
               <input
                 type={showNewPassword ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 className="w-full px-4 py-3 mt-2 border border-[#0097B2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0097B2] transition duration-300 text-black"
-                placeholder="Enter new password"
+                placeholder="Unesite novu lozinku"
                 required
               />
               <button
@@ -80,14 +101,14 @@ const ChangePassword = () => {
             </div>
           </div>
           <div>
-            <label className="block text-[#0097B2] font-semibold">Confirm New Password</label>
+            <label className="block text-[#0097B2] font-semibold">Potvrdite novu lozinku</label>
             <div className="relative">
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={confirmNewPassword}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
                 className="w-full px-4 py-3 mt-2 border border-[#0097B2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0097B2] transition duration-300 text-black"
-                placeholder="Confirm new password"
+                placeholder="Potvrdite novu lozinku"
                 required
               />
               <button
@@ -103,9 +124,10 @@ const ChangePassword = () => {
           {success && <p className="text-green-500 text-center">{success}</p>}
           <button
             type="submit"
+            disabled={!sessionReady}
             className="w-full px-4 py-3 font-bold text-white bg-[#0097B2] rounded-lg hover:bg-[#007A90] focus:outline-none focus:ring-4 focus:ring-[#0097B2] transition duration-300 shadow-lg hover:shadow-xl"
           >
-            Reset Password
+            Promijeni lozinku
           </button>
         </form>
       </div>

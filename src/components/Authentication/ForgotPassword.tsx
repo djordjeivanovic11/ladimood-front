@@ -9,7 +9,7 @@ const ForgotPassword = () => {
   const [success, setSuccess] = useState('');
   const router = useRouter();
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -18,15 +18,16 @@ const ForgotPassword = () => {
       const data = await forgotPassword(email);
 
       setSuccess(
-        data.message ||
-          'If this email is registered, you will receive instructions to reset your password.'
+        data.message || 'Ako je ovaj e-mail registrovan, dobićete uputstva za resetovanje lozinke.'
       );
       setTimeout(() => {
         router.push('/auth/login');
       }, 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage =
-        error.response?.data?.detail || 'Failed to send reset instructions. Please try again.';
+        error instanceof Error
+          ? error.message
+          : 'Slanje uputstva za reset nije uspjelo. Pokušajte ponovo.';
       setError(errorMessage);
     }
   };
@@ -34,16 +35,16 @@ const ForgotPassword = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-blue-50 p-4">
       <div className="w-full max-w-md p-8 space-y-6 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl transform transition-all duration-500 hover:shadow-3xl">
-        <h1 className="text-4xl font-extrabold text-[#0097B2] text-center">Forgot Password</h1>
+        <h1 className="text-4xl font-extrabold text-[#0097B2] text-center">Zaboravljena lozinka</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-[#0097B2] font-semibold">Email</label>
+            <label className="block text-[#0097B2] font-semibold">E-mail</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 mt-2 border border-[#0097B2] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0097B2] transition duration-300 text-black"
-              placeholder="Enter your email"
+              placeholder="Unesite e-mail"
               required
             />
           </div>
@@ -53,16 +54,16 @@ const ForgotPassword = () => {
             type="submit"
             className="w-full px-4 py-3 font-bold text-white bg-[#0097B2] rounded-lg hover:bg-[#007A90] focus:outline-none focus:ring-4 focus:ring-[#0097B2] transition duration-300 shadow-lg hover:shadow-xl"
           >
-            Send Reset Instructions
+            Pošalji uputstva za reset
           </button>
         </form>
         <p className="text-center text-[#0097B2]">
-          Remember your password?{' '}
+          Sjetili ste se lozinke?{' '}
           <button
             onClick={() => router.push('/auth/login')}
             className="text-[#0097B2] hover:underline focus:outline-none"
           >
-            Login
+            Prijava
           </button>
         </p>
       </div>

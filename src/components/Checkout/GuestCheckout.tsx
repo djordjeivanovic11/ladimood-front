@@ -89,9 +89,9 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
       <CardContent>
         {cartItems.length === 0 ? (
           <div className="py-8 text-center">
-            <p className="text-muted-foreground">Your cart is empty</p>
+            <p className="text-muted-foreground">Korpa je prazna</p>
             <Button className="mt-4" onClick={() => router.push('/shop')}>
-              Continue Shopping
+              Nastavi kupovinu
             </Button>
           </div>
         ) : (
@@ -103,10 +103,10 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
 
             {/* Contact Information */}
             <div>
-              <h3 className="mb-4 text-lg font-semibold">Contact Information</h3>
+              <h3 className="mb-4 text-lg font-semibold">Kontakt podaci</h3>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="guest_email">Email *</Label>
+                  <Label htmlFor="guest_email">E-mail *</Label>
                   <Input
                     id="guest_email"
                     type="email"
@@ -118,14 +118,14 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="guest_name">Full Name *</Label>
-                  <Input id="guest_name" placeholder="John Doe" {...register('guest_name')} />
+                  <Label htmlFor="guest_name">Ime i prezime *</Label>
+                  <Input id="guest_name" placeholder="Marko Marković" {...register('guest_name')} />
                   {errors.guest_name && (
                     <p className="text-sm text-destructive">{errors.guest_name.message}</p>
                   )}
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="guest_phone">Phone *</Label>
+                  <Label htmlFor="guest_phone">Telefon *</Label>
                   <Input
                     id="guest_phone"
                     type="tel"
@@ -141,13 +141,13 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
 
             {/* Shipping Address */}
             <div>
-              <h3 className="mb-4 text-lg font-semibold">Shipping Address</h3>
+              <h3 className="mb-4 text-lg font-semibold">Adresa za dostavu</h3>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2 sm:col-span-2">
-                  <Label htmlFor="street_address">Street Address *</Label>
+                  <Label htmlFor="street_address">Ulica i broj *</Label>
                   <Input
                     id="street_address"
-                    placeholder="123 Main St"
+                    placeholder="npr. Ulica 13. jula 2"
                     {...register('address.street_address')}
                   />
                   {errors.address?.street_address && (
@@ -157,18 +157,18 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="city">City *</Label>
+                  <Label htmlFor="city">Grad *</Label>
                   <Input id="city" placeholder="Podgorica" {...register('address.city')} />
                   {errors.address?.city && (
                     <p className="text-sm text-destructive">{errors.address.city.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="state">State/Region</Label>
-                  <Input id="state" placeholder="Optional" {...register('address.state')} />
+                  <Label htmlFor="state">Opština</Label>
+                  <Input id="state" placeholder="Opciono" {...register('address.state')} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="postal_code">Postal Code *</Label>
+                  <Label htmlFor="postal_code">Poštanski broj *</Label>
                   <Input
                     id="postal_code"
                     placeholder="81000"
@@ -179,8 +179,8 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="country">Country *</Label>
-                  <Input id="country" placeholder="Montenegro" {...register('address.country')} />
+                  <Label htmlFor="country">Država *</Label>
+                  <Input id="country" placeholder="Crna Gora" {...register('address.country')} />
                   {errors.address?.country && (
                     <p className="text-sm text-destructive">{errors.address.country.message}</p>
                   )}
@@ -207,7 +207,7 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
 
             {/* Order Summary */}
             <div className="rounded-lg bg-muted p-4">
-              <h3 className="mb-3 text-lg font-semibold">Order Summary</h3>
+              <h3 className="mb-3 text-lg font-semibold">Pregled porudžbine</h3>
               <div className="space-y-2">
                 {cartItems.map((item) => (
                   <div
@@ -223,7 +223,7 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
                   </div>
                 ))}
                 <div className="mt-3 flex justify-between border-t pt-3">
-                  <span className="text-lg font-bold">Total</span>
+                  <span className="text-lg font-bold">Ukupno</span>
                   <span className="text-lg font-bold text-primary">€{totalPrice.toFixed(2)}</span>
                 </div>
               </div>
@@ -233,7 +233,7 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
             <div className="flex gap-4">
               {onCancel && (
                 <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-                  Cancel
+                  Otkaži
                 </Button>
               )}
               <Button
@@ -241,7 +241,7 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
                 disabled={isPending}
                 className={cn('flex-1', !onCancel && 'w-full')}
               >
-                {isPending ? 'Processing...' : 'Završi porudžbinu'}
+                {isPending ? 'Obrada...' : 'Završi porudžbinu'}
               </Button>
             </div>
           </form>

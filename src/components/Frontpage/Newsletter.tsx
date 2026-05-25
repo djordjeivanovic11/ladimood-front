@@ -19,14 +19,14 @@ const SubscribeNewsletter: React.FC = () => {
 
     try {
       await addToNewsletter(email);
-      setMessage({ type: 'success', text: 'Successfully subscribed to the newsletter!' });
+      setMessage({ type: 'success', text: 'Uspješno ste se prijavili na newsletter!' });
       setEmail('');
     } catch (error: unknown) {
       const axiosError = error as { response?: { status?: number } };
       if (axiosError.response?.status === 400) {
-        setMessage({ type: 'error', text: 'This email is already registered.' });
+        setMessage({ type: 'error', text: 'Ovaj e-mail je već registrovan.' });
       } else {
-        setMessage({ type: 'error', text: 'An error occurred. Please try again.' });
+        setMessage({ type: 'error', text: 'Došlo je do greške. Pokušajte ponovo.' });
       }
     } finally {
       setIsSubmitting(false);
@@ -45,9 +45,9 @@ const SubscribeNewsletter: React.FC = () => {
     <div className="bg-background px-4 py-12 sm:px-6 lg:px-8">
       <Card className="mx-auto max-w-3xl">
         <CardContent className="p-8 text-center">
-          <h2 className="text-3xl font-extrabold">Subscribe to our Newsletter</h2>
+          <h2 className="text-3xl font-extrabold">Prijavite se na newsletter</h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Stay updated with the latest collections and exclusive offers.
+            Budite u toku sa najnovijim kolekcijama i ekskluzivnim ponudama.
           </p>
 
           {message && (
@@ -66,7 +66,7 @@ const SubscribeNewsletter: React.FC = () => {
             <div className="flex w-full sm:max-w-md">
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="Unesite e-mail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="rounded-full"
@@ -78,7 +78,7 @@ const SubscribeNewsletter: React.FC = () => {
               className="mt-4 rounded-full sm:ml-4 sm:mt-0"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Subscribe'}
+              {isSubmitting ? 'Slanje...' : 'Prijavi se'}
             </Button>
           </form>
         </CardContent>

@@ -28,36 +28,50 @@ function getAxiosDetail(error: unknown): string | null {
   return null;
 }
 
+/** Public catalog reads: empty DB or unreachable API → [] (no thrown errors). */
+async function fetchCatalogList<T>(request: () => Promise<AxiosResponse<T[]>>): Promise<T[]> {
+  try {
+    const response = await request();
+    return Array.isArray(response.data) ? response.data : [];
+  } catch {
+    return [];
+  }
+}
+
+const EMPTY_CART: Cart = { id: 0, user_id: 0, items: [] };
+
+/** Cart reads: empty cart or unreachable API → empty cart (no thrown errors). */
+async function fetchCartSafely(request: () => Promise<AxiosResponse<Cart>>): Promise<Cart> {
+  try {
+    const response = await request();
+    const data = response.data;
+    return data && Array.isArray(data.items) ? data : EMPTY_CART;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      throw error;
+    }
+    return EMPTY_CART;
+  }
+}
+
 // Function to get all products with optional filters (category, price range)
 export const getProducts = async (
   category_id?: number,
   min_price?: number,
   max_price?: number
 ): Promise<Product[]> => {
-  try {
-    const params = {
-      category_id: category_id || undefined,
-      min_price: min_price || undefined,
-      max_price: max_price || undefined,
-    };
+  const params = {
+    category_id: category_id || undefined,
+    min_price: min_price || undefined,
+    max_price: max_price || undefined,
+  };
 
-    const response: AxiosResponse<Product[]> = await api.get('/catalog/products', { params });
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    throw error;
-  }
+  return fetchCatalogList(() => api.get('/catalog/products', { params }));
 };
 
 // Function to get all categories
 export const getCategories = async (): Promise<Category[]> => {
-  try {
-    const response: AxiosResponse<Category[]> = await api.get('/catalog/categories');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    throw error;
-  }
+  return fetchCatalogList(() => api.get('/catalog/categories'));
 };
 
 // Function to get a single product by its ID
@@ -262,17 +276,11 @@ export const removeFromWishlist = async (itemId: number): Promise<MessageRespons
 
 // Get Cart
 export const getCart = async (): Promise<Cart> => {
-  try {
-    const response: AxiosResponse<Cart> = await api.get('/cart');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching cart:', error);
-    throw error;
-  }
+  return fetchCartSafely(() => api.get('/cart'));
 };
 
 // Add Item to Cart
-export const addToCart = async (cartItem: CartItem): Promise<CartItem> => {
+export const addToCart = async (cartItem: CartItemCreate): Promise<CartItem> => {
   try {
     const response: AxiosResponse<CartItem> = await api.post('/cart/items', cartItem);
     return response.data;
@@ -284,13 +292,22 @@ export const addToCart = async (cartItem: CartItem): Promise<CartItem> => {
 
 // Update Cart Item
 
-export const updateCartItem = async (cartItem: CartItem): Promise<CartItem> => {
+export const updateCartItem = async ({
+  id,
+  quantity,
+  color,
+  size,
+}: {
+  id: number;
+  quantity: number;
+  color: string;
+  size: Size;
+}): Promise<CartItem> => {
   try {
-    // Add the item_id to the URL path
-    const response: AxiosResponse<CartItem> = await api.put(`/cart/items/${cartItem.id}`, {
-      quantity: cartItem.quantity,
-      color: cartItem.color,
-      size: cartItem.size,
+    const response: AxiosResponse<CartItem> = await api.put(`/cart/items/${id}`, {
+      quantity,
+      color,
+      size,
     });
     return response.data;
   } catch (error) {
@@ -316,16 +333,7 @@ export const removeFromCart = async (
 
 export const clearCart = async (): Promise<MessageResponse> => {
   try {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      throw new Error('No access token found. Please log in.');
-    }
-
-    const response: AxiosResponse<MessageResponse> = await api.delete('/cart', {
-      headers: {
-        Authorization: `Bearer ${token}`, // Ensure token is sent in the Authorization header
-      },
-    });
+    const response: AxiosResponse<MessageResponse> = await api.delete('/cart');
 
     return response.data; // Message: "Cart cleared successfully"
   } catch (error: unknown) {
@@ -353,13 +361,7 @@ export const createGuestCart = async (): Promise<{ session_id: string; cart: Car
 };
 
 export const getGuestCart = async (sessionId: string): Promise<Cart> => {
-  try {
-    const response: AxiosResponse<Cart> = await api.get(`/cart/guest/${sessionId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching guest cart:', error);
-    throw error;
-  }
+  return fetchCartSafely(() => api.get(`/cart/guest/${sessionId}`));
 };
 
 export const addToGuestCart = async (
@@ -462,16 +464,7 @@ export const addToNewsletter = async (email: string) => {
 
 export const getCurrentUser = async (): Promise<User> => {
   try {
-    const token = localStorage.getItem('access_token'); // Retrieve token from local storage
-    if (!token) {
-      throw new Error('No access token found');
-    }
-
-    const response = await api.get<User>('/users/me', {
-      headers: {
-        Authorization: `Bearer ${token}`, // Include the token in the Authorization header
-      },
-    });
+    const response = await api.get<User>('/users/me');
 
     return response.data;
   } catch (error) {

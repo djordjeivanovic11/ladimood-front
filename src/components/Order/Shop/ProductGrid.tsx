@@ -67,10 +67,10 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
 
     try {
       await addToWishlist(wishlistItem);
-      toast.success(`"${name}" has been added to your wishlist!`);
+      toast.success(`"${name}" je dodato u listu želja!`);
     } catch (error) {
       console.error('Error adding item to wishlist:', error);
-      toast.error('Failed to add item to wishlist.');
+      toast.error('Dodavanje u listu želja nije uspjelo.');
     }
   };
 
@@ -90,7 +90,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
           openCart();
           setFeedbackMessages((prev) => ({
             ...prev,
-            [product.id]: 'Item added to cart!',
+            [product.id]: 'Dodato u korpu!',
           }));
           setTimeout(() => {
             setFeedbackMessages((prev) => ({
@@ -102,7 +102,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
         onError: () => {
           setFeedbackMessages((prev) => ({
             ...prev,
-            [product.id]: 'Failed to add item to cart.',
+            [product.id]: 'Dodavanje u korpu nije uspjelo.',
           }));
           setTimeout(() => {
             setFeedbackMessages((prev) => ({

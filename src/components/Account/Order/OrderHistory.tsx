@@ -1,21 +1,26 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ClipboardList, Package } from 'lucide-react';
 import { useUserOrdersQuery } from '@/hooks/queries/useOrders';
 import { OrderItem } from '@/app/types/types';
+import { AccountSectionHeader } from '@/components/Account/AccountSectionHeader';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { isUnauthorizedError } from '@/lib/http-error';
 
 function OrderHistorySkeleton() {
   return (
-    <div className="space-y-6">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <Card key={i}>
+    <div className="space-y-4">
+      {Array.from({ length: 2 }).map((_, i) => (
+        <Card key={i} className="border-border/60 shadow-sm">
           <CardContent className="space-y-4 p-6">
-            <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-4 w-48" />
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="h-4 w-56" />
             <Skeleton className="h-20 w-full" />
           </CardContent>
         </Card>
@@ -24,107 +29,161 @@ function OrderHistorySkeleton() {
   );
 }
 
+function getOrderDisplayId(order: { plain_id?: string; id: number | string }) {
+  if (order.plain_id) return order.plain_id;
+  return String(order.id);
+}
+
+function getItemProductName(item: OrderItem): string {
+  return item.product?.name ?? item.product_name ?? 'Artikal';
+}
+
+const ORDER_STATUS_LABELS: Record<string, string> = {
+  PENDING: 'Na čekanju',
+  PROCESSING: 'U obradi',
+  SHIPPED: 'Poslato',
+  DELIVERED: 'Isporučeno',
+  CANCELLED: 'Otkazano',
+};
+
+function formatOrderStatus(status: string): string {
+  return ORDER_STATUS_LABELS[status] ?? status;
+}
+
 const OrderHistory: React.FC = () => {
-  const { data: orders = [], isLoading, error } = useUserOrdersQuery();
+  const router = useRouter();
+  const { data: orders, isLoading, isError, error, refetch, isFetching } = useUserOrdersQuery();
   const [visibleCount, setVisibleCount] = useState(3);
 
-  const sortedOrders = [...orders].sort(
+  const orderList = orders ?? [];
+  const sortedOrders = [...orderList].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
   const visibleOrders = sortedOrders.slice(0, visibleCount);
-  const hasMore = visibleCount < orders.length;
-
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + 5);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="mx-auto my-10 max-w-3xl px-4">
-        <h2 className="mb-6 text-center text-3xl font-bold">Order History</h2>
-        <OrderHistorySkeleton />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="mx-auto my-10 max-w-3xl px-4 text-center">
-        <p className="text-destructive">Failed to fetch order history.</p>
-      </div>
-    );
-  }
+  const hasMore = visibleCount < orderList.length;
 
   return (
-    <div className="mx-auto my-10 max-w-3xl px-4">
-      <h2 className="mb-6 text-center text-3xl font-bold">Order History</h2>
+    <Card className="border-border/60 shadow-sm">
+      <CardContent className="space-y-6 p-6">
+        <AccountSectionHeader
+          icon={ClipboardList}
+          title="Historija porudžbina"
+          description="Pregled vaših prethodnih narudžbina"
+        />
 
-      {visibleOrders.length > 0 ? (
-        <div className="space-y-6">
-          {visibleOrders.map((order) => (
-            <Card key={order.id} className="transition-shadow hover:shadow-md">
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg text-primary">
-                      Order #{order.plain_id || order.id}
-                    </CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Placed on: {new Date(order.created_at).toLocaleDateString()}
-                    </p>
-                    <p className="text-sm font-medium">Total: €{order.total_price.toFixed(2)}</p>
-                  </div>
-                  <Badge variant={order.status === 'DELIVERED' ? 'default' : 'secondary'}>
-                    {order.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <h3 className="mb-3 text-base font-medium">Items</h3>
-                <ul className="space-y-3">
-                  {order.items.map((item: OrderItem) => (
-                    <li
-                      key={item.id}
-                      className="flex items-center justify-between rounded-lg border bg-muted/50 p-3"
-                    >
-                      <div>
-                        <p className="text-sm font-medium">{item.product.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Qty: {item.quantity}
-                          <span className="ml-4">Size: {item.size}</span>
+        {isLoading || (isFetching && orderList.length === 0) ? (
+          <OrderHistorySkeleton />
+        ) : isError ? (
+          <div className="space-y-4 py-6 text-center">
+            {isUnauthorizedError(error) ? (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Sesija je istekla. Prijavite se ponovo da vidite porudžbine.
+                </p>
+                <Button onClick={() => router.push('/auth/login')}>Prijava</Button>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Porudžbine trenutno nisu dostupne. Pokušajte ponovo.
+                </p>
+                <Button type="button" variant="outline" onClick={() => refetch()}>
+                  Pokušaj ponovo
+                </Button>
+              </>
+            )}
+          </div>
+        ) : orderList.length === 0 ? (
+          <div className="flex flex-col items-center gap-4 py-10 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+              <Package className="h-7 w-7 text-primary" aria-hidden />
+            </div>
+            <div className="space-y-1">
+              <p className="font-medium text-foreground">Još nema porudžbina</p>
+              <p className="text-sm text-muted-foreground">
+                Kada napravite prvu narudžbinu, pojaviće se ovdje.
+              </p>
+            </div>
+            <Button asChild>
+              <Link href="/shop">Pogledajte ponudu</Link>
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-4">
+              {visibleOrders.map((order) => (
+                <Card key={String(order.id)} className="border-border/50 bg-muted/10 shadow-none">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <p className="font-serif text-lg font-semibold text-primary">
+                          Porudžbina #{getOrderDisplayId(order)}
                         </p>
-                        <div className="mt-1 flex items-center text-sm text-muted-foreground">
-                          <span>Color:</span>
-                          <span
-                            className="ml-2 h-4 w-4 rounded-full border"
-                            style={{ backgroundColor: item.color || '#FFFFFF' }}
-                          />
-                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Datum:{' '}
+                          {new Date(order.created_at).toLocaleDateString('sr-ME', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          })}
+                        </p>
+                        <p className="text-sm font-medium">
+                          Ukupno: €{order.total_price.toFixed(2)}
+                        </p>
                       </div>
-                      <p className="text-sm font-semibold">€{item.price.toFixed(2)}</p>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-primary">
-              You have no orders yet. Start shopping and make your first purchase!
-            </p>
-          </CardContent>
-        </Card>
-      )}
+                      <Badge variant={order.status === 'DELIVERED' ? 'default' : 'secondary'}>
+                        {formatOrderStatus(order.status)}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3 pt-0">
+                    <p className="text-sm font-medium text-muted-foreground">Artikli</p>
+                    <ul className="space-y-2">
+                      {order.items.map((item: OrderItem) => (
+                        <li
+                          key={item.id}
+                          className="flex items-center justify-between rounded-lg border border-border/40 bg-background/80 px-3 py-3"
+                        >
+                          <div>
+                            <p className="text-sm font-medium">{getItemProductName(item)}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Kol: {item.quantity}
+                              {item.size ? (
+                                <span className="ml-3">Veličina: {item.size}</span>
+                              ) : null}
+                            </p>
+                            <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+                              <span>Boja:</span>
+                              <span
+                                className="h-4 w-4 rounded-full border border-border"
+                                style={{ backgroundColor: item.color || '#FFFFFF' }}
+                              />
+                            </div>
+                          </div>
+                          <p className="text-sm font-semibold">€{item.price.toFixed(2)}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
 
-      {hasMore && (
-        <div className="mt-6 flex justify-center">
-          <Button onClick={handleLoadMore}>Load More</Button>
-        </div>
-      )}
-    </div>
+            {hasMore && (
+              <div className="flex justify-center pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setVisibleCount((prev) => prev + 5)}
+                >
+                  Učitaj još
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

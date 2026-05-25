@@ -23,10 +23,12 @@ function OrderSkeleton() {
 export default function OrderPage({ params }: OrderPageProps) {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const authLoading = useAuthStore((state) => state.isLoading);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!isAuthenticated) {
       router.push('/auth/login');
       return;
@@ -44,9 +46,9 @@ export default function OrderPage({ params }: OrderPageProps) {
     };
 
     unwrapParams();
-  }, [params, isAuthenticated, router]);
+  }, [authLoading, params, isAuthenticated, router]);
 
-  if (isLoading || !orderId) {
+  if (isLoading || authLoading || !orderId) {
     return <OrderSkeleton />;
   }
 

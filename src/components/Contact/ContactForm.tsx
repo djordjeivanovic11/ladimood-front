@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { submitContactForm } from '@/api/management/axios';
 
+const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
+const ALLOWED_FILE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'application/pdf',
+];
+
 const ContactForm: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -13,6 +22,7 @@ const ContactForm: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [attachment, setAttachment] = useState<File | null>(null);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -24,6 +34,31 @@ const ContactForm: React.FC = () => {
     }));
   };
 
+  const handleAttachmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    if (!file) {
+      setAttachment(null);
+      return;
+    }
+
+    if (file.size > MAX_ATTACHMENT_BYTES) {
+      setErrorMessage('Fajl je prevelik. Maksimalna veličina je 25 MB.');
+      e.currentTarget.value = '';
+      setAttachment(null);
+      return;
+    }
+
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      setErrorMessage('Nepodržan tip fajla. Otpremite JPG, PNG, WEBP, GIF ili PDF.');
+      e.currentTarget.value = '';
+      setAttachment(null);
+      return;
+    }
+
+    setErrorMessage(null);
+    setAttachment(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -31,7 +66,7 @@ const ContactForm: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      const response = await submitContactForm(formData);
+      const response = await submitContactForm({ ...formData, attachment });
       setSuccessMessage(response.message);
       setFormData({
         name: '',
@@ -40,8 +75,11 @@ const ContactForm: React.FC = () => {
         message: '',
         inquiry_type: '',
       });
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Something went wrong. Please try again.');
+      setAttachment(null);
+    } catch (error: unknown) {
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Došlo je do greške. Pokušajte ponovo.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -50,10 +88,10 @@ const ContactForm: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 md:p-10 bg-gradient-to-br from-white via-gray-50 to-gray-100 shadow-2xl rounded-2xl">
       <h2 className="text-4xl md:text-5xl font-bold text-center text-[#0097B2] mb-4 md:mb-6">
-        Get in Touch
+        Kontaktirajte nas
       </h2>
       <p className="text-lg md:text-xl text-center text-gray-600 mb-8">
-        Let us know your thoughts or share your creative t-shirt design ideas!
+        Podijelite svoje misli ili ideje za kreativni dizajn majice!
       </p>
 
       {successMessage && (
@@ -71,7 +109,7 @@ const ContactForm: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Name
+              Ime
             </label>
             <input
               type="text"
@@ -80,13 +118,13 @@ const ContactForm: React.FC = () => {
               value={formData.name}
               onChange={handleInputChange}
               required
-              placeholder="John Doe"
+              placeholder="Marko Marković"
               className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0097B2] focus:border-[#0097B2] bg-gray-50 text-gray-800"
             />
           </div>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
+              E-mail
             </label>
             <input
               type="email"
@@ -95,14 +133,14 @@ const ContactForm: React.FC = () => {
               value={formData.email}
               onChange={handleInputChange}
               required
-              placeholder="john@example.com"
+              placeholder="marko@primjer.com"
               className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0097B2] focus:border-[#0097B2] bg-gray-50 text-gray-800"
             />
           </div>
         </div>
         <div>
           <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-            Phone
+            Telefon
           </label>
           <input
             type="text"
@@ -111,13 +149,13 @@ const ContactForm: React.FC = () => {
             value={formData.phone}
             onChange={handleInputChange}
             required
-            placeholder="123-456-7890"
+            placeholder="+382 67 123 456"
             className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0097B2] focus:border-[#0097B2] bg-gray-50 text-gray-800"
           />
         </div>
         <div>
           <label htmlFor="inquiry_type" className="block text-sm font-medium text-gray-700">
-            Inquiry Type
+            Vrsta upita
           </label>
           <select
             id="inquiry_type"
@@ -127,15 +165,15 @@ const ContactForm: React.FC = () => {
             required
             className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0097B2] focus:border-[#0097B2] bg-gray-50 text-gray-800"
           >
-            <option value="">Select Inquiry Type</option>
-            <option value="General Inquiry">General Inquiry</option>
-            <option value="Product Support">Product Support</option>
-            <option value="Sales Inquiry">Sales Inquiry</option>
+            <option value="">Odaberite vrstu upita</option>
+            <option value="Opšti upit">Opšti upit</option>
+            <option value="Podrška za proizvod">Podrška za proizvod</option>
+            <option value="Prodajni upit">Prodajni upit</option>
           </select>
         </div>
         <div>
           <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-            Message
+            Poruka
           </label>
           <textarea
             id="message"
@@ -144,9 +182,34 @@ const ContactForm: React.FC = () => {
             onChange={handleInputChange}
             required
             rows={4}
-            placeholder="I have an idea for a cool t-shirt design..."
+            placeholder="Imam ideju za cool dizajn majice..."
             className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0097B2] focus:border-[#0097B2] bg-gray-50 text-gray-800"
           ></textarea>
+        </div>
+        <div>
+          <label htmlFor="attachment" className="block text-sm font-medium text-gray-700">
+            Prilog (opciono, max 25 MB)
+          </label>
+          <input
+            type="file"
+            id="attachment"
+            name="attachment"
+            accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+            onChange={handleAttachmentChange}
+            className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0097B2] focus:border-[#0097B2] bg-gray-50 text-gray-800"
+          />
+          {attachment && (
+            <div className="mt-2 flex items-center justify-between rounded-lg bg-white px-3 py-2 text-sm text-gray-700">
+              <span className="truncate pr-2">{attachment.name}</span>
+              <button
+                type="button"
+                onClick={() => setAttachment(null)}
+                className="text-[#007a99] hover:text-[#005a70]"
+              >
+                Ukloni
+              </button>
+            </div>
+          )}
         </div>
         <div>
           <button
@@ -158,7 +221,7 @@ const ContactForm: React.FC = () => {
                 : 'bg-gradient-to-r from-[#0097B2] to-[#007a99] hover:to-[#005a70]'
             }`}
           >
-            {isSubmitting ? 'Submitting...' : 'Submit'}
+            {isSubmitting ? 'Slanje...' : 'Pošalji'}
           </button>
         </div>
       </form>

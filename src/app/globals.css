@@ -77,8 +77,101 @@
   h4 {
     @apply font-serif tracking-tight;
   }
+  /* iOS-style frosted glass for fixed nav */
+  .nav-glass {
+    background: hsl(var(--background) / 0.52);
+    -webkit-backdrop-filter: blur(24px) saturate(1.65);
+    backdrop-filter: blur(24px) saturate(1.65);
+    border-bottom: 1px solid hsl(0 0% 100% / 0.55);
+    box-shadow:
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.65),
+      0 4px 24px -6px hsl(var(--foreground) / 0.08);
+  }
+
+  .nav-glass--idle {
+    background: hsl(var(--background) / 0.28);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    backdrop-filter: blur(20px) saturate(1.5);
+    border-bottom-color: hsl(0 0% 100% / 0.35);
+    box-shadow:
+      inset 0 1px 0 0 hsl(0 0% 100% / 0.4),
+      0 2px 16px -8px hsl(var(--foreground) / 0.05);
+  }
+
+  .nav-drawer-glass {
+    background: hsl(var(--background) / 0.72);
+    -webkit-backdrop-filter: blur(28px) saturate(1.7);
+    backdrop-filter: blur(28px) saturate(1.7);
+    border-right: 1px solid hsl(0 0% 100% / 0.45);
+    box-shadow:
+      inset 1px 0 0 0 hsl(0 0% 100% / 0.5),
+      8px 0 32px -8px hsl(var(--foreground) / 0.12);
+  }
+
   a {
     @apply underline-offset-4 hover:underline;
+  }
+}
+
+@layer components {
+  /* react-phone-input-2: keep digits clear of the flag on all viewports */
+  .ladimood-phone-input.react-tel-input {
+    @apply w-full font-sans;
+  }
+
+  .ladimood-phone-input.react-tel-input .ladimood-phone-input__field {
+    @apply !m-0 !h-10 !min-h-10 !w-full !rounded-md !border !border-input !bg-background !text-base !leading-normal md:!text-sm;
+    padding-left: 3.5rem !important;
+    padding-right: 0.75rem !important;
+    width: 100% !important;
+  }
+
+  .ladimood-phone-input.react-tel-input .ladimood-phone-input__field--error {
+    @apply !border-destructive;
+  }
+
+  .ladimood-phone-input.react-tel-input .ladimood-phone-input__button {
+    @apply !rounded-l-md !border !border-input !border-r-0 !bg-background;
+    width: 3.5rem !important;
+  }
+
+  .ladimood-phone-input.react-tel-input .ladimood-phone-input__button--error {
+    @apply !border-destructive;
+  }
+
+  .ladimood-phone-input.react-tel-input .selected-flag {
+    width: 3.5rem !important;
+    padding: 0 0.5rem !important;
+  }
+
+  .ladimood-phone-input.react-tel-input .selected-flag .arrow {
+    left: 2.35rem !important;
+  }
+
+  .ladimood-phone-input.react-tel-input .selected-flag .flag {
+    transform: scale(1.05);
+  }
+
+  .ladimood-phone-input.react-tel-input .ladimood-phone-input__dropdown {
+    @apply !z-50 !rounded-md !border !border-input !bg-popover !text-popover-foreground !shadow-md;
+    width: 100% !important;
+    max-width: 100%;
+  }
+
+  @media (max-width: 640px) {
+    .ladimood-phone-input.react-tel-input .ladimood-phone-input__field {
+      padding-left: 3.75rem !important;
+      @apply !text-base;
+    }
+
+    .ladimood-phone-input.react-tel-input .ladimood-phone-input__button,
+    .ladimood-phone-input.react-tel-input .selected-flag {
+      width: 3.75rem !important;
+    }
+
+    .ladimood-phone-input.react-tel-input .selected-flag .arrow {
+      left: 2.55rem !important;
+    }
   }
 }
 

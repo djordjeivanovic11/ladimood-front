@@ -3,37 +3,39 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useCategoriesQuery } from '@/hooks/queries/useProducts';
 
-const categories = [
-  {
-    title: 'DUKSERICE',
-    subtitle: ' PULLOVER HOODIE | FULL ZIP HOODIE| CREWNECK',
-    imageSrc: '/images/categories/hoodies.png',
-    link: '/shop?category=hoodies',
-  },
-  {
-    title: 'MAJICE',
-    subtitle: 'SLIM FIT| OVERSIZE | KLASIČNE',
-    imageSrc: '/images/categories/tees.png',
-    link: '/shop?category=T-Shirts',
-  },
-  {
-    title: 'ACCESSORIES',
-    subtitle: 'KAPE | NARUKVICE | TORBE | ČARAPE',
-    imageSrc: '/images/categories/accessories.png',
-    link: '/shop?category=accessories',
-  },
+const fallbackCards = [
+  '/images/categories/hoodies.png',
+  '/images/categories/tees.png',
+  '/images/categories/accessories.png',
 ];
 
 const CategoryComponent = () => {
+  const { data: categories = [] } = useCategoriesQuery();
+  const dynamicCards =
+    categories.length > 0
+      ? categories.slice(0, 3).map((category, idx) => ({
+          title: category.name.toUpperCase(),
+          subtitle: category.description || 'Istraži proizvode iz ove kategorije',
+          imageSrc: category.image_url || fallbackCards[idx % fallbackCards.length],
+          link: `/shop?category_id=${category.id}`,
+        }))
+      : fallbackCards.map((img, idx) => ({
+          title: `KATEGORIJA ${idx + 1}`,
+          subtitle: 'Istraži proizvode',
+          imageSrc: img,
+          link: '/shop',
+        }));
+
   return (
     <div className="bg-background py-16">
       <h1 className="mb-16 text-center text-5xl font-bold leading-tight text-primary md:text-6xl">
         Istraži kategorije
       </h1>
       <div className="mx-auto grid max-w-screen-xl grid-cols-1 gap-10 px-4 md:grid-cols-3 md:px-8">
-        {categories.map((category, index) => (
-          <Link href={category.link} key={category.title}>
+        {dynamicCards.map((category, index) => (
+          <Link href={category.link} key={`${category.title}-${index}`}>
             <div
               className={`group relative h-[450px] cursor-pointer overflow-hidden rounded-xl ${
                 index % 2 === 0 ? 'bg-background shadow-2xl' : 'bg-muted shadow-lg'

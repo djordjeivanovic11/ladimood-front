@@ -15,23 +15,33 @@ const Footer: React.FC = () => {
             <h5 className="font-bold mb-2">Linkovi</h5>
             <ul>
               <li className="mb-2">
-                <Link href="/" passHref>
-                  <span className="hover:underline cursor-pointer">Naslovna</span>
+                <Link href="/" className="hover:underline">
+                  Naslovna
                 </Link>
               </li>
               <li className="mb-2">
-                <Link href="/shop" passHref>
-                  <span className="hover:underline cursor-pointer">Šopinguj</span>
+                <Link href="/shop" className="hover:underline">
+                  Prodavnica
                 </Link>
               </li>
               <li className="mb-2">
-                <Link href="/auth/login" passHref>
-                  <span className="hover:underline cursor-pointer">Login</span>
+                <Link href="/contact" className="hover:underline">
+                  Kontakt
                 </Link>
               </li>
               <li className="mb-2">
-                <Link href="/cart" passHref>
-                  <span className="hover:underline cursor-pointer">Korpa</span>
+                <Link href="/account" className="hover:underline">
+                  Moj nalog
+                </Link>
+              </li>
+              <li className="mb-2">
+                <Link href="/auth/login" className="hover:underline">
+                  Prijava
+                </Link>
+              </li>
+              <li className="mb-2">
+                <Link href="/auth/register" className="hover:underline">
+                  Registracija
                 </Link>
               </li>
             </ul>
@@ -39,27 +49,30 @@ const Footer: React.FC = () => {
           <div className="w-full md:w-1/4 mb-6 md:mb-0">
             <h5 className="font-bold mb-2">Kontaktiraj nas</h5>
             <p className="text-sm">
-              Ulica 13.jula 2<br />
               Podgorica, 81000
               <br />
-              Phone: +38269851872
+              Telefon: +38269851872
               <br />
-              Email: contact@ladimood.com
+              E-mail: contact@ladimood.com
             </p>
           </div>
           <div className="w-full md:w-1/4">
-            <h5 className="font-bold mb-2">Follow Us</h5>
+            <h5 className="font-bold mb-2">Pratite nas</h5>
             <div className="flex space-x-4">
-              <Link href="https://www.instagram.com/ladimood.store/" passHref>
-                <span className="hover:text-gray-400 cursor-pointer">
-                  <FaInstagram className="w-6 h-6" />
-                </span>
+              <Link
+                href="https://www.instagram.com/ladimood.store/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-gray-400"
+                aria-label="Instagram"
+              >
+                <FaInstagram className="h-6 w-6" />
               </Link>
             </div>
           </div>
         </div>
         <div className="mt-6 text-center text-sm text-white">
-          © 2024 Ladimood. Sva prava rezervisana.
+          © {new Date().getFullYear()} Ladimood. Sva prava rezervisana.
         </div>
       </div>
     </footer>

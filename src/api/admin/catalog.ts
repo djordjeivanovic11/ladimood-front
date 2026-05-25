@@ -1,5 +1,6 @@
 import axiosInstance from '@/api/axiosInstance';
 import type {
+  Category,
   Collection,
   Product,
   ProductMedia,
@@ -123,6 +124,36 @@ export async function adminListCollections(): Promise<Collection[]> {
   return res.data;
 }
 
+export async function adminListCategories(): Promise<Category[]> {
+  const res = await axiosInstance.get<Category[]>('/admin/categories');
+  return res.data;
+}
+
+export async function adminCreateCategory(payload: {
+  name: string;
+  description?: string | null;
+  image_url?: string | null;
+}): Promise<Category> {
+  const res = await axiosInstance.post<Category>('/admin/categories', payload);
+  return res.data;
+}
+
+export async function adminUpdateCategory(
+  categoryId: number,
+  payload: Partial<{
+    name: string;
+    description: string | null;
+    image_url: string | null;
+  }>
+): Promise<Category> {
+  const res = await axiosInstance.put<Category>(`/admin/categories/${categoryId}`, payload);
+  return res.data;
+}
+
+export async function adminDeleteCategory(categoryId: number): Promise<void> {
+  await axiosInstance.delete(`/admin/categories/${categoryId}`);
+}
+
 export async function adminCreateCollection(payload: {
   name: string;
   slug: string;
@@ -150,15 +181,17 @@ export async function adminDeleteCollection(collectionId: number): Promise<void>
   await axiosInstance.delete(`/admin/collections/${collectionId}`);
 }
 
-export async function adminCloudinarySignature(payload?: { folder?: string }): Promise<{
-  cloud_name: string;
-  api_key: string;
-  timestamp: number;
-  folder: string;
-  signature: string;
+export async function adminCreateStorageUploadUrl(payload: {
+  filename: string;
+  product_id?: number;
+  collection_id?: number;
+  category_id?: number;
+}): Promise<{
+  bucket: string;
+  path: string;
+  signed_upload_url: string;
+  public_url: string;
 }> {
-  const res = await axiosInstance.post('/admin/cloudinary/signature', {
-    folder: payload?.folder ?? 'ladimood',
-  });
+  const res = await axiosInstance.post('/admin/storage/upload-url', payload);
   return res.data;
 }

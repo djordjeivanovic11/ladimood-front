@@ -88,14 +88,14 @@ const Product: React.FC<ProductProps> = ({
           {availableColors.map((color, index) => (
             <button
               key={index}
-              title={`Select color ${color}`}
+              title={`Odaberi boju ${color}`}
               onClick={() => onSelectColor(color)}
               className={cn(
                 'h-6 w-6 rounded-full border-2 transition-transform hover:scale-110',
                 selectedColor === color ? 'border-primary ring-2 ring-primary/50' : 'border-border',
                 swatchBgClass(color)
               )}
-              aria-label={`Select color ${color}`}
+              aria-label={`Odaberi boju ${color}`}
             />
           ))}
         </div>
@@ -112,7 +112,7 @@ const Product: React.FC<ProductProps> = ({
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border hover:bg-muted'
               )}
-              aria-label={`Select size ${size}`}
+              aria-label={`Odaberi veličinu ${size}`}
             >
               {size}
             </button>

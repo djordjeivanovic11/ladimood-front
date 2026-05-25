@@ -24,6 +24,14 @@ import { toast } from 'sonner';
 
 type SaleFinalizedStatus = 'none' | 'finalized' | 'exists' | 'failed';
 
+const orderStatusLabels: Record<OrderStatusEnum, string> = {
+  [OrderStatusEnum.CREATED]: 'Kreirano',
+  [OrderStatusEnum.PENDING]: 'Na čekanju',
+  [OrderStatusEnum.SHIPPED]: 'Poslato',
+  [OrderStatusEnum.DELIVERED]: 'Dostavljeno',
+  [OrderStatusEnum.CANCELLED]: 'Otkazano',
+};
+
 const OrdersManagement: React.FC = () => {
   const [orders, setOrders] = useState<OrderManagement[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<OrderManagement[]>([]);
@@ -31,7 +39,7 @@ const OrdersManagement: React.FC = () => {
 
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchOrderId, setSearchOrderId] = useState<string>('');
   const [searchOrderName, setSearchOrderName] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -60,7 +68,7 @@ const OrdersManagement: React.FC = () => {
 
         setError(null);
       } catch (err) {
-        setError('Failed to fetch orders. Please try again later.');
+        setError('Učitavanje porudžbina nije uspjelo. Pokušajte ponovo.');
         console.error('Error fetching orders:', err);
       }
     };
@@ -77,10 +85,10 @@ const OrdersManagement: React.FC = () => {
         prev.map((order) => (order.id === orderId ? { ...order, status: newStatus } : order))
       );
       setError(null);
-      toast.success('Order status updated successfully');
+      toast.success('Status porudžbine je uspješno ažuriran');
     } catch (err) {
       console.error('Error updating status:', err);
-      toast.error('Failed to update order status');
+      toast.error('Ažuriranje statusa porudžbine nije uspjelo');
     }
   };
 
@@ -103,7 +111,7 @@ const OrdersManagement: React.FC = () => {
           [order.id]: 'exists',
         }));
       } else {
-        toast.success('Sale finalized successfully!');
+        toast.success('Prodaja je uspješno finalizovana!');
         setSaleFinalizedStatusMap((prev) => ({
           ...prev,
           [order.id]: 'finalized',
@@ -111,7 +119,7 @@ const OrdersManagement: React.FC = () => {
       }
     } catch (err) {
       console.error('Error finalizing sale:', err);
-      toast.error('Failed to finalize the sale');
+      toast.error('Finalizacija prodaje nije uspjela');
       setSaleFinalizedStatusMap((prev) => ({
         ...prev,
         [order.id]: 'failed',
@@ -131,7 +139,7 @@ const OrdersManagement: React.FC = () => {
         (order) => new Date(order.created_at) <= new Date(endDate)
       );
     }
-    if (statusFilter) {
+    if (statusFilter !== 'all') {
       updatedFilteredOrders = updatedFilteredOrders.filter(
         (order) => order.status === statusFilter
       );
@@ -142,9 +150,8 @@ const OrdersManagement: React.FC = () => {
       );
     }
     if (searchOrderName) {
-      updatedFilteredOrders = updatedFilteredOrders.filter(
-        (order) =>
-          order.user?.full_name.toLowerCase().includes(searchOrderName.toLowerCase().trim())
+      updatedFilteredOrders = updatedFilteredOrders.filter((order) =>
+        order.user?.full_name.toLowerCase().includes(searchOrderName.toLowerCase().trim())
       );
     }
     setFilteredOrders(updatedFilteredOrders);
@@ -165,8 +172,13 @@ const OrdersManagement: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-muted/50 p-6">
-      <h2 className="mb-6 text-2xl font-bold text-primary">Orders Management</h2>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold">Upravljanje porudžbinama</h2>
+        <p className="text-muted-foreground">
+          Pregled porudžbina, statusa isporuke i finalizacije prodaje iz jednog mjesta.
+        </p>
+      </div>
 
       {error && (
         <div className="mb-4 rounded-lg bg-destructive/10 p-4 text-destructive">
@@ -177,12 +189,12 @@ const OrdersManagement: React.FC = () => {
       {/* Filters */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>Filteri</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
             <div className="space-y-2">
-              <Label htmlFor="startDate">Start Date</Label>
+              <Label htmlFor="startDate">Datum od</Label>
               <Input
                 id="startDate"
                 type="date"
@@ -191,7 +203,7 @@ const OrdersManagement: React.FC = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="endDate">End Date</Label>
+              <Label htmlFor="endDate">Datum do</Label>
               <Input
                 id="endDate"
                 type="date"
@@ -203,40 +215,40 @@ const OrdersManagement: React.FC = () => {
               <Label htmlFor="status">Status</Label>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder="All" />
+                  <SelectValue placeholder="Sve" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All</SelectItem>
+                  <SelectItem value="all">Sve</SelectItem>
                   {Object.values(OrderStatusEnum).map((status) => (
                     <SelectItem key={status} value={status}>
-                      {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
+                      {orderStatusLabels[status]}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="orderId">Order ID</Label>
+              <Label htmlFor="orderId">ID porudžbine</Label>
               <Input
                 id="orderId"
                 type="text"
                 value={searchOrderId}
                 onChange={(e) => setSearchOrderId(e.target.value)}
-                placeholder="Search by Order ID"
+                placeholder="Pretraga po ID porudžbine"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="orderName">Order Name</Label>
+              <Label htmlFor="orderName">Ime kupca</Label>
               <Input
                 id="orderName"
                 type="text"
                 value={searchOrderName}
                 onChange={(e) => setSearchOrderName(e.target.value)}
-                placeholder="Search by Order Name"
+                placeholder="Pretraga po imenu"
               />
             </div>
           </div>
-          <Button onClick={applyFilters}>Apply Filters</Button>
+          <Button onClick={applyFilters}>Primijeni filtere</Button>
         </CardContent>
       </Card>
 
@@ -245,7 +257,7 @@ const OrdersManagement: React.FC = () => {
         {filteredOrders.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">No orders match the selected filters.</p>
+              <p className="text-muted-foreground">Nema porudžbina koje odgovaraju filterima.</p>
             </CardContent>
           </Card>
         ) : (
@@ -253,7 +265,7 @@ const OrdersManagement: React.FC = () => {
             <Card key={order.id}>
               <CardContent className="p-6">
                 <div className="mb-4 flex items-center justify-between">
-                  <CardTitle className="text-xl text-primary">Order ID: {order.id}</CardTitle>
+                  <CardTitle className="text-xl">ID porudžbine: {order.id}</CardTitle>
                   <StatusManagement
                     orderId={order.id}
                     currentStatus={order.status}
@@ -263,13 +275,13 @@ const OrdersManagement: React.FC = () => {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
                     <p className="font-medium">
-                      User:{' '}
+                      Korisnik:{' '}
                       <span className="font-normal">
                         {order.user ? `${order.user.full_name} (${order.user.email})` : 'N/A'}
                       </span>
                     </p>
                     <p className="font-medium">
-                      Address:{' '}
+                      Adresa:{' '}
                       <span className="font-normal">
                         {order.address
                           ? `${order.address.street_address}, ${order.address.city}, ${order.address.country}`
@@ -279,20 +291,20 @@ const OrdersManagement: React.FC = () => {
                   </div>
                   <div>
                     <p className="font-medium">
-                      Order Date:{' '}
+                      Datum porudžbine:{' '}
                       <span className="font-normal">
                         {new Date(order.created_at).toLocaleDateString()}
                       </span>
                     </p>
                     <p className="font-medium">
-                      Total Amount:{' '}
+                      Ukupan iznos:{' '}
                       <span className="font-normal">€{order.total_price.toFixed(2)}</span>
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-4">
-                  <h4 className="text-lg font-medium text-primary">Items:</h4>
+                  <h4 className="text-lg font-medium">Artikli:</h4>
                   <ul className="mt-2 space-y-2">
                     {order.items.map((item) => (
                       <li
@@ -317,29 +329,26 @@ const OrdersManagement: React.FC = () => {
                 {/* Finalized sale status badge */}
                 <div className="mt-4">
                   {saleFinalizedStatusMap[order.id] === 'finalized' && (
-                    <Badge>Sale Finalized</Badge>
+                    <Badge>Prodaja finalizovana</Badge>
                   )}
                   {saleFinalizedStatusMap[order.id] === 'exists' && (
-                    <Badge variant="secondary">Sale Already Exists</Badge>
+                    <Badge variant="secondary">Prodaja već postoji</Badge>
                   )}
                   {saleFinalizedStatusMap[order.id] === 'failed' && (
-                    <Badge variant="destructive">Finalization Failed</Badge>
+                    <Badge variant="destructive">Finalizacija nije uspjela</Badge>
                   )}
                 </div>
 
                 <div className="mt-6 flex flex-col items-center justify-between gap-4 md:flex-row">
-                  <Button
-                    onClick={() => handleFinalizeSale(order)}
-                    className="w-full bg-green-600 hover:bg-green-700 md:w-auto"
-                  >
-                    Finalize Sale
+                  <Button onClick={() => handleFinalizeSale(order)} className="w-full md:w-auto">
+                    Finalizuj prodaju
                   </Button>
                   <Button
                     onClick={() => handleViewOrderClick(order.id)}
                     variant="outline"
                     className="w-full md:w-auto"
                   >
-                    View Full Order
+                    Pogledaj cijelu porudžbinu
                   </Button>
                 </div>
               </CardContent>
@@ -358,7 +367,7 @@ const OrdersManagement: React.FC = () => {
               disabled={currentPage === 1}
               className="rounded-l-lg rounded-r-none"
             >
-              Previous
+              Prethodna
             </Button>
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
               <Button
@@ -376,7 +385,7 @@ const OrdersManagement: React.FC = () => {
               disabled={currentPage === totalPages}
               className="rounded-l-none rounded-r-lg"
             >
-              Next
+              Sljedeća
             </Button>
           </nav>
         </div>

@@ -2,10 +2,10 @@ import { z } from 'zod';
 import { addressSchema } from './address.schema';
 
 export const guestCheckoutSchema = z.object({
-  guest_email: z.string().email('Please enter a valid email'),
-  guest_name: z.string().min(2, 'Name must be at least 2 characters'),
-  guest_phone: z.string().min(8, 'Phone number must be at least 8 characters'),
-  delivery_note: z.string().max(200, 'Delivery note is too long').optional(),
+  guest_email: z.string().email('Unesite ispravnu e-mail adresu'),
+  guest_name: z.string().min(2, 'Ime mora imati najmanje 2 znaka'),
+  guest_phone: z.string().min(8, 'Broj telefona mora imati najmanje 8 znakova'),
+  delivery_note: z.string().max(200, 'Napomena za dostavu je predugačka').optional(),
   address: addressSchema,
 });
 
@@ -20,11 +20,11 @@ export type AuthenticatedCheckoutFormData = z.infer<typeof authenticatedCheckout
 
 // Contact form schema
 export const contactFormSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email'),
+  name: z.string().min(2, 'Ime mora imati najmanje 2 znaka'),
+  email: z.string().email('Unesite ispravnu e-mail adresu'),
   phone: z.string().optional(),
-  message: z.string().min(10, 'Message must be at least 10 characters'),
-  inquiry_type: z.string().min(1, 'Please select an inquiry type'),
+  message: z.string().min(10, 'Poruka mora imati najmanje 10 znakova'),
+  inquiry_type: z.string().min(1, 'Odaberite vrstu upita'),
 });
 
 export type ContactFormData = z.infer<typeof contactFormSchema>;

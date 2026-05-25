@@ -1,27 +1,46 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchCurrentUser, loginUser, registerUser, refreshToken } from '@/api/auth/axios';
+import { fetchCurrentUser } from '@/api/auth/axios';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { toast } from '@/lib/toast';
 import type { UserCreate } from '@/app/types/types';
+import { supabase } from '@/lib/supabase';
 
 export const authKeys = {
   user: ['auth', 'user'] as const,
 };
 
 export function useCurrentUser() {
-  const accessToken = useAuthStore((state) => state.accessToken);
+  const authLoading = useAuthStore((state) => state.isLoading);
+  const setAuthSession = useAuthStore((state) => state.setAuthSession);
   const setUser = useAuthStore((state) => state.updateUser);
-  const setLoading = useAuthStore((state) => state.setLoading);
+  const logout = useAuthStore((state) => state.logout);
 
   return useQuery({
     queryKey: authKeys.user,
     queryFn: async () => {
-      const user = await fetchCurrentUser();
-      setUser(user);
-      setLoading(false);
-      return user;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        setAuthSession(false);
+        setUser(null);
+        return null;
+      }
+
+      setAuthSession(true);
+
+      try {
+        const user = await fetchCurrentUser();
+        setUser(user);
+        return user;
+      } catch (error) {
+        await supabase.auth.signOut();
+        logout();
+        throw error;
+      }
     },
-    enabled: !!accessToken,
+    enabled: !authLoading,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: false,
   });
@@ -33,18 +52,20 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: async ({ email, password }: { email: string; password: string }) => {
-      const tokens = await loginUser(email, password);
-      return tokens;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw new Error(error.message);
+      if (!data.session) throw new Error('Prijava nije uspjela: nema aktivne sesije');
+      return true;
     },
-    onSuccess: async (tokens) => {
+    onSuccess: async () => {
       // Fetch user after getting tokens
       const user = await fetchCurrentUser();
-      login(tokens, user);
+      login(user);
       queryClient.invalidateQueries({ queryKey: authKeys.user });
-      toast.success('Welcome back!');
+      toast.success('Dobrodošli nazad!');
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Login failed');
+      toast.error(error.message || 'Prijava nije uspjela');
     },
   });
 }
@@ -55,19 +76,31 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: async (userData: UserCreate) => {
-      await registerUser(userData);
-      // Auto-login after registration
-      const tokens = await loginUser(userData.email, userData.password);
-      return tokens;
+      const { data, error } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            full_name: userData.full_name,
+            phone_number: userData.phone_number,
+          },
+        },
+      });
+      if (error) throw new Error(error.message);
+      return data.session;
     },
-    onSuccess: async (tokens) => {
+    onSuccess: async (session) => {
+      if (!session) {
+        toast.success('Nalog je kreiran. Potvrdite e-mail, zatim se prijavite.');
+        return;
+      }
       const user = await fetchCurrentUser();
-      login(tokens, user);
+      login(user);
       queryClient.invalidateQueries({ queryKey: authKeys.user });
-      toast.success('Account created successfully!');
+      toast.success('Nalog je uspješno kreiran!');
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Registration failed');
+      toast.error(error.message || 'Registracija nije uspjela');
     },
   });
 }
@@ -78,32 +111,15 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: async () => {
-      // Just clear local state, no server call needed for JWT logout
-      return Promise.resolve();
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw new Error(error.message);
+      }
     },
     onSuccess: () => {
       logout();
       queryClient.clear();
-      toast.success('Logged out successfully');
-    },
-  });
-}
-
-export function useRefreshToken() {
-  const setTokens = useAuthStore((state) => state.setTokens);
-  const currentRefreshToken = useAuthStore((state) => state.refreshToken);
-
-  return useMutation({
-    mutationFn: async () => {
-      if (!currentRefreshToken) throw new Error('No refresh token');
-      return refreshToken(currentRefreshToken);
-    },
-    onSuccess: (tokens) => {
-      setTokens(tokens.access_token, tokens.refresh_token);
-    },
-    onError: () => {
-      // If refresh fails, logout
-      useAuthStore.getState().logout();
+      toast.success('Uspješno ste se odjavili');
     },
   });
 }

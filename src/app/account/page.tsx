@@ -9,6 +9,7 @@ import Wishlist from '@/components/Account/Wishlist';
 import Cart from '@/components/Account/Cart';
 import Newsletter from '@/components/Frontpage/Newsletter';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useCurrentUser } from '@/hooks/queries/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function AccountSkeleton() {
@@ -27,50 +28,42 @@ function AccountSkeleton() {
 export default function AccountPage() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const authLoading = useAuthStore((state) => state.isLoading);
+  const { data: user, isLoading: userLoading } = useCurrentUser();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth/login');
-    } else {
-      setIsLoading(false);
+    if (authLoading || userLoading) return;
+    if (!isAuthenticated && !user) {
+      router.replace('/auth/login');
     }
-  }, [isAuthenticated, router]);
+  }, [authLoading, userLoading, isAuthenticated, user, router]);
 
-  if (isLoading) {
+  if (authLoading || userLoading) {
     return <AccountSkeleton />;
+  }
+
+  if (!isAuthenticated && !user) {
+    return null;
   }
 
   return (
     <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8">
-      <h1 className="m-5 mb-12 text-center text-3xl font-extrabold text-primary sm:mb-16 sm:text-4xl md:text-5xl lg:text-6xl">
-        My Account
+      <h1 className="m-5 mb-10 text-center font-serif text-3xl font-semibold tracking-tight text-primary sm:mb-12 sm:text-4xl md:text-5xl">
+        Moj nalog
       </h1>
 
       <div className="mx-auto max-w-6xl space-y-8 sm:space-y-12">
         {/* User Details and Address */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div>
-            <UserDetails />
-          </div>
-          <div>
-            <AddressManager />
-          </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+          <UserDetails />
+          <AddressManager />
         </div>
 
-        {/* Order History */}
-        <div>
-          <OrderHistory />
-        </div>
+        <OrderHistory />
 
-        {/* Wishlist and Cart */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div>
-            <Wishlist />
-          </div>
-          <div>
-            <Cart />
-          </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+          <Wishlist />
+          <Cart />
         </div>
       </div>
 

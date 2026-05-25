@@ -50,21 +50,21 @@ const Login = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-accent/30 p-4">
       <div className="w-full max-w-md transform space-y-6 rounded-2xl bg-card p-8 shadow-2xl transition-all duration-500">
-        <h1 className="text-center text-4xl font-extrabold text-primary">Login</h1>
+        <h1 className="text-center text-4xl font-extrabold text-primary">Prijava</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" placeholder="Enter your email" {...register('email')} />
+            <Label htmlFor="email">E-mail</Label>
+            <Input id="email" type="email" placeholder="Unesite e-mail" {...register('email')} />
             {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Lozinka</Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
+                placeholder="Unesite lozinku"
                 className="pr-10"
                 {...register('password')}
               />
@@ -87,13 +87,13 @@ const Login = () => {
               onClick={() => router.push('/auth/forgot-password')}
               className="text-sm text-primary hover:underline focus:outline-none"
             >
-              Forgot Password?
+              Zaboravili ste lozinku?
             </button>
           </div>
 
           {error && (
             <p className="text-center text-sm text-destructive">
-              {error instanceof Error ? error.message : 'Login failed'}
+              {error instanceof Error ? error.message : 'Prijava nije uspjela'}
             </p>
           )}
 
@@ -116,21 +116,21 @@ const Login = () => {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                Logging in...
+                Prijava u toku...
               </span>
             ) : (
-              'Login'
+              'Prijava'
             )}
           </Button>
         </form>
 
         <p className="text-center text-muted-foreground">
-          Don&apos;t have an account?{' '}
+          Nemate nalog?{' '}
           <button
             onClick={() => router.push('/auth/register')}
             className="text-primary hover:underline focus:outline-none"
           >
-            Register
+            Registracija
           </button>
         </p>
       </div>

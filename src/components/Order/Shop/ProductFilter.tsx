@@ -35,7 +35,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
     <div className="space-y-6">
       <div>
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Category
+          Kategorija
         </h3>
         <div className="space-y-2">
           <button
@@ -45,7 +45,7 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               selectedCategoryId === null ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
             }`}
           >
-            All
+            Sve
           </button>
           {categories.map((c) => (
             <button
@@ -66,11 +66,11 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
 
       <div>
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Price
+          Cijena
         </h3>
         <div className="space-y-3">
           <input
-            aria-label="Max price"
+            aria-label="Maksimalna cijena"
             type="range"
             min={0}
             max={maxPrice}
@@ -89,17 +89,17 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
 
       <div>
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          Sort
+          Sortiranje
         </h3>
         <select
-          title="Sort By"
+          title="Sortiraj po"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
         >
-          <option value="relevance">Relevance</option>
-          <option value="priceLowToHigh">Price: Low to High</option>
-          <option value="priceHighToLow">Price: High to Low</option>
+          <option value="relevance">Relevantnost</option>
+          <option value="priceLowToHigh">Cijena: od niže ka višoj</option>
+          <option value="priceHighToLow">Cijena: od više ka nižoj</option>
         </select>
       </div>
     </div>
@@ -113,17 +113,17 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
           <SheetTrigger asChild>
             <Button variant="outline" className="gap-2">
               <Filter className="h-4 w-4" />
-              Filters
+              Filteri
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[320px] sm:w-[360px]">
             <SheetHeader>
-              <SheetTitle>Filters</SheetTitle>
+              <SheetTitle>Filteri</SheetTitle>
             </SheetHeader>
             <div className="mt-6">{FiltersPanel}</div>
             <div className="mt-6">
               <Button className="w-full" onClick={() => setOpen(false)}>
-                Apply
+                Primijeni
               </Button>
             </div>
           </SheetContent>

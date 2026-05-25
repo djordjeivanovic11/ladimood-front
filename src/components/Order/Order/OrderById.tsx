@@ -13,6 +13,14 @@ interface OrderByIdProps {
   orderId: string;
 }
 
+const statusLabels: Record<string, string> = {
+  CREATED: 'Kreirano',
+  PENDING: 'Na čekanju',
+  SHIPPED: 'Poslato',
+  DELIVERED: 'Dostavljeno',
+  CANCELLED: 'Otkazano',
+};
+
 function OrderSkeleton() {
   return (
     <Card>
@@ -48,7 +56,7 @@ const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
       <Card>
         <CardContent className="flex h-64 items-center justify-center">
           <p className="text-destructive">
-            {error instanceof Error ? error.message : 'Failed to fetch order details.'}
+            {error instanceof Error ? error.message : 'Učitavanje detalja porudžbine nije uspjelo.'}
           </p>
         </CardContent>
       </Card>
@@ -59,7 +67,7 @@ const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
     return (
       <Card>
         <CardContent className="flex h-64 items-center justify-center">
-          <p className="text-muted-foreground">Order not found.</p>
+          <p className="text-muted-foreground">Porudžbina nije pronađena.</p>
         </CardContent>
       </Card>
     );
@@ -81,62 +89,56 @@ const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
   return (
     <Card>
       <CardContent className="p-8 md:p-12">
-        {/* Order Header */}
         <div className="mb-10 flex flex-col items-center justify-between md:flex-row">
-          <h1 className="text-3xl font-bold">Order #{order.plain_id || order.id}</h1>
+          <h1 className="text-3xl font-bold">Porudžbina #{order.plain_id || order.id}</h1>
           <Badge variant={getStatusVariant(order.status)} className="mt-4 px-4 py-2 md:mt-0">
-            {order.status}
+            {statusLabels[order.status] ?? order.status}
           </Badge>
         </div>
 
-        {/* Order Details Grid */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {/* User Information */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-lg">
-                <FaUser className="mr-2 text-primary" /> User Information
+                <FaUser className="mr-2 text-primary" /> Podaci o korisniku
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-muted-foreground">
-              {order.user_id ? <p>User ID: {order.user_id}</p> : <p>Guest Order</p>}
+              {order.user_id ? <p>ID korisnika: {order.user_id}</p> : <p>Gost porudžbina</p>}
             </CardContent>
           </Card>
 
-          {/* Shipping Address */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-lg">
-                <FaTruck className="mr-2 text-green-500" /> Shipping Address
+                <FaTruck className="mr-2 text-green-500" /> Adresa za dostavu
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1 text-muted-foreground">
-              <p>Address details available in order confirmation</p>
+              <p>Detalji adrese dostupni su u potvrdi porudžbine</p>
             </CardContent>
           </Card>
 
-          {/* Order Meta */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center text-lg">
-                <FaBoxOpen className="mr-2 text-yellow-500" /> Order Details
+                <FaBoxOpen className="mr-2 text-yellow-500" /> Detalji porudžbine
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-muted-foreground">
               <p>
-                <strong>Created:</strong> {new Date(order.created_at).toLocaleString()}
+                <strong>Kreirano:</strong> {new Date(order.created_at).toLocaleString('sr-ME')}
               </p>
               <p>
-                <strong>Total:</strong>{' '}
+                <strong>Ukupno:</strong>{' '}
                 <span className="font-semibold text-primary">€{order.total_price.toFixed(2)}</span>
               </p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Order Items */}
         <div className="mt-12">
-          <h2 className="mb-6 text-2xl font-bold">Items</h2>
+          <h2 className="mb-6 text-2xl font-bold">Artikli</h2>
           <div className="space-y-6">
             {order.items.map((item) => (
               <OrderItem key={item.id} item={item} />

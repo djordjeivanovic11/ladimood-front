@@ -27,21 +27,11 @@ function ProductLoadingSkeleton() {
 }
 
 export default function Frontpage() {
-  const { data: products = [], isLoading, error } = useProductsQuery();
-
-  if (error) {
-    return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <p className="text-center text-destructive">
-          Nije moguće učitati proizvode. Pokušajte ponovo kasnije.
-        </p>
-      </div>
-    );
-  }
+  const { data: products = [], isLoading } = useProductsQuery();
 
   return (
     <div className="bg-background">
-      <div className="mb-16">
+      <div className="-mt-20 mb-16 md:-mt-24">
         <Hero />
       </div>
 
@@ -58,7 +48,15 @@ export default function Frontpage() {
       </div>
 
       <div className="mb-16">
-        {isLoading ? <ProductLoadingSkeleton /> : <ProductGrid products={products} />}
+        {isLoading ? (
+          <ProductLoadingSkeleton />
+        ) : products.length > 0 ? (
+          <ProductGrid products={products} />
+        ) : (
+          <p className="px-8 text-center text-muted-foreground">
+            Trenutno nema proizvoda u ponudi. Uskoro dodajemo nove komade.
+          </p>
+        )}
       </div>
 
       <div className="mb-16">

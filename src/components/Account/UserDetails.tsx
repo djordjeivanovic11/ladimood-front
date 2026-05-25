@@ -1,77 +1,115 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+
+import React from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getUserDetails } from '@/api/account/axios';
+import { LogOut, Mail, Phone, User } from 'lucide-react';
 import { logoutUser } from '@/api/auth/axios';
-import { User } from '@/app/types/types';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { useCurrentUser } from '@/hooks/queries/useAuth';
+import { AccountSectionHeader } from '@/components/Account/AccountSectionHeader';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+
+function UserDetailsSkeleton() {
+  return (
+    <Card className="border-border/60 shadow-sm">
+      <CardContent className="space-y-4 p-6 pt-6">
+        <Skeleton className="h-10 w-3/4" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </CardContent>
+    </Card>
+  );
+}
+
+function DetailRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof User;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex gap-3 rounded-lg border border-border/50 bg-muted/30 px-4 py-3">
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+      <div className="min-w-0">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+        <p className="break-words text-base font-medium text-foreground">{value}</p>
+      </div>
+    </div>
+  );
+}
 
 const UserDetails: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  const cachedUser = useAuthStore((state) => state.user);
+  const logoutStore = useAuthStore((state) => state.logout);
+  const { data: fetchedUser, isLoading, isFetching, isError, refetch } = useCurrentUser();
 
-  useEffect(() => {
-    getUserDetails().then(setUser).catch(console.error);
-  }, []);
+  const user = fetchedUser ?? cachedUser;
+  const showSkeleton = (isLoading || isFetching) && !user;
 
   const handleLogout = async () => {
     try {
       await logoutUser();
-      // Clear tokens
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      window.location.reload();
+      logoutStore();
       router.replace('/');
     } catch (error) {
-      alert('Failed to log out. Please try again.');
       console.error('Logout failed', error);
     }
   };
 
-  if (!user) {
+  if (showSkeleton) {
+    return <UserDetailsSkeleton />;
+  }
+
+  if (isError || !user) {
     return (
-      <div className="text-center text-gray-500 min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0097B2]"></div>
-        <p className="ml-4">Loading...</p>
-      </div>
+      <Card className="border-border/60 shadow-sm">
+        <CardContent className="space-y-4 py-10 text-center">
+          <p className="text-sm text-muted-foreground">Profil trenutno nije dostupan.</p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <Button type="button" variant="outline" onClick={() => refetch()}>
+              Pokušaj ponovo
+            </Button>
+            <Button asChild>
+              <Link href="/auth/login">Prijava</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-6 sm:p-8 max-w-lg mx-auto mt-12">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800">Welcome, {user.full_name}!</h2>
-          <p className="text-gray-500 text-sm">Manage your account details below</p>
+    <Card className="border-border/60 shadow-sm">
+      <CardContent className="space-y-6 p-6">
+        <AccountSectionHeader
+          icon={User}
+          title={`Dobrodošli, ${user.full_name}!`}
+          description="Pregled podataka vašeg naloga"
+        />
+        <div className="space-y-3">
+          <DetailRow icon={User} label="Ime" value={user.full_name} />
+          <DetailRow icon={Mail} label="E-mail" value={user.email} />
+          <DetailRow
+            icon={Phone}
+            label="Telefon"
+            value={user.phone_number?.trim() || 'Nije unijeto'}
+          />
         </div>
-
-        {/* User Details */}
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm font-medium text-gray-500">Name:</p>
-            <p className="text-lg font-semibold text-gray-800 break-words">{user.full_name}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Email:</p>
-            <p className="text-lg font-semibold text-gray-800 break-words">{user.email}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500">Phone:</p>
-            <p className="text-lg font-semibold text-gray-800 break-words">{user.phone_number}</p>
-          </div>
-        </div>
-
-        {/* Logout Button */}
-        <div className="text-center">
-          <button
-            onClick={handleLogout}
-            className="bg-[#0097B2] text-white font-semibold py-3 px-8 rounded-md shadow-md hover:bg-[#007A90] hover:shadow-lg focus:ring-2 focus:ring-[#0097B2] transition-all duration-300 w-full"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-    </div>
+        <Button type="button" variant="outline" className="w-full gap-2" onClick={handleLogout}>
+          <LogOut className="h-4 w-4" aria-hidden />
+          Odjava
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
 

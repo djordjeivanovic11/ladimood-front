@@ -18,9 +18,9 @@ const SuccessPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center text-center">
       <FaCheckCircle className="text-[#0097B2] text-6xl mb-4" />
-      <h1 className="text-3xl font-bold mb-2 text-gray-800">Order Successful!</h1>
+      <h1 className="text-3xl font-bold mb-2 text-gray-800">Porudžbina uspješna!</h1>
       <p className="text-lg text-gray-600">
-        Thank you for your order! You will be redirected to the shop shortly.
+        Hvala na porudžbini! Uskoro ćete biti preusmjereni u prodavnicu.
       </p>
     </div>
   );

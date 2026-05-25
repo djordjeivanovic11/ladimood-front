@@ -49,6 +49,7 @@ function ConfirmationSkeleton() {
 export default function ConfirmationPage() {
   const router = useRouter();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const authLoading = useAuthStore((state) => state.isLoading);
 
   const [cartItems, setCartItems] = useState<CartItemData[]>([]);
   const [totalAmount, setTotalAmount] = useState<number>(0);
@@ -57,6 +58,7 @@ export default function ConfirmationPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
     if (!isAuthenticated) {
       router.push('/auth/login');
       return;
@@ -78,14 +80,14 @@ export default function ConfirmationPage() {
         }
       } catch (err) {
         console.error('Failed to load cart items:', err);
-        setError('Failed to load cart items. Please try again.');
+        setError('Učitavanje korpe nije uspjelo. Pokušajte ponovo.');
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchCartItems();
-  }, [router, isAuthenticated]);
+  }, [authLoading, router, isAuthenticated]);
 
   const handleFinalizeOrder = async () => {
     setIsSubmitting(true);
@@ -112,18 +114,18 @@ export default function ConfirmationPage() {
         'orderDetails',
         JSON.stringify({ ...orderData, total_price: totalAmount })
       );
-      toast.success('Order placed successfully!');
+      toast.success('Porudžbina je uspješno poslata!');
       router.push(`/success/${createdOrder.id}`);
     } catch (err) {
       console.error('Order creation failed:', err);
-      setError('Failed to place the order. Please try again later.');
-      toast.error('Failed to place order');
+      setError('Slanje porudžbine nije uspjelo. Pokušajte ponovo kasnije.');
+      toast.error('Porudžbina nije poslata');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
         <ConfirmationSkeleton />
@@ -135,12 +137,12 @@ export default function ConfirmationPage() {
     <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
       <Card className="w-full max-w-3xl">
         <CardHeader>
-          <CardTitle className="text-center text-2xl text-primary">Confirm Your Order</CardTitle>
+          <CardTitle className="text-center text-2xl text-primary">Potvrdite porudžbinu</CardTitle>
         </CardHeader>
         <CardContent className="space-y-8">
           {/* Cart Items Overview */}
           <div>
-            <h2 className="mb-4 text-lg font-medium">Items:</h2>
+            <h2 className="mb-4 text-lg font-medium">Artikli:</h2>
             {cartItems.length > 0 ? (
               <ul className="space-y-4">
                 {cartItems.map((item, index) => (
@@ -149,20 +151,20 @@ export default function ConfirmationPage() {
                       {item.product.image_url ? (
                         <Image
                           src={item.product.image_url}
-                          alt={item.product.name || 'Product image'}
+                          alt={item.product.name || 'Slika proizvoda'}
                           className="rounded-md border object-cover"
                           width={64}
                           height={64}
                         />
                       ) : (
                         <div className="flex h-16 w-16 items-center justify-center rounded-md bg-muted">
-                          <span className="text-sm text-muted-foreground">No Image</span>
+                          <span className="text-sm text-muted-foreground">Nema slike</span>
                         </div>
                       )}
                       <div>
                         <p className="font-medium">{item.product.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {item.quantity} × €{item.product.price.toFixed(2)} | Size: {item.size}
+                          {item.quantity} × €{item.product.price.toFixed(2)} | Veličina: {item.size}
                         </p>
                       </div>
                     </div>
@@ -179,11 +181,11 @@ export default function ConfirmationPage() {
                 ))}
               </ul>
             ) : (
-              <p className="text-muted-foreground">Your cart is empty.</p>
+              <p className="text-muted-foreground">Korpa je prazna.</p>
             )}
 
             <div className="mt-6 flex justify-end">
-              <p className="text-lg font-bold">Total: €{totalAmount.toFixed(2)}</p>
+              <p className="text-lg font-bold">Ukupno: €{totalAmount.toFixed(2)}</p>
             </div>
           </div>
 
@@ -195,10 +197,10 @@ export default function ConfirmationPage() {
           {/* Buttons */}
           <div className="flex items-center justify-between">
             <Button variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
-              Back to Cart
+              Nazad u korpu
             </Button>
             <Button onClick={handleFinalizeOrder} disabled={isSubmitting || cartItems.length === 0}>
-              {isSubmitting ? 'Finalizing...' : 'Finalize Order'}
+              {isSubmitting ? 'Završavanje...' : 'Završi porudžbinu'}
             </Button>
           </div>
 

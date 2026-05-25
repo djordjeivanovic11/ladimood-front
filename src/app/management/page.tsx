@@ -5,70 +5,126 @@ import axiosInstance from '@/api/axiosInstance';
 import OrderManagement from '@/components/Management/OrderManagement';
 import SalesManagement from '@/components/Management/SalesManagement';
 import CatalogManagement from '@/components/Management/CatalogManagement';
+import ManagementOverview from '@/components/Management/ManagementOverview';
+import CatalogTaxonomyManagement from '@/components/Management/CatalogTaxonomyManagement';
 import { User } from '@/app/types/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
+
+type ManagementSection = 'overview' | 'operations' | 'catalog';
 
 export default function ManagementPage() {
-  const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [activeSection, setActiveSection] = useState<ManagementSection>('overview');
   const router = useRouter();
 
   useEffect(() => {
-    // Example: read token from localStorage (or cookies via document.cookie)
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      // No token => redirect to login
-      router.replace('/auth/login');
-      return;
-    }
+    let mounted = true;
 
-    // Call your API to verify the user's details
-    axiosInstance
-      .get<User>('/users/me')
-      .then((res) => {
-        const user = res.data;
-        if (user?.role?.name !== 'ADMIN') {
-          // return to previous page
-          router.back();
-          alert('You are not authorized to access this page.');
-        } else {
-          setLoading(false);
+    const verifyAdminAccess = async () => {
+      try {
+        const res = await axiosInstance.get<User>('/users/me');
+        if (!mounted) return;
+        if (res.data?.role?.name !== 'ADMIN') {
+          router.replace('/account');
+          return;
         }
-      })
-      .catch((error) => {
-        console.error('Error fetching user:', error);
-        // On error, go to login
-        router.replace('/auth/login');
-      });
+        setIsAuthorized(true);
+      } catch {
+        if (!mounted) return;
+        router.replace('/auth/login?next=/management');
+      }
+    };
+
+    void verifyAdminAccess();
+    return () => {
+      mounted = false;
+    };
   }, [router]);
 
-  // While we’re fetching the user data, show a loading state
-  if (loading) {
-    return <div>Loading...</div>;
+  if (!isAuthorized) {
+    return <div>Učitavanje...</div>;
   }
 
-  // Render the management dashboard if the user is allowed
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <header className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-[#0097B2]">Management Dashboard</h1>
+    <div className="min-h-screen bg-muted/30 p-6 lg:p-8">
+      <header className="mb-6">
+        <h1 className="text-4xl font-bold text-[#0097B2]">MENADŽMENT</h1>
+        <p className="mt-2 text-muted-foreground">
+          Centralizovana kontrola baze, porudžbina, prodaje i kompletnog upravljanja katalogom.
+        </p>
       </header>
-      <main>
-        <Tabs defaultValue="orders" className="mx-auto max-w-screen-xl">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="sales">Sales</TabsTrigger>
-            <TabsTrigger value="catalog">Catalog</TabsTrigger>
-          </TabsList>
-          <TabsContent value="orders" className="mt-6">
-            <OrderManagement />
-          </TabsContent>
-          <TabsContent value="sales" className="mt-6">
-            <SalesManagement />
-          </TabsContent>
-          <TabsContent value="catalog" className="mt-6">
-            <CatalogManagement />
-          </TabsContent>
-        </Tabs>
+      <main className="mx-auto grid max-w-screen-2xl gap-6 lg:grid-cols-[280px_1fr]">
+        <Card className="h-fit">
+          <CardContent className="p-3">
+            <div className="space-y-2">
+              <button
+                className={`w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors ${
+                  activeSection === 'overview'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => setActiveSection('overview')}
+              >
+                Pregled table
+              </button>
+              <button
+                className={`w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors ${
+                  activeSection === 'operations'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => setActiveSection('operations')}
+              >
+                Porudžbine i prodaja
+              </button>
+              <button
+                className={`w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors ${
+                  activeSection === 'catalog'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => setActiveSection('catalog')}
+              >
+                Upravljanje katalogom
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div>
+          {activeSection === 'overview' ? <ManagementOverview /> : null}
+
+          {activeSection === 'operations' ? (
+            <Tabs defaultValue="orders" className="w-full">
+              <TabsList>
+                <TabsTrigger value="orders">Porudžbine</TabsTrigger>
+                <TabsTrigger value="sales">Prodaja</TabsTrigger>
+              </TabsList>
+              <TabsContent value="orders" className="mt-4">
+                <OrderManagement />
+              </TabsContent>
+              <TabsContent value="sales" className="mt-4">
+                <SalesManagement />
+              </TabsContent>
+            </Tabs>
+          ) : null}
+
+          {activeSection === 'catalog' ? (
+            <Tabs defaultValue="products" className="w-full">
+              <TabsList>
+                <TabsTrigger value="products">Proizvodi</TabsTrigger>
+                <TabsTrigger value="taxonomy">Kategorije i kolekcije</TabsTrigger>
+              </TabsList>
+              <TabsContent value="products" className="mt-4">
+                <CatalogManagement />
+              </TabsContent>
+              <TabsContent value="taxonomy" className="mt-4">
+                <CatalogTaxonomyManagement />
+              </TabsContent>
+            </Tabs>
+          ) : null}
+        </div>
       </main>
     </div>
   );

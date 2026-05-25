@@ -1,19 +1,18 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { User, TokenResponse } from '@/app/types/types';
+import type { User } from '@/app/types/types';
 
 interface AuthState {
   user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
+  hasSession: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
 
   // Actions
-  login: (tokens: TokenResponse, user: User) => void;
+  login: (user: User) => void;
   logout: () => void;
-  updateUser: (user: User) => void;
-  setTokens: (accessToken: string, refreshToken?: string) => void;
+  updateUser: (user: User | null) => void;
+  setAuthSession: (hasSession: boolean) => void;
   setLoading: (loading: boolean) => void;
   hydrate: () => void;
 }
@@ -22,16 +21,14 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
-      accessToken: null,
-      refreshToken: null,
+      hasSession: false,
       isAuthenticated: false,
       isLoading: true,
 
-      login: (tokens, user) =>
+      login: (user) =>
         set({
           user,
-          accessToken: tokens.access_token,
-          refreshToken: tokens.refresh_token ?? null,
+          hasSession: true,
           isAuthenticated: true,
           isLoading: false,
         }),
@@ -39,27 +36,25 @@ export const useAuthStore = create<AuthState>()(
       logout: () =>
         set({
           user: null,
-          accessToken: null,
-          refreshToken: null,
+          hasSession: false,
           isAuthenticated: false,
           isLoading: false,
         }),
 
-      updateUser: (user) => set({ user }),
-
-      setTokens: (accessToken, refreshToken) =>
+      updateUser: (user) => set({ user, isAuthenticated: get().hasSession && !!user }),
+      setAuthSession: (hasSession) =>
         set({
-          accessToken,
-          refreshToken: refreshToken ?? get().refreshToken,
+          hasSession,
+          user: hasSession ? get().user : null,
+          isAuthenticated: hasSession && !!get().user,
         }),
 
       setLoading: (loading) => set({ isLoading: loading }),
 
       hydrate: () => {
-        const state = get();
         set({
-          isLoading: false,
-          isAuthenticated: !!state.accessToken && !!state.user,
+          hasSession: false,
+          isAuthenticated: false,
         });
       },
     }),
@@ -68,9 +63,6 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
-        isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
@@ -84,4 +76,3 @@ export const useAuthStore = create<AuthState>()(
 // Selector hooks for performance optimization
 export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
 export const useUser = () => useAuthStore((state) => state.user);
-export const useAccessToken = () => useAuthStore((state) => state.accessToken);

@@ -1,11 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { OrderStatusEnum } from '@/app/types/types';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface StatusManagementProps {
   orderId: number;
   currentStatus: OrderStatusEnum;
   onStatusChange: (orderId: number, newStatus: OrderStatusEnum) => Promise<void>;
 }
+
+const statusLabels: Record<OrderStatusEnum, string> = {
+  [OrderStatusEnum.CREATED]: 'Kreirano',
+  [OrderStatusEnum.PENDING]: 'Na čekanju',
+  [OrderStatusEnum.SHIPPED]: 'Poslato',
+  [OrderStatusEnum.DELIVERED]: 'Dostavljeno',
+  [OrderStatusEnum.CANCELLED]: 'Otkazano',
+};
 
 const StatusManagement: React.FC<StatusManagementProps> = ({
   orderId,
@@ -15,6 +31,10 @@ const StatusManagement: React.FC<StatusManagementProps> = ({
   const [status, setStatus] = useState<OrderStatusEnum>(currentStatus);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setStatus(currentStatus);
+  }, [currentStatus]);
 
   const handleStatusUpdate = async (newStatus: OrderStatusEnum) => {
     if (newStatus === status) return;
@@ -26,53 +46,54 @@ const StatusManagement: React.FC<StatusManagementProps> = ({
       await onStatusChange(orderId, newStatus);
       setStatus(newStatus);
     } catch (err) {
-      setError('Failed to update status. Please try again.');
+      setError('Ažuriranje statusa nije uspjelo. Pokušajte ponovo.');
       console.error('Error updating status:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const getStatusStyles = (status: OrderStatusEnum) => {
-    switch (status) {
+  const getStatusStyles = (statusValue: OrderStatusEnum) => {
+    switch (statusValue) {
       case OrderStatusEnum.CREATED:
-        return 'bg-gray-200 text-gray-800';
+        return 'bg-muted text-muted-foreground';
       case OrderStatusEnum.PENDING:
-        return 'bg-yellow-200 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200';
       case OrderStatusEnum.SHIPPED:
-        return 'bg-blue-200 text-blue-800';
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200';
       case OrderStatusEnum.DELIVERED:
-        return 'bg-green-200 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200';
       case OrderStatusEnum.CANCELLED:
-        return 'bg-red-200 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-muted text-muted-foreground';
     }
   };
 
   return (
     <div className="space-y-2">
-      <div className={`inline-block px-4 py-1 rounded-md font-medium ${getStatusStyles(status)}`}>
-        Current Status: {status.charAt(0) + status.slice(1).toLowerCase()}
-      </div>
+      <Badge className={getStatusStyles(status)} variant="outline">
+        Trenutni status: {statusLabels[status]}
+      </Badge>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
-      <select
-        aria-label={`Change status for order ${orderId}`}
+      <Select
         value={status}
-        onChange={(e) => handleStatusUpdate(e.target.value as OrderStatusEnum)}
+        onValueChange={(value) => void handleStatusUpdate(value as OrderStatusEnum)}
         disabled={isLoading}
-        className={`w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${
-          isLoading ? 'bg-gray-200 cursor-not-allowed' : 'focus:ring-[#0097B2]'
-        }`}
       >
-        {Object.values(OrderStatusEnum).map((statusOption) => (
-          <option key={statusOption} value={statusOption}>
-            {statusOption.charAt(0) + statusOption.slice(1).toLowerCase()}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger aria-label={`Promijeni status porudžbine ${orderId}`} className="w-[220px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.values(OrderStatusEnum).map((statusOption) => (
+            <SelectItem key={statusOption} value={statusOption}>
+              {statusLabels[statusOption]}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };

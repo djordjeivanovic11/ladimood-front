@@ -1,5 +1,7 @@
+import axios from 'axios';
 import axiosInstance from '../axiosInstance';
 import {
+  AddressManagement,
   Order,
   SalesRecord,
   OrderStatusEnum,
@@ -7,13 +9,45 @@ import {
   OrderResponse,
 } from '@/app/types/types';
 
+function getAxiosDetail(error: unknown): string | null {
+  if (!axios.isAxiosError(error)) return null;
+  const data = error.response?.data;
+  if (!data || typeof data !== 'object' || !('detail' in data)) return null;
+
+  const detail = (data as { detail?: unknown }).detail;
+  if (typeof detail === 'string' && detail.trim()) return detail;
+
+  if (Array.isArray(detail)) {
+    const messages = detail
+      .map((item) => {
+        if (!item || typeof item !== 'object') return null;
+        const entry = item as { msg?: string; loc?: unknown[] };
+        const field =
+          Array.isArray(entry.loc) && entry.loc.length > 0
+            ? String(entry.loc[entry.loc.length - 1])
+            : null;
+        if (entry.msg && field) return `${field}: ${entry.msg}`;
+        return entry.msg ?? null;
+      })
+      .filter((msg): msg is string => Boolean(msg));
+    if (messages.length > 0) return messages.join(' ');
+  }
+
+  return null;
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  return getAxiosDetail(error) ?? (error instanceof Error ? error.message : fallback);
+}
+
 export const fetchSalesRecords = async (): Promise<SalesRecord[]> => {
   try {
     const response = await axiosInstance.get<SalesRecord[]>('/admin/sales');
     return response.data;
-  } catch (error: any) {
-    console.error('Error fetching sales records:', error?.response?.data?.detail || error.message);
-    throw new Error(error?.response?.data?.detail || 'Failed to fetch sales records.');
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, 'Učitavanje evidencije prodaje nije uspjelo.');
+    console.error('Error fetching sales records:', message);
+    throw new Error(message);
   }
 };
 
@@ -27,18 +61,21 @@ export const createSalesRecord = async (salesRecord: {
   try {
     const response = await axiosInstance.post<SalesRecord>('/admin/sales', salesRecord);
     return response.data;
-  } catch (error: any) {
-    // Check for the "already exists" case
-    if (error?.response?.status === 400 && error?.response?.data?.detail) {
-      if (error.response.data.detail.includes('already exists')) {
-        console.warn(
-          'A sales record for this order already exists. Returning null instead of throwing.'
-        );
-        return null;
-      }
+  } catch (error: unknown) {
+    const detail = getAxiosDetail(error);
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 400 &&
+      detail?.includes('already exists')
+    ) {
+      console.warn(
+        'A sales record for this order already exists. Returning null instead of throwing.'
+      );
+      return null;
     }
-    console.error('Error creating sales record:', error?.response?.data?.detail || error.message);
-    throw new Error(error?.response?.data?.detail || 'Failed to create sales record.');
+    const message = getErrorMessage(error, 'Kreiranje evidencije prodaje nije uspjelo.');
+    console.error('Error creating sales record:', message);
+    throw new Error(message);
   }
 };
 
@@ -47,12 +84,58 @@ export const fetchAllOrdersWithDetails = async (): Promise<OrderManagement[]> =>
   try {
     const response = await axiosInstance.get<OrderManagement[]>('/admin/orders');
     return response.data;
-  } catch (error: any) {
-    console.error(
-      'Error fetching orders with details:',
-      error?.response?.data?.detail || error.message
-    );
-    throw new Error(error?.response?.data?.detail || 'Failed to fetch orders with details.');
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, 'Učitavanje porudžbina nije uspjelo.');
+    console.error('Error fetching orders with details:', message);
+    throw new Error(message);
+  }
+};
+
+export interface AdminUserOverview {
+  id: number;
+  email: string;
+  full_name: string;
+  phone_number?: string | null;
+  is_active: boolean;
+  role_name?: string | null;
+  created_at: string;
+  address?: AddressManagement | null;
+  order_count: number;
+  total_spent: number;
+  last_order_at?: string | null;
+  last_order_status?: OrderStatusEnum | null;
+}
+
+export interface DashboardSummary {
+  users_count: number;
+  addresses_count: number;
+  orders_count: number;
+  sales_count: number;
+  delivered_orders_count: number;
+  completion_rate: number;
+  total_sales_amount: number;
+  status_counts: Record<string, number>;
+}
+
+export const fetchAdminUsersOverview = async (): Promise<AdminUserOverview[]> => {
+  try {
+    const response = await axiosInstance.get<AdminUserOverview[]>('/admin/users');
+    return response.data;
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, 'Učitavanje pregleda korisnika nije uspjelo.');
+    console.error('Error fetching admin users overview:', message);
+    throw new Error(message);
+  }
+};
+
+export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
+  try {
+    const response = await axiosInstance.get<DashboardSummary>('/admin/dashboard/summary');
+    return response.data;
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, 'Učitavanje sažetka table nije uspjelo.');
+    console.error('Error fetching dashboard summary:', message);
+    throw new Error(message);
   }
 };
 
@@ -60,14 +143,13 @@ export const fetchOrderDetailsById = async (orderId: number): Promise<OrderRespo
   try {
     const response = await axiosInstance.get<OrderResponse>(`/admin/orders/${orderId}`);
     return response.data;
-  } catch (error: any) {
-    console.error(
-      `Error fetching order details with ID ${orderId}:`,
-      error?.response?.data?.detail || error.message
+  } catch (error: unknown) {
+    const message = getErrorMessage(
+      error,
+      `Učitavanje detalja porudžbine ID ${orderId} nije uspjelo.`
     );
-    throw new Error(
-      error?.response?.data?.detail || `Failed to fetch order details with ID ${orderId}.`
-    );
+    console.error(`Error fetching order details with ID ${orderId}:`, message);
+    throw new Error(message);
   }
 };
 
@@ -81,14 +163,13 @@ export const updateOrderStatus = async (
       { status } // Correct payload structure
     );
     return response.data;
-  } catch (error: any) {
-    console.error(
-      `Error updating status for order with ID ${orderId}:`,
-      error?.response?.data?.detail || error.message
+  } catch (error: unknown) {
+    const message = getErrorMessage(
+      error,
+      `Ažuriranje statusa porudžbine ID ${orderId} nije uspjelo.`
     );
-    throw new Error(
-      error?.response?.data?.detail || `Failed to update order status for ID ${orderId}.`
-    );
+    console.error(`Error updating status for order with ID ${orderId}:`, message);
+    throw new Error(message);
   }
 };
 
@@ -98,15 +179,27 @@ export const submitContactForm = async (contactData: {
   phone: string;
   message: string;
   inquiry_type: string;
+  attachment?: File | null;
 }): Promise<{ message: string }> => {
   try {
+    const payload = new FormData();
+    payload.append('name', contactData.name);
+    payload.append('email', contactData.email);
+    payload.append('phone', contactData.phone);
+    payload.append('message', contactData.message);
+    payload.append('inquiry_type', contactData.inquiry_type);
+    if (contactData.attachment) {
+      payload.append('attachment', contactData.attachment);
+    }
+
     const response = await axiosInstance.post<{ message: string }>(
       '/notifications/contact',
-      contactData
+      payload
     );
     return response.data;
-  } catch (error: any) {
-    console.error(`Error submitting contact form:`, error?.response?.data?.detail || error.message);
-    throw new Error(error?.response?.data?.detail || `Failed to submit contact form.`);
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, 'Slanje kontakt forme nije uspjelo.');
+    console.error('Error submitting contact form:', message);
+    throw new Error(message);
   }
 };

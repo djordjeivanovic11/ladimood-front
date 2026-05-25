@@ -1,8 +1,14 @@
 'use client';
+
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Heart, ShoppingBag, X } from 'lucide-react';
 import { getWishlist, removeFromWishlist } from '@/api/account/axios';
 import { WishlistItem } from '@/app/types/types';
-import Image from 'next/image';
+import { AccountSectionHeader } from '@/components/Account/AccountSectionHeader';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 const Wishlist: React.FC = () => {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
@@ -14,89 +20,72 @@ const Wishlist: React.FC = () => {
   const handleRemove = async (itemId: number) => {
     try {
       await removeFromWishlist(itemId);
-      setWishlist(wishlist.filter((item) => item.id !== itemId));
+      setWishlist((items) => items.filter((item) => item.id !== itemId));
     } catch (error) {
       console.error('Failed to remove item from wishlist', error);
     }
   };
 
-  const handleShop = (_productId: number) => {
-    window.location.href = `/shop`;
-  };
-
   return (
-    <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 border border-gray-200 max-w-xl mx-auto my-6">
-      {wishlist.length > 0 ? (
-        <div className="space-y-4">
-          {/* Header */}
-          <h2 className="text-2xl font-bold text-gray-800 text-center border-b border-gray-300 pb-4">
-            Your Wishlist
-          </h2>
+    <Card className="h-full border-border/60 shadow-sm">
+      <CardContent className="space-y-5 p-6">
+        <AccountSectionHeader icon={Heart} title="Lista želja" description="Sačuvani artikli" />
 
-          {/* Wishlist Items */}
+        {wishlist.length > 0 ? (
           <ul className="space-y-4">
             {wishlist.map((item) => (
               <li
                 key={item.id}
-                className="flex flex-col bg-gray-50 shadow rounded-md p-4 border border-gray-200"
+                className="flex flex-col gap-3 rounded-lg border border-border/50 bg-muted/20 p-4 sm:flex-row sm:items-center"
               >
-                {/* Product Image */}
-                {item.product.image_url && (
+                {item.product.image_url ? (
                   <Image
                     src={item.product.image_url}
                     alt={item.product.name}
-                    width={128}
-                    height={128}
-                    className="w-full sm:w-32 h-32 object-cover rounded-md border border-gray-300 mb-3 mx-auto"
+                    width={96}
+                    height={96}
+                    className="mx-auto h-24 w-24 shrink-0 rounded-md border border-border/50 object-cover sm:mx-0"
                   />
-                )}
-
-                {/* Product Details */}
-                <div className="text-center">
-                  <p className="text-lg font-semibold text-gray-800">{item.product.name}</p>
-                  <p className="text-sm text-gray-600 mt-1 truncate">{item.product.description}</p>
-                  <p className="text-sm text-gray-800 mt-2 font-medium">
-                    Price: €{item.product.price.toFixed(2)}
+                ) : null}
+                <div className="min-w-0 flex-1 text-center sm:text-left">
+                  <p className="font-medium text-foreground">{item.product.name}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Cijena: €{item.product.price.toFixed(2)} · Veličina: {item.size}
                   </p>
-                  <div className="flex items-center justify-center mt-2 gap-4">
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-600">Color:</span>
-                      <div
-                        className="w-6 h-6 rounded-full border border-black ml-2"
-                        style={{ backgroundColor: item.color }}
-                        title={`Color: ${item.color}`}
-                      ></div>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-sm text-gray-600">Size:</span>
-                      <span className="text-sm text-black font-semibold ml-2">{item.size}</span>
-                    </div>
+                  <div className="mt-2 flex items-center justify-center gap-2 sm:justify-start">
+                    <span className="text-xs text-muted-foreground">Boja:</span>
+                    <span
+                      className="h-4 w-4 rounded-full border border-border"
+                      style={{ backgroundColor: item.color }}
+                      title={item.color}
+                    />
                   </div>
                 </div>
-
-                {/* Buttons */}
-                <div className="flex flex-col sm:flex-row sm:justify-center gap-2 mt-4">
-                  <button
-                    onClick={() => handleShop(item.product.id)}
-                    className="bg-[#0097B2] text-white px-4 py-2 rounded-md hover:bg-[#007A90] transition-all"
-                  >
-                    Shop Now
-                  </button>
-                  <button
+                <div className="flex flex-col gap-2 sm:shrink-0">
+                  <Button asChild size="sm" className="gap-2">
+                    <Link href="/shop">
+                      <ShoppingBag className="h-4 w-4" aria-hidden />U šop
+                    </Link>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-2 text-muted-foreground"
                     onClick={() => handleRemove(item.id)}
-                    className="bg-gray-300 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-all"
                   >
-                    Remove
-                  </button>
+                    <X className="h-4 w-4" aria-hidden />
+                    Ukloni
+                  </Button>
                 </div>
               </li>
             ))}
           </ul>
-        </div>
-      ) : (
-        <p className="text-center text-gray-500 text-lg mt-4">Your wishlist is empty.</p>
-      )}
-    </div>
+        ) : (
+          <p className="py-6 text-center text-sm text-muted-foreground">Lista želja je prazna.</p>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

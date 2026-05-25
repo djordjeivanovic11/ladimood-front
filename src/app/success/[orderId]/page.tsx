@@ -171,7 +171,7 @@ export default function SuccessPage() {
                       <div>
                         <p className="font-medium">{item.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {item.quantity} × €{item.price.toFixed(2)} | Size: {item.size}
+                          {item.quantity} × €{item.price.toFixed(2)} | Veličina: {item.size}
                         </p>
                       </div>
                     </div>
@@ -179,7 +179,7 @@ export default function SuccessPage() {
                 ))}
               </ul>
               <div className="mt-6 flex justify-end">
-                <p className="text-lg font-bold">Total: €{total.toFixed(2)}</p>
+                <p className="text-lg font-bold">Ukupno: €{total.toFixed(2)}</p>
               </div>
             </div>
           </div>

@@ -20,7 +20,7 @@ const Hero: React.FC = () => {
         className="absolute inset-0 w-full h-full object-cover z-0"
       >
         <source src="/videos/intro.MOV" type="video/mp4" />
-        Your browser does not support the video tag.
+        Vaš pregledač ne podržava video tag.
       </video>
 
       {/* Hero Content */}
@@ -33,7 +33,7 @@ const Hero: React.FC = () => {
         <div className="mt-8" data-aos="fade-up" data-aos-delay="500">
           <Link href="/shop">
             <span className="bg-white text-[#0097B2] font-bold py-3 px-8 rounded-full transition-transform hover:scale-110 hover:bg-[#007A90] drop-shadow-md cursor-pointer">
-              Shop Now
+              Kupi sada
             </span>
           </Link>
         </div>

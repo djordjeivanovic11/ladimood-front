@@ -1,4 +1,4 @@
-export { useAuthStore, useIsAuthenticated, useUser, useAccessToken } from './useAuthStore';
+export { useAuthStore, useIsAuthenticated, useUser } from './useAuthStore';
 export { useCartStore, useCartItems, useIsCartOpen, useGuestSessionId } from './useCartStore';
 export {
   useUIStore,

@@ -149,6 +149,7 @@ export interface ProductGridProps {
 export interface CategoryBase {
   name: string;
   description?: string;
+  image_url?: string | null;
 }
 
 export interface Category extends CategoryBase {

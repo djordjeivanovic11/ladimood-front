@@ -62,7 +62,6 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
 
   return (
     <>
-      {/* Backdrop */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 transition-opacity"
@@ -71,30 +70,27 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
         />
       )}
 
-      {/* Sidebar */}
       <div
         className={`fixed right-0 top-0 z-50 h-full w-full transform bg-background shadow-xl transition-transform duration-300 ease-in-out sm:w-96 md:w-[28rem] ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="flex h-full flex-col">
-          {/* Header */}
           <div className="flex items-center justify-between border-b p-4">
-            <h2 className="text-xl font-bold text-primary sm:text-2xl">Your Cart</h2>
-            <Button variant="ghost" size="icon" onClick={closeCart} aria-label="Close Cart">
+            <h2 className="text-xl font-bold text-primary sm:text-2xl">Vaša korpa</h2>
+            <Button variant="ghost" size="icon" onClick={closeCart} aria-label="Zatvori korpu">
               <FaTimes className="h-5 w-5" />
             </Button>
           </div>
 
-          {/* Content */}
           <div className="flex-1 overflow-y-auto p-4">
             {isLoading ? (
               <CartSkeleton />
             ) : cartItems.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center">
-                <p className="font-bold text-primary">Your cart is empty.</p>
+                <p className="font-bold text-primary">Korpa je prazna.</p>
                 <Button onClick={closeCart} className="mt-4">
-                  Continue Shopping
+                  Nastavi kupovinu
                 </Button>
               </div>
             ) : (
@@ -111,7 +107,6 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
             )}
           </div>
 
-          {/* Footer */}
           {cartItems.length > 0 && (
             <div className="border-t p-4">
               <CallToOrder

@@ -77,7 +77,7 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
           />
           <input
             type="email"
-            placeholder="Email Adresa"
+            placeholder="E-mail adresa"
             value={referral.email}
             onChange={(e) => handleChange(index, 'email', e.target.value)}
             className="w-full px-3 py-2 border rounded-md text-gray-900"

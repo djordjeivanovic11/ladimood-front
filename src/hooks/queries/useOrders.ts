@@ -3,6 +3,7 @@ import { getUserOrders, createGuestOrder, getOrderById } from '@/api/account/axi
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCartStore } from '@/stores/useCartStore';
 import { toast } from '@/lib/toast';
+import { isUnauthorizedError } from '@/lib/http-error';
 import type { GuestOrderCreate } from '@/api/account/axios';
 
 export const orderKeys = {
@@ -13,12 +14,17 @@ export const orderKeys = {
 
 export function useOrdersQuery() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const authLoading = useAuthStore((state) => state.isLoading);
 
   return useQuery({
     queryKey: orderKeys.list(),
     queryFn: getUserOrders,
-    enabled: isAuthenticated,
+    enabled: !authLoading && isAuthenticated,
     staleTime: 60 * 1000, // 1 minute
+    retry: (failureCount, error) => {
+      if (isUnauthorizedError(error)) return false;
+      return failureCount < 1;
+    },
   });
 }
 
@@ -53,11 +59,11 @@ export function useCreateGuestOrder() {
       } catch {
         // ignore
       }
-      toast.success(`Order #${order.id} placed successfully!`);
+      toast.success(`Porudžbina #${order.id} je uspješno poslata!`);
       return order;
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Failed to place order');
+      toast.error(error.message || 'Slanje porudžbine nije uspjelo');
     },
   });
 }

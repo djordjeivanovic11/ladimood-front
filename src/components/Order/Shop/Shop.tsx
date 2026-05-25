@@ -22,7 +22,7 @@ function ShopLoadingSkeleton() {
   );
 }
 
-const Shop: React.FC = () => {
+const ShopContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -120,80 +120,88 @@ const Shop: React.FC = () => {
     !!selectedCategoryId || selectedPriceRange[1] !== DEFAULT_MAX_PRICE || sortBy !== 'relevance';
 
   return (
-    <Suspense fallback={<ShopLoadingSkeleton />}>
-      <div className="mx-auto flex max-w-screen-xl flex-col gap-6 px-4 py-8 md:flex-row md:px-6">
-        {/* Filters */}
-        <div className="md:w-80">
-          <ProductFilter
-            categories={categories}
-            selectedCategoryId={selectedCategoryId}
-            setSelectedCategoryId={setSelectedCategoryId}
-            selectedPriceRange={selectedPriceRange}
-            setSelectedPriceRange={setSelectedPriceRange}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-          />
-        </div>
-
-        {/* Products */}
-        <div className="flex-1">
-          {/* Active filter chips */}
-          {hasActiveFilters && (
-            <div className="mb-4 flex flex-wrap items-center gap-2">
-              {activeCategoryName && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedCategoryId(null)}
-                  className="rounded-full border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted"
-                >
-                  {activeCategoryName} ×
-                </button>
-              )}
-              {selectedPriceRange[1] !== DEFAULT_MAX_PRICE && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedPriceRange([0, DEFAULT_MAX_PRICE])}
-                  className="rounded-full border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted"
-                >
-                  Up to €{selectedPriceRange[1]} ×
-                </button>
-              )}
-              {sortBy !== 'relevance' && (
-                <button
-                  type="button"
-                  onClick={() => setSortBy('relevance')}
-                  className="rounded-full border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted"
-                >
-                  {sortBy === 'priceLowToHigh' ? 'Price ↑' : 'Price ↓'} ×
-                </button>
-              )}
-              <Button
-                variant="ghost"
-                className="h-8 px-3 text-sm"
-                onClick={() => {
-                  setSelectedCategoryId(null);
-                  setSelectedPriceRange([0, DEFAULT_MAX_PRICE]);
-                  setSortBy('relevance');
-                }}
-              >
-                Clear all
-              </Button>
-            </div>
-          )}
-
-          {isLoading ? (
-            <ShopLoadingSkeleton />
-          ) : sortedProducts.length > 0 ? (
-            <ProductGrid products={sortedProducts} />
-          ) : (
-            <div className="flex h-full min-h-[400px] items-center justify-center">
-              <p className="text-muted-foreground">No products found for the selected filters.</p>
-            </div>
-          )}
-        </div>
+    <div className="mx-auto flex max-w-screen-xl flex-col gap-6 px-4 py-8 md:flex-row md:px-6">
+      {/* Filters */}
+      <div className="md:w-80">
+        <ProductFilter
+          categories={categories}
+          selectedCategoryId={selectedCategoryId}
+          setSelectedCategoryId={setSelectedCategoryId}
+          selectedPriceRange={selectedPriceRange}
+          setSelectedPriceRange={setSelectedPriceRange}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+        />
       </div>
-    </Suspense>
+
+      {/* Products */}
+      <div className="flex-1">
+        {/* Active filter chips */}
+        {hasActiveFilters && (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            {activeCategoryName && (
+              <button
+                type="button"
+                onClick={() => setSelectedCategoryId(null)}
+                className="rounded-full border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted"
+              >
+                {activeCategoryName} ×
+              </button>
+            )}
+            {selectedPriceRange[1] !== DEFAULT_MAX_PRICE && (
+              <button
+                type="button"
+                onClick={() => setSelectedPriceRange([0, DEFAULT_MAX_PRICE])}
+                className="rounded-full border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted"
+              >
+                Do €{selectedPriceRange[1]} ×
+              </button>
+            )}
+            {sortBy !== 'relevance' && (
+              <button
+                type="button"
+                onClick={() => setSortBy('relevance')}
+                className="rounded-full border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted"
+              >
+                {sortBy === 'priceLowToHigh' ? 'Cijena ↑' : 'Cijena ↓'} ×
+              </button>
+            )}
+            <Button
+              variant="ghost"
+              className="h-8 px-3 text-sm"
+              onClick={() => {
+                setSelectedCategoryId(null);
+                setSelectedPriceRange([0, DEFAULT_MAX_PRICE]);
+                setSortBy('relevance');
+              }}
+            >
+              Obriši sve
+            </Button>
+          </div>
+        )}
+
+        {isLoading ? (
+          <ShopLoadingSkeleton />
+        ) : sortedProducts.length > 0 ? (
+          <ProductGrid products={sortedProducts} />
+        ) : (
+          <div className="flex h-full min-h-[400px] items-center justify-center">
+            <p className="text-muted-foreground">
+              {hasActiveFilters
+                ? 'Nema proizvoda za odabrane filtere.'
+                : 'Trenutno nema proizvoda u ponudi.'}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
+
+const Shop: React.FC = () => (
+  <Suspense fallback={<ShopLoadingSkeleton />}>
+    <ShopContent />
+  </Suspense>
+);
 
 export default Shop;

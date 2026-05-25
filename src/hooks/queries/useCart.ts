@@ -1,9 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  addToCart as addToUserCart,
+  updateCartItem as updateUserCartItem,
+  clearCart as clearUserCart,
   getCart,
   removeFromCart,
   getGuestCart,
   addToGuestCart,
+  updateGuestCartItem,
   removeFromGuestCart,
   clearGuestCart,
 } from '@/api/account/axios';
@@ -20,6 +24,7 @@ export const cartKeys = {
 
 export function useCartQuery() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const authLoading = useAuthStore((state) => state.isLoading);
   const guestSessionId = useCartStore((state) => state.guestSessionId);
 
   return useQuery({
@@ -31,10 +36,11 @@ export function useCartQuery() {
       if (guestSessionId) {
         return getGuestCart(guestSessionId);
       }
-      return { items: [] };
+      return { id: 0, user_id: 0, items: [] };
     },
-    enabled: isAuthenticated || !!guestSessionId,
+    enabled: !authLoading && (isAuthenticated || !!guestSessionId),
     staleTime: 30 * 1000, // 30 seconds
+    retry: false,
   });
 }
 
@@ -46,20 +52,19 @@ export function useAddToCart() {
   return useMutation({
     mutationFn: async (item: CartItemCreate) => {
       if (isAuthenticated) {
-        // For authenticated users, we need to convert CartItemCreate to the format expected by addToCart
-        return addToGuestCart(guestSessionId ?? '', item);
+        return addToUserCart(item);
       }
       if (guestSessionId) {
         return addToGuestCart(guestSessionId, item);
       }
-      throw new Error('No cart session available');
+      throw new Error('Sesija korpe nije dostupna');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
       toast.success('Added to cart!');
     },
     onError: () => {
-      toast.error('Failed to add item to cart');
+      toast.error('Dodavanje u korpu nije uspjelo');
     },
   });
 }
@@ -77,20 +82,22 @@ export function useRemoveFromCart() {
       if (guestSessionId) {
         return removeFromGuestCart(guestSessionId, itemId);
       }
-      throw new Error('No cart session available');
+      throw new Error('Sesija korpe nije dostupna');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
       toast.success('Item removed from cart');
     },
     onError: () => {
-      toast.error('Failed to remove item');
+      toast.error('Uklanjanje artikla nije uspjelo');
     },
   });
 }
 
 export function useUpdateCartItem() {
   const queryClient = useQueryClient();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const guestSessionId = useCartStore((state) => state.guestSessionId);
 
   return useMutation({
     mutationFn: async ({
@@ -104,8 +111,13 @@ export function useUpdateCartItem() {
       color: string;
       size: Size;
     }) => {
-      // For now, this is a local-only update since we don't have a dedicated update endpoint
-      return { itemId, quantity, color, size };
+      if (isAuthenticated) {
+        return updateUserCartItem({ id: itemId, quantity, color, size });
+      }
+      if (guestSessionId) {
+        return updateGuestCartItem(guestSessionId, itemId, quantity, color, size);
+      }
+      throw new Error('Sesija korpe nije dostupna');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cartKeys.all });
@@ -115,15 +127,18 @@ export function useUpdateCartItem() {
 
 export function useClearCart() {
   const queryClient = useQueryClient();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const guestSessionId = useCartStore((state) => state.guestSessionId);
 
   return useMutation({
     mutationFn: async () => {
+      if (isAuthenticated) {
+        return clearUserCart();
+      }
       if (guestSessionId) {
         return clearGuestCart(guestSessionId);
       }
-      // For authenticated users, we might need a different endpoint
-      return Promise.resolve();
+      throw new Error('Sesija korpe nije dostupna');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: cartKeys.all });

@@ -1,6 +1,5 @@
-'use client';
-
 import React, { ReactNode } from 'react';
+import type { Metadata } from 'next';
 import { Inter, Cormorant_Garamond } from 'next/font/google';
 import Navbar from '@/components/Layout/Header/Navbar';
 import Footer from '@/components/Layout/Footer/Footer';
@@ -14,6 +13,56 @@ const cormorant = Cormorant_Garamond({
   variable: '--font-serif',
 });
 
+const siteDescription =
+  'Ladimood vam donosi visokokvalitetne majice i odjeću inspirisanu crnogorskom kulturom. Nosi svoje korijene s ponosom i izrazi svoj jedinstveni stil.';
+
+export const metadata: Metadata = {
+  title: 'Ladimood | Podgorički brend',
+  description: siteDescription,
+  keywords: [
+    'Ladimood',
+    'crnogorski brend',
+    'kultne podgoričke majice',
+    'Crna Gora na majici',
+    'podgorički brend',
+    'Podgorica',
+    'obilježja Podgorice',
+    'visokokvalitetne majice',
+    'jedinstveni dizajn',
+    'ladi mood',
+    'moda Crna Gora',
+    'Balkanski brendovi',
+    'kul majice',
+    'balkanske izreke',
+    'balkanske fore',
+    'balkanske šale',
+  ],
+  authors: [{ name: 'Ladimood' }],
+  robots: 'index, follow',
+  alternates: {
+    canonical: 'https://www.ladimood.com',
+  },
+  icons: {
+    icon: [{ url: '/images/icon.svg', type: 'image/svg+xml' }],
+  },
+  openGraph: {
+    title: 'Ladimood | Podgorički brend',
+    description:
+      'Otkrijte jedinstvenu odjeću inspirisanu crnogorskom kulturom, forama i ležernim stilom života uz Ladimood. Naše majice spajaju naše šale, izreke, vrhunski dizajn i kvalitetne materijale.',
+    url: 'https://www.ladimood.com',
+    siteName: 'Ladimood',
+    type: 'website',
+    images: ['/images/icon.png'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Ladimood | Podgorički brend',
+    description:
+      'Ladimood je podgorički brend koji nudi jedinstvene, visokokvalitetne majice inspirisane crnogorskim forama i stilom života. Nosi obilježja svoje kulture i dijeli svoj stil.',
+    images: ['/images/icon.png'],
+  },
+};
+
 interface RootLayoutProps {
   children: ReactNode;
 }
@@ -21,42 +70,10 @@ interface RootLayoutProps {
 const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
   return (
     <html lang="en" className={`${inter.variable} ${cormorant.variable} h-full w-full`}>
-      <head>
-        <title>Ladimood | Podgorički brend</title>
-        <meta
-          name="description"
-          content="Ladimood vam donosi visokokvalitetne majice i odjeću inspirisanu crnogorskom kulturom. Nosi svoje korijene s ponosom i izrazi svoj jedinstveni stil."
-        />
-        <meta
-          name="keywords"
-          content="Ladimood, crnogorski brend, kultne podgoričke majice, Crna Gora na majici, podgorički brend, Podgorica, obilježja Podgorice, visokokvalitetne majice, jedinstveni dizajn, ladi mood, moda Crna Gora, Balkanski brendovi, kul majice, balkanske izreke, balkanske fore, balkanske šale"
-        />
-        <meta name="author" content="Ladimood" />
-        <meta property="og:title" content="Ladimood | Podgorički brend" />
-        <meta
-          property="og:description"
-          content="Otkrijte jedinstvenu odjeću inspirisanu crnogorskom kulturom, forama i ležernim stilom života uz Ladimood. Naše majice spajaju naše šale, izreke, vrhunski dizajn i kvalitetne materijale."
-        />
-        <meta property="og:image" content="/images/icon.png" />
-        <meta property="og:url" content="https://www.ladimood.com" />
-        <meta property="og:type" content="website" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Ladimood | Podgorički brend" />
-        <meta
-          name="twitter:description"
-          content="Ladimood je podgorički brend koji nudi jedinstvene, visokokvalitetne majice inspirisane crnogorskim forama i stilom života. Nosi obilježja svoje kulture i dijeli svoj stil."
-        />
-        <meta name="twitter:image" content="/images/icon.png" />
-        <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://www.ladimood.com" />
-        <link rel="icon" href="/images/icon2.svg" sizes="any" />
-      </head>
       <body className="flex min-h-dvh w-full flex-col bg-background text-foreground antialiased">
         <Providers>
           <Navbar />
-          <main className="w-full flex-grow bg-background pt-[120px] md:pt-[100px]">
-            {children}
-          </main>
+          <main className="w-full flex-grow bg-background pt-20 md:pt-24">{children}</main>
           <Footer />
         </Providers>
       </body>

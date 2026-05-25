@@ -46,7 +46,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, updateQuantity, removeFromCar
           <h3 className="font-semibold">{item.product.name}</h3>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <div className="h-4 w-4 rounded-full border" style={{ backgroundColor: item.color }} />
-            <span>Size: {item.size}</span>
+            <span>Veličina: {item.size}</span>
           </div>
           <p className="font-bold text-primary">€{item.product.price.toFixed(2)}</p>
         </div>
@@ -59,7 +59,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, updateQuantity, removeFromCar
             className="h-8 w-8"
             onClick={handleDecrement}
             disabled={item.quantity <= 1}
-            aria-label="Decrease quantity"
+            aria-label="Smanji količinu"
           >
             <FaMinus className="h-3 w-3" />
           </Button>
@@ -69,7 +69,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, updateQuantity, removeFromCar
             size="icon"
             className="h-8 w-8"
             onClick={handleIncrement}
-            aria-label="Increase quantity"
+            aria-label="Povećaj količinu"
           >
             <FaPlus className="h-3 w-3" />
           </Button>
@@ -81,7 +81,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, updateQuantity, removeFromCar
           size="icon"
           className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
           onClick={handleRemove}
-          aria-label="Remove item from cart"
+          aria-label="Ukloni artikal iz korpe"
         >
           <FaTimes className="h-4 w-4" />
         </Button>

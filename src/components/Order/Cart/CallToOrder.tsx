@@ -10,7 +10,7 @@ const CallToOrder: React.FC<CallToOrderProps> = ({ cartItems, onCancel, onOrder 
   const router = useRouter();
 
   if (!cartItems || cartItems.length === 0) {
-    return <div className="text-center text-muted-foreground">Your cart is empty.</div>;
+    return <div className="text-center text-muted-foreground">Korpa je prazna.</div>;
   }
 
   const totalAmount = cartItems.reduce((total, item) => {
@@ -49,14 +49,14 @@ const CallToOrder: React.FC<CallToOrderProps> = ({ cartItems, onCancel, onOrder 
     <Card className="mt-4">
       <CardContent className="flex items-center justify-between p-4">
         <div>
-          <h2 className="text-xl font-semibold">Ready to Order?</h2>
-          <p className="text-muted-foreground">You have {cartItems.length} items in your cart.</p>
-          <p className="font-bold text-primary">Total: €{totalAmount.toFixed(2)}</p>
+          <h2 className="text-xl font-semibold">Spremni za porudžbinu?</h2>
+          <p className="text-muted-foreground">Imate {cartItems.length} artikala u korpi.</p>
+          <p className="font-bold text-primary">Ukupno: €{totalAmount.toFixed(2)}</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleProceedToConfirmation}>Proceed to Confirmation</Button>
+          <Button onClick={handleProceedToConfirmation}>Nastavi na potvrdu</Button>
           <Button variant="outline" onClick={onCancel}>
-            Cancel
+            Otkaži
           </Button>
         </div>
       </CardContent>
