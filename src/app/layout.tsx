@@ -1,12 +1,11 @@
 import React, { ReactNode } from 'react';
 import type { Metadata } from 'next';
-import { Inter, Cormorant_Garamond } from 'next/font/google';
+import { Cormorant_Garamond } from 'next/font/google';
 import Navbar from '@/components/Layout/Header/Navbar';
 import Footer from '@/components/Layout/Footer/Footer';
 import { Providers } from '@/components/Providers';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
@@ -67,7 +66,7 @@ interface RootLayoutProps {
 
 const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
   return (
-    <html lang="en" className={`${inter.variable} ${cormorant.variable} h-full w-full`}>
+    <html lang="en" className={`${cormorant.variable} h-full w-full`}>
       <body className="flex min-h-dvh w-full flex-col bg-background text-foreground antialiased">
         <Providers>
           <Navbar />

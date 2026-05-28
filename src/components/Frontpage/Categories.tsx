@@ -19,7 +19,7 @@ const CategoryComponent = () => {
       ? categories.slice(0, 3).map((category, idx) => ({
           title: category.name.toUpperCase(),
           subtitle: category.description || 'Istraži proizvode iz ove kategorije',
-          imageSrc: category.image_url || fallbackCards[idx % fallbackCards.length],
+          imageSrc: category.image_url?.trim() || fallbackCards[idx % fallbackCards.length],
           link: `/shop?category_id=${category.id}`,
         }))
       : fallbackCards.map((img, idx) => ({

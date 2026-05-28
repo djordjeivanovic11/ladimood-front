@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import api from '../axiosInstance';
+import { isNotFoundError } from '@/lib/http-error';
 import type {
   User,
   Address,
@@ -123,12 +124,15 @@ export const fetchCurrentUser = async (): Promise<User> => {
 //         ADDRESS ROUTES            //
 //-----------------------------------//
 
-// Get User Address
-export const getAddress = async (): Promise<Address> => {
+// Get User Address (null when the user has not saved one yet)
+export const getAddress = async (): Promise<Address | null> => {
   try {
     const response: AxiosResponse<Address> = await api.get('/users/address');
     return response.data;
   } catch (error) {
+    if (isNotFoundError(error)) {
+      return null;
+    }
     console.error('Error fetching address:', error);
     throw error;
   }
@@ -146,11 +150,14 @@ export const setAddress = async (address: AddressBase): Promise<Address> => {
 };
 
 // Delete Address
-export const deleteAddress = async (): Promise<MessageResponse> => {
+export const deleteAddress = async (): Promise<MessageResponse | null> => {
   try {
     const response: AxiosResponse<MessageResponse> = await api.delete('/users/address');
     return response.data;
   } catch (error) {
+    if (isNotFoundError(error)) {
+      return null;
+    }
     console.error('Error deleting address:', error);
     throw error;
   }

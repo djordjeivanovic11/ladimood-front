@@ -265,11 +265,14 @@ export interface OrderBase {
 export interface Order extends OrderBase {
   id: string | number;
   order_number?: number;
-  user_id: number;
+  user_id?: number;
   plain_id?: string;
+  payment_method?: string;
+  delivery_note?: string | null;
+  address?: AddressBase | null;
   items: OrderItem[];
-  created_at: Date;
-  updated_at: Date;
+  created_at: Date | string;
+  updated_at: Date | string;
 }
 
 // Order Details Props
@@ -441,6 +444,7 @@ export interface OrderByIdProps {
 
 export interface OrderManagement {
   id: number;
+  order_number?: number;
   user_id: number;
   user?: UserBase;
   address?: AddressManagement;

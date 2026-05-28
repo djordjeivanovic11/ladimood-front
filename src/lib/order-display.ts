@@ -42,6 +42,34 @@ export function getOrderDisplayNumber(order: {
   return formatOrderCode(order.id);
 }
 
+export function formatOrderPurchaseDate(createdAt: string | Date): string {
+  return new Date(createdAt).toLocaleDateString('sr-ME', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+}
+
+export function formatOrderAddress(
+  address?: {
+    street_address: string;
+    city: string;
+    state?: string | null;
+    postal_code?: string;
+    country: string;
+  } | null
+): string {
+  if (!address) return 'Adresa nije dostupna';
+
+  const parts = [
+    address.street_address,
+    [address.city, address.postal_code].filter(Boolean).join(' '),
+    address.country,
+  ].filter(Boolean);
+
+  return parts.join(', ');
+}
+
 export function mapOrderItemsToDisplay(items: OrderItemLike[]): SuccessOrderLineItem[] {
   return items.map((item) => ({
     product_id: item.product_id,

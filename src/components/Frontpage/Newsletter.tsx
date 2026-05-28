@@ -47,7 +47,7 @@ const SubscribeNewsletter: React.FC = () => {
         <CardContent className="p-8 text-center">
           <h2 className="text-3xl font-extrabold">Prijavite se na newsletter</h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Budite u toku sa najnovijim kolekcijama i ekskluzivnim ponudama.
+            Budite u toku sa najnovijim kolekcijama i najnovijim ponudama.
           </p>
 
           {message && (

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { FaTimes } from 'react-icons/fa';
 import CartItemComponent from './CartItem';
 import CallToOrder from '@/components/Order/Cart/CallToOrder';
@@ -32,6 +33,7 @@ function CartSkeleton() {
 }
 
 const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
+  const router = useRouter();
   const { data: cart, isLoading, refetch } = useCartQuery();
   const cartItems = cart?.items ?? [];
   const { mutate: removeFromCart } = useRemoveFromCart();
@@ -57,6 +59,11 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
 
   const handleCancelOrder = () => {
     closeCart();
+  };
+
+  const handleContinueShopping = () => {
+    closeCart();
+    router.push('/shop');
   };
 
   return (
@@ -88,7 +95,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
             ) : cartItems.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center">
                 <p className="font-bold text-primary">Korpa je prazna.</p>
-                <Button onClick={closeCart} className="mt-4">
+                <Button className="mt-4" onClick={handleContinueShopping}>
                   Nastavi kupovinu
                 </Button>
               </div>
@@ -107,12 +114,15 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
           </div>
 
           {cartItems.length > 0 && (
-            <div className="border-t p-4">
+            <div className="space-y-3 border-t p-4">
               <CallToOrder
                 cartItems={cartItems}
                 onOrder={handleOrder}
                 onCancel={handleCancelOrder}
               />
+              <Button variant="outline" className="w-full" onClick={handleContinueShopping}>
+                Nastavi kupovinu
+              </Button>
             </div>
           )}
         </div>

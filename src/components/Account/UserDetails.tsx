@@ -11,6 +11,7 @@ import { AccountSectionHeader } from '@/components/Account/AccountSectionHeader'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatPhoneNumber } from '@/lib/phone';
 
 function UserDetailsSkeleton() {
   return (
@@ -101,7 +102,7 @@ const UserDetails: React.FC = () => {
           <DetailRow
             icon={Phone}
             label="Telefon"
-            value={user.phone_number?.trim() || 'Nije unijeto'}
+            value={formatPhoneNumber(user.phone_number) || 'Nije unijeto'}
           />
         </div>
         <Button type="button" variant="outline" className="w-full gap-2" onClick={handleLogout}>

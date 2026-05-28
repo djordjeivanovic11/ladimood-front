@@ -66,7 +66,7 @@
     @apply border-border;
   }
   html {
-    @apply font-sans;
+    @apply font-serif;
   }
   body {
     @apply bg-background text-foreground;
@@ -116,7 +116,7 @@
 @layer components {
   /* react-phone-input-2: keep digits clear of the flag on all viewports */
   .ladimood-phone-input.react-tel-input {
-    @apply w-full font-sans;
+    @apply w-full;
   }
 
   .ladimood-phone-input.react-tel-input .ladimood-phone-input__field {

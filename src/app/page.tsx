@@ -7,7 +7,6 @@ import ProductGrid from '@/components/Order/Shop/ProductGrid';
 import Newsletter from '@/components/Frontpage/Newsletter';
 import MontenegrinGallery from '@/components/Frontpage/MontenegrinGallery';
 import SuggestionBox from '@/components/Frontpage/ShareIdeas';
-import ShopPrompt from '@/components/Frontpage/ShopPrompt';
 import { useProductsQuery } from '@/hooks/queries/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -36,10 +35,6 @@ export default function Frontpage() {
 
       <div className="mb-16">
         <MontenegrinGallery />
-      </div>
-
-      <div className="mb-16">
-        <ShopPrompt />
       </div>
 
       <div className="mb-16">

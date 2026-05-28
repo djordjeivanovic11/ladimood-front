@@ -173,6 +173,16 @@ export const updateOrderStatus = async (
   }
 };
 
+export const deleteOrder = async (orderId: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/admin/orders/${orderId}`);
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, `Brisanje porudžbine ID ${orderId} nije uspjelo.`);
+    console.error(`Error deleting order with ID ${orderId}:`, message);
+    throw new Error(message);
+  }
+};
+
 export const submitContactForm = async (contactData: {
   name: string;
   email: string;

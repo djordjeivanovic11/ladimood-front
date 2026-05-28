@@ -132,7 +132,6 @@ const Product: React.FC<ProductProps> = ({
           <Button
             onClick={() => {
               onAddToCart();
-              toast.success('Dodato u korpu.');
             }}
             className="flex-1"
           >

@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import OrderById from '@/components/Order/Order/OrderById';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,12 +12,11 @@ interface OrderPageProps {
   params: Promise<{ orderId: string }>;
 }
 
-function OrderSkeleton() {
+function OrderPageSkeleton() {
   return (
-    <div className="mx-auto max-w-5xl space-y-4 p-8">
-      <Skeleton className="h-8 w-64" />
-      <Skeleton className="h-4 w-48" />
-      <Skeleton className="h-64 w-full rounded-lg" />
+    <div className="mx-auto max-w-6xl space-y-6">
+      <Skeleton className="h-4 w-32" />
+      <Skeleton className="h-96 w-full rounded-lg" />
     </div>
   );
 }
@@ -49,14 +50,25 @@ export default function OrderPage({ params }: OrderPageProps) {
   }, [authLoading, params, isAuthenticated, router]);
 
   if (isLoading || authLoading || !orderId) {
-    return <OrderSkeleton />;
+    return (
+      <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8">
+        <OrderPageSkeleton />
+      </div>
+    );
   }
 
   return (
-    <section className="min-h-screen bg-muted/50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl">
+    <div className="min-h-screen bg-background px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <Link
+          href="/account"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden />
+          Nazad na nalog
+        </Link>
         <OrderById orderId={orderId} />
       </div>
-    </section>
+    </div>
   );
 }

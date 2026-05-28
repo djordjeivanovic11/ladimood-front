@@ -10,6 +10,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatPhoneNumber } from '@/lib/phone';
 
 const statusOrder = ['CREATED', 'PENDING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] as const;
 
@@ -128,7 +129,9 @@ export default function ManagementOverview() {
                     <Badge variant="secondary">{user.order_count} porudžbina</Badge>
                   </div>
                   <p className="text-muted-foreground">{user.email}</p>
-                  <p className="text-muted-foreground">{user.phone_number || 'Nema telefona'}</p>
+                  <p className="text-muted-foreground">
+                    {user.phone_number ? formatPhoneNumber(user.phone_number) : 'Nema telefona'}
+                  </p>
                   <p className="mt-1">{formatAddress(user.address)}</p>
                   <p className="text-xs text-muted-foreground">
                     Uloga: {user.role_name || 'N/A'} • Ukupno potrošeno: €

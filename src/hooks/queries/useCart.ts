@@ -61,7 +61,7 @@ export function useAddToCart() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: cartKeys.all });
-      toast.success('Added to cart!');
+      toast.success('Dodato u korpu.');
     },
     onError: () => {
       toast.error('Dodavanje u korpu nije uspjelo');

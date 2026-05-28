@@ -6,6 +6,7 @@ import {
   fetchAllOrdersWithDetails,
   updateOrderStatus,
   createSalesRecord,
+  deleteOrder,
 } from '@/api/management/axios';
 import { OrderManagement, OrderStatusEnum } from '@/app/types/types';
 import StatusManagement from './StatusManagement';
@@ -21,9 +22,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { Trash2 } from 'lucide-react';
 import { OrderLineImage } from '@/components/Order/OrderLineImage';
-import { formatOrderCode } from '@/lib/order-display';
+import { formatOrderCode, formatOrderPurchaseDate } from '@/lib/order-display';
+import { formatPhoneNumber } from '@/lib/phone';
+
+const DELETE_CONFIRMATION_TEXT = 'delete';
 
 type SaleFinalizedStatus = 'none' | 'finalized' | 'exists' | 'failed';
 
@@ -51,6 +64,9 @@ const OrdersManagement: React.FC = () => {
   const [saleFinalizedStatusMap, setSaleFinalizedStatusMap] = useState<{
     [orderId: number]: SaleFinalizedStatus;
   }>({});
+  const [orderToDelete, setOrderToDelete] = useState<OrderManagement | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const itemsPerPage = 12;
 
@@ -151,7 +167,8 @@ const OrdersManagement: React.FC = () => {
     if (searchOrderId) {
       updatedFilteredOrders = updatedFilteredOrders.filter((order) => {
         const needle = searchOrderId.trim();
-        return order.id.toString() === needle || formatOrderCode(order.id) === needle;
+        const displayOrder = order.order_number ?? order.id;
+        return order.id.toString() === needle || formatOrderCode(displayOrder) === needle;
       });
     }
     if (searchOrderName) {
@@ -175,6 +192,43 @@ const OrdersManagement: React.FC = () => {
   const handleViewOrderClick = (orderId: number) => {
     router.push(`/management/orders/${orderId}`);
   };
+
+  const openDeleteDialog = (order: OrderManagement) => {
+    setOrderToDelete(order);
+    setDeleteConfirmText('');
+  };
+
+  const closeDeleteDialog = () => {
+    if (isDeleting) return;
+    setOrderToDelete(null);
+    setDeleteConfirmText('');
+  };
+
+  const handleDeleteOrder = async () => {
+    if (!orderToDelete || deleteConfirmText !== DELETE_CONFIRMATION_TEXT) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteOrder(orderToDelete.id);
+      setOrders((prev) => prev.filter((order) => order.id !== orderToDelete.id));
+      setFilteredOrders((prev) => prev.filter((order) => order.id !== orderToDelete.id));
+      setSaleFinalizedStatusMap((prev) => {
+        const next = { ...prev };
+        delete next[orderToDelete.id];
+        return next;
+      });
+      toast.success('Porudžbina je uspješno obrisana');
+      setOrderToDelete(null);
+      setDeleteConfirmText('');
+    } catch (err) {
+      console.error('Error deleting order:', err);
+      toast.error('Brisanje porudžbine nije uspjelo');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const isDeleteConfirmed = deleteConfirmText === DELETE_CONFIRMATION_TEXT;
 
   return (
     <div className="space-y-6">
@@ -269,13 +323,26 @@ const OrdersManagement: React.FC = () => {
           currentOrders.map((order) => (
             <Card key={order.id}>
               <CardContent className="p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <CardTitle className="text-xl">Porudžbina #{formatOrderCode(order.id)}</CardTitle>
-                  <StatusManagement
-                    orderId={order.id}
-                    currentStatus={order.status}
-                    onStatusChange={handleStatusChange}
-                  />
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <CardTitle className="text-xl">
+                    Porudžbina #{formatOrderCode(order.order_number ?? order.id)}
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <StatusManagement
+                      orderId={order.id}
+                      currentStatus={order.status}
+                      onStatusChange={handleStatusChange}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={() => openDeleteDialog(order)}
+                      aria-label={`Obriši porudžbinu #${formatOrderCode(order.order_number ?? order.id)}`}
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden />
+                    </Button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
@@ -283,6 +350,14 @@ const OrdersManagement: React.FC = () => {
                       Korisnik:{' '}
                       <span className="font-normal">
                         {order.user ? `${order.user.full_name} (${order.user.email})` : 'N/A'}
+                      </span>
+                    </p>
+                    <p className="font-medium">
+                      Telefon:{' '}
+                      <span className="font-normal">
+                        {order.user?.phone_number
+                          ? formatPhoneNumber(order.user.phone_number)
+                          : 'Nema telefona'}
                       </span>
                     </p>
                     <p className="font-medium">
@@ -298,7 +373,7 @@ const OrdersManagement: React.FC = () => {
                     <p className="font-medium">
                       Datum porudžbine:{' '}
                       <span className="font-normal">
-                        {new Date(order.created_at).toLocaleDateString()}
+                        {formatOrderPurchaseDate(order.created_at)}
                       </span>
                     </p>
                     <p className="font-medium">
@@ -368,6 +443,42 @@ const OrdersManagement: React.FC = () => {
           ))
         )}
       </div>
+
+      <Dialog open={orderToDelete !== null} onOpenChange={(open) => !open && closeDeleteDialog()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Obriši porudžbinu</DialogTitle>
+            <DialogDescription>
+              {orderToDelete
+                ? `Ova akcija je trajna i ne može se poništiti. Porudžbina #${formatOrderCode(orderToDelete.order_number ?? orderToDelete.id)} i svi povezani podaci biće uklonjeni. Unesite "${DELETE_CONFIRMATION_TEXT}" da potvrdite brisanje.`
+                : null}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="deleteConfirm">Potvrda</Label>
+            <Input
+              id="deleteConfirm"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder={DELETE_CONFIRMATION_TEXT}
+              autoComplete="off"
+              disabled={isDeleting}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={closeDeleteDialog} disabled={isDeleting}>
+              Otkaži
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => void handleDeleteOrder()}
+              disabled={!isDeleteConfirmed || isDeleting}
+            >
+              {isDeleting ? 'Brisanje...' : 'Obriši porudžbinu'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Pagination */}
       {filteredOrders.length > itemsPerPage && (

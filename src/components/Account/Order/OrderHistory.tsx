@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ClipboardList, Package } from 'lucide-react';
@@ -8,7 +8,8 @@ import { useUserOrdersQuery } from '@/hooks/queries/useOrders';
 import { OrderItem } from '@/app/types/types';
 import { OrderLineImage } from '@/components/Order/OrderLineImage';
 import { AccountSectionHeader } from '@/components/Account/AccountSectionHeader';
-import { getOrderDisplayNumber } from '@/lib/order-display';
+import { getOrderDisplayNumber, formatOrderPurchaseDate } from '@/lib/order-display';
+import { formatOrderStatus, getOrderStatusBadgeVariant } from '@/lib/order-status';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -39,29 +40,16 @@ function getItemImageUrl(item: OrderItem): string | undefined {
   return item.product_image_url ?? item.product?.image_url ?? undefined;
 }
 
-const ORDER_STATUS_LABELS: Record<string, string> = {
-  PENDING: 'Na čekanju',
-  PROCESSING: 'U obradi',
-  SHIPPED: 'Poslato',
-  DELIVERED: 'Isporučeno',
-  CANCELLED: 'Otkazano',
-};
-
-function formatOrderStatus(status: string): string {
-  return ORDER_STATUS_LABELS[status] ?? status;
-}
+const MAX_ORDERS_SHOWN = 3;
 
 const OrderHistory: React.FC = () => {
   const router = useRouter();
   const { data: orders, isLoading, isError, error, refetch, isFetching } = useUserOrdersQuery();
-  const [visibleCount, setVisibleCount] = useState(3);
 
   const orderList = orders ?? [];
-  const sortedOrders = [...orderList].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
-  const visibleOrders = sortedOrders.slice(0, visibleCount);
-  const hasMore = visibleCount < orderList.length;
+  const recentOrders = [...orderList]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, MAX_ORDERS_SHOWN);
 
   return (
     <Card className="border-border/60 shadow-sm">
@@ -112,7 +100,7 @@ const OrderHistory: React.FC = () => {
         ) : (
           <>
             <div className="space-y-4">
-              {visibleOrders.map((order) => (
+              {recentOrders.map((order) => (
                 <Card key={String(order.id)} className="border-border/50 bg-muted/10 shadow-none">
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-4">
@@ -121,18 +109,13 @@ const OrderHistory: React.FC = () => {
                           Porudžbina #{getOrderDisplayNumber(order)}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Datum:{' '}
-                          {new Date(order.created_at).toLocaleDateString('sr-ME', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                          })}
+                          Datum: {formatOrderPurchaseDate(order.created_at)}
                         </p>
                         <p className="text-sm font-medium">
                           Ukupno: €{order.total_price.toFixed(2)}
                         </p>
                       </div>
-                      <Badge variant={order.status === 'DELIVERED' ? 'default' : 'secondary'}>
+                      <Badge variant={getOrderStatusBadgeVariant(order.status)}>
                         {formatOrderStatus(order.status)}
                       </Badge>
                     </div>
@@ -172,22 +155,19 @@ const OrderHistory: React.FC = () => {
                         </li>
                       ))}
                     </ul>
+                    <Link
+                      href={`/order/${order.id}`}
+                      className="inline-block text-sm font-medium text-primary underline underline-offset-4 transition-colors hover:text-primary/80"
+                    >
+                      Pogledaj porudžbinu
+                    </Link>
                   </CardContent>
                 </Card>
               ))}
             </div>
-
-            {hasMore && (
-              <div className="flex justify-center pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setVisibleCount((prev) => prev + 5)}
-                >
-                  Učitaj još
-                </Button>
-              </div>
-            )}
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Ako želite da modifikujete ili izbrišete porudžbinu, pošaljite nam odgovor na email.
+            </p>
           </>
         )}
       </CardContent>

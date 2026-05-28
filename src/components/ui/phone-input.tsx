@@ -3,6 +3,7 @@
 import PhoneInput, { type PhoneInputProps } from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 
+import { normalizePhoneNumber } from '@/lib/phone';
 import { cn } from '@/lib/utils';
 
 type PhoneNumberInputProps = Omit<
@@ -17,6 +18,7 @@ export function PhoneNumberInput({
   containerClassName,
   hasError,
   country = 'me',
+  onChange,
   ...props
 }: PhoneNumberInputProps) {
   return (
@@ -24,6 +26,9 @@ export function PhoneNumberInput({
       country={country}
       countryCodeEditable={false}
       enableSearch
+      onChange={(value, data, event, formattedValue) => {
+        onChange?.(normalizePhoneNumber(value), data, event, formattedValue);
+      }}
       containerClass={cn('ladimood-phone-input', containerClassName)}
       inputClass={cn(
         'ladimood-phone-input__field',

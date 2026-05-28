@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { PhoneNumberInput } from '@/components/ui/phone-input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { shouldUnoptimizeImage } from '@/lib/image';
+import { normalizePhoneNumber } from '@/lib/phone';
 import { cn } from '@/lib/utils';
 import type { Size } from '@/app/types/types';
 
@@ -66,7 +67,7 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
         })),
         guest_email: data.guest_email,
         guest_name: data.guest_name,
-        guest_phone: data.guest_phone,
+        guest_phone: normalizePhoneNumber(data.guest_phone),
         delivery_note: data.delivery_note,
         address: data.address,
       },

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaUser, FaUserCheck } from 'react-icons/fa';
 import { sendReferrals } from '@/api/account/axios';
 import { MessageResponse } from '@/app/types/types';
+import { toast } from '@/lib/toast';
 
 interface ReferralPopupProps {
   onClose: () => void;
@@ -36,10 +37,11 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
       if (response.message === 'Referral emails sent successfully.') {
         setSubmitted(true);
         setError(null);
+        toast.success('Poslato prijateljima!');
 
         setTimeout(() => {
           onClose();
-        }, 3000);
+        }, 1500);
       } else {
         setError('Nije uspjelo slanje preporuka. Pokušajte ponovo.');
       }
@@ -94,9 +96,6 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
       </button>
 
       {error && <p className="mt-4 text-red-500">{error}</p>}
-      {submitted && (
-        <p className="mt-4 text-green-600 font-semibold">Emailovi su poslati vašim prijateljima!</p>
-      )}
     </div>
   );
 };

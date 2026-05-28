@@ -2,18 +2,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchCurrentUser } from '@/api/auth/axios';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { toast } from '@/lib/toast';
+import { normalizePhoneNumber } from '@/lib/phone';
 import type { UserCreate } from '@/app/types/types';
 import { supabase } from '@/lib/supabase';
 
 export const authKeys = {
   user: ['auth', 'user'] as const,
 };
-
-function normalizePhoneNumber(phone?: string): string {
-  const trimmed = phone?.trim();
-  if (!trimmed) return '';
-  return trimmed.startsWith('+') ? trimmed : `+${trimmed}`;
-}
 
 export function useCurrentUser() {
   const authLoading = useAuthStore((state) => state.isLoading);

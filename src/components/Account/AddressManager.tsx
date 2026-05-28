@@ -52,6 +52,7 @@ const AddressManager: React.FC<AddressManagerProps> = ({ onAddressSaved }) => {
   useEffect(() => {
     getAddress()
       .then((data) => {
+        if (!data) return;
         setAddressState(data);
         setForm({
           street_address: data.street_address || '',

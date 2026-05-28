@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingCart, Store, X } from 'lucide-react';
+import { ShoppingCart, X } from 'lucide-react';
+import CallToOrder from '@/components/Order/Cart/CallToOrder';
 import { getCart, removeFromCart } from '@/api/account/axios';
 import { Cart as CartType, CartItem as CartItemType, Size } from '@/app/types/types';
 import { AccountSectionHeader } from '@/components/Account/AccountSectionHeader';
@@ -37,58 +38,64 @@ const Cart: React.FC = () => {
         />
 
         {cart && cart.items.length > 0 ? (
-          <ul className="space-y-4">
-            {cart.items.map((item: CartItemType) => (
-              <li
-                key={item.id}
-                className="flex flex-col gap-3 rounded-lg border border-border/50 bg-muted/20 p-4 sm:flex-row sm:items-center"
-              >
-                {item.product.image_url ? (
-                  <Image
-                    src={item.product.image_url}
-                    alt={item.product.name}
-                    width={96}
-                    height={96}
-                    className="mx-auto h-24 w-24 shrink-0 rounded-md border border-border/50 object-cover sm:mx-0"
-                  />
-                ) : null}
-                <div className="min-w-0 flex-1 text-center sm:text-left">
-                  <p className="font-medium text-foreground">{item.product.name}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    €{item.product.price.toFixed(2)} · Kol: {item.quantity} · Veličina: {item.size}
-                  </p>
-                  <div className="mt-2 flex items-center justify-center gap-2 sm:justify-start">
-                    <span className="text-xs text-muted-foreground">Boja:</span>
-                    <span
-                      className="h-4 w-4 rounded-full border border-border"
-                      style={{ backgroundColor: item.color }}
-                      title={item.color}
+          <>
+            <ul className="space-y-4">
+              {cart.items.map((item: CartItemType) => (
+                <li
+                  key={item.id}
+                  className="flex flex-col gap-3 rounded-lg border border-border/50 bg-muted/20 p-4 sm:flex-row sm:items-center"
+                >
+                  {item.product.image_url ? (
+                    <Image
+                      src={item.product.image_url}
+                      alt={item.product.name}
+                      width={96}
+                      height={96}
+                      className="mx-auto h-24 w-24 shrink-0 rounded-md border border-border/50 object-cover sm:mx-0"
                     />
+                  ) : null}
+                  <div className="min-w-0 flex-1 text-center sm:text-left">
+                    <p className="font-medium text-foreground">{item.product.name}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      €{item.product.price.toFixed(2)} · Kol: {item.quantity} · Veličina:{' '}
+                      {item.size}
+                    </p>
+                    <div className="mt-2 flex items-center justify-center gap-2 sm:justify-start">
+                      <span className="text-xs text-muted-foreground">Boja:</span>
+                      <span
+                        className="h-4 w-4 rounded-full border border-border"
+                        style={{ backgroundColor: item.color }}
+                        title={item.color}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-col gap-2 sm:shrink-0">
-                  <Button asChild size="sm" variant="outline" className="gap-2">
-                    <Link href="/shop">
-                      <Store className="h-4 w-4" aria-hidden />
-                      Nastavi kupovinu
-                    </Link>
-                  </Button>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="gap-2 text-muted-foreground"
+                    className="gap-2 text-muted-foreground sm:shrink-0"
                     onClick={() => handleRemove(item.id, item.color, item.size)}
                   >
                     <X className="h-4 w-4" aria-hidden />
                     Ukloni
                   </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
+                </li>
+              ))}
+            </ul>
+
+            <CallToOrder cartItems={cart.items} onCancel={() => undefined} />
+
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/shop">Nastavi kupovinu</Link>
+            </Button>
+          </>
         ) : (
-          <p className="py-6 text-center text-sm text-muted-foreground">Korpa je prazna.</p>
+          <div className="flex flex-col items-center gap-4 py-6 text-center">
+            <p className="text-sm text-muted-foreground">Korpa je prazna.</p>
+            <Button asChild>
+              <Link href="/shop">Nastavi kupovinu</Link>
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>

@@ -16,7 +16,7 @@ const SuggestionBox: React.FC = () => {
           </h2>
           <p className="mb-8 text-lg leading-relaxed text-muted-foreground md:text-xl">
             Podijelite svoje ideje i pomozite nam da kreiramo jedinstvene majice koje slave
-            podgoričku kulturu i stil života. Radujemo se vašim prijedlozima!
+            crnogorsku kulturu i stil života. Radujemo se vašim prijedlozima!
           </p>
           <Link href="/contact" passHref>
             <Button size="lg" className="w-full rounded-full md:w-auto">
@@ -29,7 +29,7 @@ const SuggestionBox: React.FC = () => {
         <div className="relative w-full md:w-1/2">
           <div className="relative aspect-[4/5] md:aspect-square">
             <Image
-              src=""
+              src="/images/slideshow/image6.jpeg"
               alt="Predložite svoj stil"
               fill
               className="rounded-lg object-cover shadow-2xl transition duration-300 hover:scale-105"
