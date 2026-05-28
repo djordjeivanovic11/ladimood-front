@@ -26,14 +26,12 @@ const Hero: React.FC = () => {
       {/* Hero Content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-black bg-opacity-40 z-10">
         <h1 className="text-white text-4xl md:text-6xl font-bold drop-shadow-lg" data-aos="fade-up">
-          WORK HARD, PLAY HARDER
-          <br />
-          UZ LADIMOOD
+          LADIMOOD, VJERUJ MI
         </h1>
         <div className="mt-8" data-aos="fade-up" data-aos-delay="500">
           <Link href="/shop">
             <span className="bg-white text-[#0097B2] font-bold py-3 px-8 rounded-full transition-transform hover:scale-110 hover:bg-[#007A90] drop-shadow-md cursor-pointer">
-              Kupi sada
+              Šopinguj
             </span>
           </Link>
         </div>

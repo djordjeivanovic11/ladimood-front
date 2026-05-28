@@ -7,7 +7,6 @@ import ProductGrid from '@/components/Order/Shop/ProductGrid';
 import Newsletter from '@/components/Frontpage/Newsletter';
 import MontenegrinGallery from '@/components/Frontpage/MontenegrinGallery';
 import SuggestionBox from '@/components/Frontpage/ShareIdeas';
-import OurStory from '@/components/Frontpage/OurStory';
 import ShopPrompt from '@/components/Frontpage/ShopPrompt';
 import { useProductsQuery } from '@/hooks/queries/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -33,10 +32,6 @@ export default function Frontpage() {
     <div className="bg-background">
       <div className="-mt-20 mb-16 md:-mt-24">
         <Hero />
-      </div>
-
-      <div className="mb-16">
-        <OurStory />
       </div>
 
       <div className="mb-16">

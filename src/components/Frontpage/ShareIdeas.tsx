@@ -29,7 +29,7 @@ const SuggestionBox: React.FC = () => {
         <div className="relative w-full md:w-1/2">
           <div className="relative aspect-[4/5] md:aspect-square">
             <Image
-              src="/images/slideshow/image6.jpeg"
+              src=""
               alt="Predložite svoj stil"
               fill
               className="rounded-lg object-cover shadow-2xl transition duration-300 hover:scale-105"

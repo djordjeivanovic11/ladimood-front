@@ -51,12 +51,10 @@ const MontenegrinGallery: React.FC = () => {
     '/images/slideshow/image3.jpeg',
     '/images/slideshow/image4.jpeg',
     '/images/slideshow/image5.jpeg',
+    '/images/slideshow/image6.jpeg',
     '/images/slideshow/image7.jpeg',
     '/images/slideshow/image8.jpeg',
     '/images/slideshow/image9.jpeg',
-    '/images/slideshow/image10.jpeg',
-    '/images/slideshow/image11.jpeg',
-    '/images/slideshow/image12.jpeg',
   ];
 
   return (
@@ -66,11 +64,9 @@ const MontenegrinGallery: React.FC = () => {
           Made in Montenegro
         </h1>
         <p className="mx-auto mb-6 max-w-3xl text-center text-sm leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
-          Doživite srce crnogorske kulture kroz našu{' '}
-          <span className="font-semibold text-primary">jedinstvenu kolekciju majica</span>. Ladimood
-          je brend posvećen slavljenju umjetnosti laganog življenja—uživanja u malim trenucima,
-          šoljici kafe u ruci, pod toplim crnogorskim suncem. Zaboravite na žurbu i stres;
-          prihvatite opuštanje i osmijeh.
+          Ladimood je brend posvećen slavljenju umjetnosti laganog življenja, uživanja u malim
+          trenucima, šoljici kafe i dobrom društvu pod toplim crnogorskim suncem. Zaboravite na
+          žurbu i stres, prihvatite opuštanje, osmijeh i ladimood.
         </p>
       </div>
 

@@ -16,6 +16,9 @@ import { cn } from '@/lib/utils';
 const navLinkClass =
   'cursor-pointer font-serif text-base text-foreground/90 transition-colors hover:text-primary md:text-lg';
 
+const desktopNavLinkClass =
+  'cursor-pointer font-serif text-lg font-semibold text-foreground/90 transition-colors hover:text-primary md:text-xl';
+
 const Navbar: React.FC = () => {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -88,23 +91,27 @@ const Navbar: React.FC = () => {
           </Link>
 
           <div className="hidden items-center gap-7 md:flex">
-            <button type="button" onClick={handleShopLink} className={navLinkClass}>
+            <button type="button" onClick={handleShopLink} className={desktopNavLinkClass}>
               Prodavnica
             </button>
-            <button type="button" onClick={() => router.push('/contact')} className={navLinkClass}>
+            <button
+              type="button"
+              onClick={() => router.push('/contact')}
+              className={desktopNavLinkClass}
+            >
               Kontakt
             </button>
             {isAuthenticated ? (
               <button
                 type="button"
                 onClick={() => handleProtectedLink('/account')}
-                className="text-lg text-foreground/90 transition-colors hover:text-primary"
+                className="text-xl text-foreground/90 transition-colors hover:text-primary"
                 aria-label="Nalog"
               >
                 <FaUser />
               </button>
             ) : (
-              <Link href="/auth/login" className={navLinkClass}>
+              <Link href="/auth/login" className={desktopNavLinkClass}>
                 Prijava
               </Link>
             )}
