@@ -3,15 +3,28 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import type { EmailOtpType } from '@supabase/supabase-js';
+import axios from 'axios';
 import { fetchCurrentUser } from '@/api/auth/axios';
-import { completeAuthCallback } from '@/lib/supabase-auth-callback';
+import { completeAuthCallback, isSupabaseEmailConfirmed } from '@/lib/supabase-auth-callback';
 import { isPkceVerifierMissingError } from '@/lib/supabase-auth-errors';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type VerificationState = 'checking' | 'verified' | 'pending' | 'error';
+
+function getErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const detail = error.response?.data;
+    if (detail && typeof detail === 'object' && 'detail' in detail) {
+      const message = (detail as { detail?: unknown }).detail;
+      if (typeof message === 'string' && message.trim()) return message;
+    }
+    if (error.message) return error.message;
+  }
+  if (error instanceof Error && error.message) return error.message;
+  return 'Nijesmo uspjeli da provjerimo verifikaciju. Pokušajte ponovo.';
+}
 
 function VerifiedPageContent() {
   const router = useRouter();
@@ -31,17 +44,10 @@ function VerifiedPageContent() {
 
   useEffect(() => {
     let cancelled = false;
-    const code = searchParams.get('code');
-    const tokenHash = searchParams.get('token_hash');
-    const type = searchParams.get('type') as EmailOtpType | null;
 
     const run = async () => {
       try {
-        const { session, error: callbackError } = await completeAuthCallback({
-          code,
-          tokenHash,
-          type,
-        });
+        const { session, error: callbackError } = await completeAuthCallback();
         if (callbackError) throw callbackError;
 
         if (!session) {
@@ -61,9 +67,26 @@ function VerifiedPageContent() {
         }
 
         setAuthSession(true);
-        const user = await fetchCurrentUser();
-        if (cancelled) return;
-        updateUser(user);
+
+        let user = null;
+        try {
+          user = await fetchCurrentUser({ skipAuthRedirect: true });
+          if (cancelled) return;
+          updateUser(user);
+        } catch (backendError) {
+          if (cancelled) return;
+          const supabaseConfirmed = await isSupabaseEmailConfirmed();
+          if (isOAuthFlow || supabaseConfirmed) {
+            setState('verified');
+            setMessage(
+              isOAuthFlow
+                ? 'Google prijava je uspješna. Nastavljamo dalje.'
+                : 'Vaš e-mail je potvrđen u Supabase-u. Nastavljamo dalje.'
+            );
+            return;
+          }
+          throw backendError;
+        }
 
         if (isOAuthFlow) {
           setState('verified');
@@ -71,7 +94,7 @@ function VerifiedPageContent() {
           return;
         }
 
-        if (user.email_verified) {
+        if (user?.email_verified || (await isSupabaseEmailConfirmed())) {
           setState('verified');
           setMessage('Vaš e-mail je potvrđen. Možete nastaviti na porudžbinu.');
           return;
@@ -96,7 +119,7 @@ function VerifiedPageContent() {
           return;
         }
         setState('error');
-        setMessage('Nijesmo uspjeli da provjerimo verifikaciju. Pokušajte ponovo.');
+        setMessage(getErrorMessage(error));
       }
     };
 
@@ -105,7 +128,7 @@ function VerifiedPageContent() {
     return () => {
       cancelled = true;
     };
-  }, [isOAuthFlow, searchParams, setAuthSession, updateUser]);
+  }, [isOAuthFlow, setAuthSession, updateUser]);
 
   useEffect(() => {
     if (state !== 'verified') return;

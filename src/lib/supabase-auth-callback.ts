@@ -9,23 +9,83 @@ export type AuthCallbackParams = {
   code: string | null;
   tokenHash: string | null;
   type: EmailOtpType | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  errorDescription: string | null;
 };
+
+/** Read auth callback params from query string and URL hash (Supabase uses both). */
+export function readAuthCallbackParams(href = window.location.href): AuthCallbackParams {
+  const url = new URL(href);
+  const params: Record<string, string> = {};
+
+  if (url.hash.startsWith('#')) {
+    try {
+      new URLSearchParams(url.hash.slice(1)).forEach((value, key) => {
+        params[key] = value;
+      });
+    } catch {
+      // ignore malformed hash
+    }
+  }
+
+  url.searchParams.forEach((value, key) => {
+    params[key] = value;
+  });
+
+  const rawType = params.type;
+  const type =
+    rawType === 'signup' ||
+    rawType === 'invite' ||
+    rawType === 'magiclink' ||
+    rawType === 'recovery' ||
+    rawType === 'email_change' ||
+    rawType === 'email'
+      ? rawType
+      : null;
+
+  return {
+    code: params.code ?? null,
+    tokenHash: params.token_hash ?? params.token ?? null,
+    type,
+    accessToken: params.access_token ?? null,
+    refreshToken: params.refresh_token ?? null,
+    errorDescription: params.error_description ?? params.error ?? null,
+  };
+}
 
 /**
  * Finish an auth redirect (Google OAuth, email verify, password recovery).
  *
- * createBrowserClient enables detectSessionInUrl + PKCE, so getSession() already
- * waits for the client to exchange ?code=... from the URL. Calling
- * exchangeCodeForSession() again consumes nothing and throws
- * pkce_code_verifier_not_found even when login succeeded.
+ * createBrowserClient enables detectSessionInUrl + PKCE, so getSession() usually
+ * completes the ?code= exchange. Email templates may still redirect with hash
+ * tokens (#access_token=...) which PKCE-only auto-detect rejects — we handle
+ * those with setSession().
  */
 export async function completeAuthCallback(
-  params: AuthCallbackParams
+  params?: Partial<AuthCallbackParams>
 ): Promise<{ session: Session | null; error: Error | null }> {
-  const { tokenHash, type } = params;
+  const resolved =
+    typeof window !== 'undefined'
+      ? { ...readAuthCallbackParams(), ...params }
+      : {
+          code: params?.code ?? null,
+          tokenHash: params?.tokenHash ?? null,
+          type: params?.type ?? null,
+          accessToken: params?.accessToken ?? null,
+          refreshToken: params?.refreshToken ?? null,
+          errorDescription: params?.errorDescription ?? null,
+        };
 
-  if (tokenHash && type) {
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+  if (resolved.errorDescription) {
+    return { session: null, error: new Error(resolved.errorDescription) };
+  }
+
+  if (resolved.tokenHash && resolved.type) {
+    const { error } = await supabase.auth.verifyOtp({
+      type: resolved.type,
+      token_hash: resolved.tokenHash,
+    });
     if (error) {
       return { session: null, error: new Error(error.message) };
     }
@@ -50,7 +110,20 @@ export async function completeAuthCallback(
     return result;
   }
 
-  for (let i = 0; i < 6; i += 1) {
+  if (resolved.accessToken && resolved.refreshToken) {
+    const { data, error } = await supabase.auth.setSession({
+      access_token: resolved.accessToken,
+      refresh_token: resolved.refreshToken,
+    });
+    if (error) {
+      return { session: null, error: new Error(error.message) };
+    }
+    if (data.session) {
+      return { session: data.session, error: null };
+    }
+  }
+
+  for (let i = 0; i < 10; i += 1) {
     await delay(300);
     result = await readSession();
     if (result.error) {
@@ -62,4 +135,13 @@ export async function completeAuthCallback(
   }
 
   return { session: null, error: null };
+}
+
+export async function isSupabaseEmailConfirmed(): Promise<boolean> {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+  if (error || !user) return false;
+  return Boolean(user.email_confirmed_at);
 }

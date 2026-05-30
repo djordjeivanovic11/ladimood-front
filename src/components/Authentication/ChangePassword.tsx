@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import type { EmailOtpType } from '@supabase/supabase-js';
 import { resetPassword } from '@/api/auth/axios';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { completeAuthCallback } from '@/lib/supabase-auth-callback';
@@ -19,17 +18,8 @@ const ChangePassword = () => {
 
   useEffect(() => {
     const prepareRecoverySession = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-      const tokenHash = urlParams.get('token_hash');
-      const type = urlParams.get('type') as EmailOtpType | null;
-
       try {
-        const { session, error: callbackError } = await completeAuthCallback({
-          code,
-          tokenHash,
-          type,
-        });
+        const { session, error: callbackError } = await completeAuthCallback();
 
         if (callbackError) {
           if (isPkceVerifierMissingError(callbackError)) {

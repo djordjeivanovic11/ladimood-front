@@ -13,9 +13,16 @@ function getAxiosDetail(error: unknown): string | null {
   return null;
 }
 
+type FetchCurrentUserOptions = {
+  /** Avoid global 401 handler during auth callback pages. */
+  skipAuthRedirect?: boolean;
+};
+
 // Fetch current user
-export const fetchCurrentUser = async (): Promise<User> => {
-  const response = await api.get<User>('/users/me');
+export const fetchCurrentUser = async (options?: FetchCurrentUserOptions): Promise<User> => {
+  const response = await api.get<User>('/users/me', {
+    headers: options?.skipAuthRedirect ? { 'X-Skip-Auth-Redirect': '1' } : undefined,
+  });
   return response.data;
 };
 

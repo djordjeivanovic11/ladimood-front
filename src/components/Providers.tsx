@@ -17,6 +17,12 @@ interface ProvidersProps {
   children: React.ReactNode;
 }
 
+function isAuthCallbackPath(): boolean {
+  if (typeof window === 'undefined') return false;
+  const path = window.location.pathname;
+  return path.startsWith('/auth/verified') || path.startsWith('/auth/change-password');
+}
+
 function CartBootstrap() {
   useCartSync();
   const authLoading = useAuthStore((state) => state.isLoading);
@@ -59,7 +65,7 @@ export function Providers({ children }: ProvidersProps) {
           updateUser(user);
         }
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401) {
+        if (axios.isAxiosError(error) && error.response?.status === 401 && !isAuthCallbackPath()) {
           await supabase.auth.signOut();
         }
         if (mounted) logout();
