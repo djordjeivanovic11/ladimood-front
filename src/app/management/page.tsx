@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axiosInstance from '@/api/axiosInstance';
 import OrderManagement from '@/components/Management/OrderManagement';
@@ -15,7 +15,7 @@ import { Card, CardContent } from '@/components/ui/card';
 type ManagementSection = 'overview' | 'operations' | 'catalog' | 'users';
 type CatalogTab = 'products' | 'taxonomy';
 
-export default function ManagementPage() {
+function ManagementPageContent() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [activeSection, setActiveSection] = useState<ManagementSection>('overview');
   const [catalogTab, setCatalogTab] = useState<CatalogTab>('products');
@@ -178,5 +178,13 @@ export default function ManagementPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function ManagementPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen p-6 lg:p-8">Učitavanje...</div>}>
+      <ManagementPageContent />
+    </Suspense>
   );
 }
