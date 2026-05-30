@@ -26,10 +26,10 @@ const Hero: React.FC = () => {
       {/* Hero Content */}
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 px-4 text-center">
         <h1
-          className="text-balance text-3xl font-bold text-white drop-shadow-lg sm:text-4xl md:text-6xl"
+          className="text-balance text-5xl font-bold text-white drop-shadow-lg sm:text-4xl md:text-6xl"
           data-aos="fade-up"
         >
-          LADIMOOD, VJERUJ MI
+          LADIMOOD
         </h1>
         <div className="mt-8" data-aos="fade-up" data-aos-delay="500">
           <Link href="/shop">

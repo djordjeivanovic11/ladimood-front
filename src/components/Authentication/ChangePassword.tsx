@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { resetPassword } from '@/api/auth/axios';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { supabase } from '@/lib/supabase';
+import { completeAuthCallback } from '@/lib/supabase-auth-callback';
 import { isPkceVerifierMissingError } from '@/lib/supabase-auth-errors';
 
 const ChangePassword = () => {
@@ -24,45 +24,35 @@ const ChangePassword = () => {
       const tokenHash = urlParams.get('token_hash');
       const type = urlParams.get('type') as EmailOtpType | null;
 
-      if (code) {
-        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-        if (exchangeError) {
-          if (isPkceVerifierMissingError(exchangeError)) {
-            setError(
-              'Link za reset lozinke mora biti otvoren u istom browseru gdje je reset pokrenut. Zatražite novi reset link i otvorite ga u istom browseru.'
-            );
-            return;
-          }
-          setError(exchangeError.message);
-          return;
-        }
-      } else if (tokenHash && type) {
-        const { error: verifyError } = await supabase.auth.verifyOtp({
+      try {
+        const { session, error: callbackError } = await completeAuthCallback({
+          code,
+          tokenHash,
           type,
-          token_hash: tokenHash,
         });
-        if (verifyError) {
-          if (isPkceVerifierMissingError(verifyError)) {
+
+        if (callbackError) {
+          if (isPkceVerifierMissingError(callbackError)) {
             setError(
               'Link za reset lozinke mora biti otvoren u istom browseru gdje je reset pokrenut. Zatražite novi reset link i otvorite ga u istom browseru.'
             );
             return;
           }
-          setError(verifyError.message);
+          setError(callbackError.message);
           return;
         }
+
+        if (!session) {
+          setError('Link za reset je nevažeći ili je istekao.');
+          return;
+        }
+
+        setSessionReady(true);
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : 'Link za reset je nevažeći ili je istekao.';
+        setError(message);
       }
-
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        setError('Link za reset je nevažeći ili je istekao.');
-        return;
-      }
-
-      setSessionReady(true);
     };
 
     void prepareRecoverySession();

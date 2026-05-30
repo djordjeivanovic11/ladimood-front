@@ -5,17 +5,13 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import type { EmailOtpType } from '@supabase/supabase-js';
 import { fetchCurrentUser } from '@/api/auth/axios';
-import { supabase } from '@/lib/supabase';
+import { completeAuthCallback } from '@/lib/supabase-auth-callback';
 import { isPkceVerifierMissingError } from '@/lib/supabase-auth-errors';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type VerificationState = 'checking' | 'verified' | 'pending' | 'error';
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 function VerifiedPageContent() {
   const router = useRouter();
@@ -41,23 +37,12 @@ function VerifiedPageContent() {
 
     const run = async () => {
       try {
-        if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) throw error;
-        } else if (tokenHash && type) {
-          const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
-          if (error) throw error;
-        }
-
-        let session = null;
-        for (let i = 0; i < 8; i += 1) {
-          const {
-            data: { session: currentSession },
-          } = await supabase.auth.getSession();
-          session = currentSession;
-          if (session) break;
-          await delay(500);
-        }
+        const { session, error: callbackError } = await completeAuthCallback({
+          code,
+          tokenHash,
+          type,
+        });
+        if (callbackError) throw callbackError;
 
         if (!session) {
           if (cancelled) return;
