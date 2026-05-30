@@ -1,12 +1,10 @@
-import React from 'react';
+import { Suspense } from 'react';
 import Register from '@/components/Authentication/Register';
 
-const RegisterPage: React.FC = () => {
+export default function RegisterPage() {
   return (
-    <div>
+    <Suspense fallback={null}>
       <Register />
-    </div>
+    </Suspense>
   );
-};
-
-export default RegisterPage;
+}

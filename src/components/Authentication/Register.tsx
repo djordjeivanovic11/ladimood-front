@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterFormData } from '@/schemas/auth.schema';
-import { useRegister } from '@/hooks/queries/useAuth';
+import { useLoginWithGoogle, useRegister } from '@/hooks/queries/useAuth';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { AuthDivider, GoogleSignInButton } from '@/components/Authentication/GoogleSignInButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,8 +16,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Register() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { mutate: registerUser, isPending, error } = useRegister();
+  const { mutate: loginWithGoogle, isPending: isGooglePending } = useLoginWithGoogle();
+  const nextPath = searchParams.get('next') || '/confirmation';
+  const safeNextPath = nextPath.startsWith('/') ? nextPath : '/confirmation';
 
   const {
     register,
@@ -29,9 +34,9 @@ export default function Register() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/account');
+      router.push(safeNextPath);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, safeNextPath]);
 
   const onSubmit = (data: RegisterFormData) => {
     if (data.password !== data.confirmPassword) {
@@ -55,6 +60,15 @@ export default function Register() {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <GoogleSignInButton
+            label="Registracija putem Google-a"
+            loading={isGooglePending}
+            disabled={isPending}
+            onClick={() => loginWithGoogle({ nextPath: safeNextPath })}
+          />
+
+          <AuthDivider />
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="full_name">Ime i prezime</Label>
@@ -118,7 +132,7 @@ export default function Register() {
               </p>
             )}
 
-            <Button type="submit" className="w-full" disabled={isPending}>
+            <Button type="submit" className="w-full" disabled={isPending || isGooglePending}>
               {isPending ? 'Registracija u toku...' : 'Registracija'}
             </Button>
           </form>
@@ -126,7 +140,7 @@ export default function Register() {
           <p className="mt-6 text-center text-muted-foreground">
             Već imate nalog?{' '}
             <button
-              onClick={() => router.push('/auth/login')}
+              onClick={() => router.push(`/auth/login?next=${encodeURIComponent(safeNextPath)}`)}
               className="text-primary hover:underline focus:outline-none"
             >
               Prijava

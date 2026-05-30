@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { fetchCurrentUser } from '@/api/auth/axios';
+import { deleteAccount, fetchCurrentUser, updateUserPhone } from '@/api/auth/axios';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { toast } from '@/lib/toast';
 import { normalizePhoneNumber } from '@/lib/phone';
-import type { UserCreate } from '@/app/types/types';
+import type { User, UserCreate } from '@/app/types/types';
 import { supabase } from '@/lib/supabase';
 
 export const authKeys = {
@@ -71,6 +71,30 @@ export function useLogin() {
   });
 }
 
+export function useLoginWithGoogle() {
+  return useMutation({
+    mutationFn: async ({ nextPath }: { nextPath?: string }) => {
+      const safeNext = nextPath?.startsWith('/') ? nextPath : '/confirmation';
+      const redirectTo =
+        typeof window !== 'undefined'
+          ? `${window.location.origin}/auth/verified?next=${encodeURIComponent(safeNext)}&auth_source=oauth`
+          : undefined;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          queryParams: { prompt: 'select_account' },
+        },
+      });
+      if (error) throw new Error(error.message);
+      return true;
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Google prijava nije uspjela');
+    },
+  });
+}
+
 export function useRegister() {
   const queryClient = useQueryClient();
   const login = useAuthStore((state) => state.login);
@@ -79,7 +103,7 @@ export function useRegister() {
     mutationFn: async (userData: UserCreate) => {
       const emailRedirectTo =
         typeof window !== 'undefined'
-          ? `${window.location.origin}/auth/verified?next=/confirmation`
+          ? `${window.location.origin}/auth/verified?next=/confirmation&auth_source=email_signup`
           : undefined;
       const { data, error } = await supabase.auth.signUp({
         email: userData.email,
@@ -126,6 +150,42 @@ export function useLogout() {
       logout();
       queryClient.clear();
       toast.success('Uspješno ste se odjavili');
+    },
+  });
+}
+
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+  const logout = useAuthStore((state) => state.logout);
+
+  return useMutation({
+    mutationFn: async (confirmation: string) => {
+      await deleteAccount(confirmation);
+      await supabase.auth.signOut();
+    },
+    onSuccess: () => {
+      logout();
+      queryClient.clear();
+      toast.success('Vaš nalog je obrisan.');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Brisanje naloga nije uspjelo');
+    },
+  });
+}
+
+export function useUpdateUserPhone() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (phone_number: string) => updateUserPhone(phone_number),
+    onSuccess: (user: User) => {
+      queryClient.setQueryData(authKeys.user, user);
+      toast.success('Broj telefona je sačuvan.');
+      return user;
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Čuvanje broja telefona nije uspjelo');
     },
   });
 }

@@ -1,17 +1,18 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import axiosInstance from '@/api/axiosInstance';
 import OrderManagement from '@/components/Management/OrderManagement';
 import SalesManagement from '@/components/Management/SalesManagement';
 import CatalogManagement from '@/components/Management/CatalogManagement';
 import ManagementOverview from '@/components/Management/ManagementOverview';
 import CatalogTaxonomyManagement from '@/components/Management/CatalogTaxonomyManagement';
+import UserManagement from '@/components/Management/UserManagement';
 import { User } from '@/app/types/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 
-type ManagementSection = 'overview' | 'operations' | 'catalog';
+type ManagementSection = 'overview' | 'operations' | 'catalog' | 'users';
 type CatalogTab = 'products' | 'taxonomy';
 
 export default function ManagementPage() {
@@ -20,6 +21,7 @@ export default function ManagementPage() {
   const [catalogTab, setCatalogTab] = useState<CatalogTab>('products');
   const [focusedProductId, setFocusedProductId] = useState<number | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     let mounted = true;
@@ -45,6 +47,25 @@ export default function ManagementPage() {
     };
   }, [router]);
 
+  useEffect(() => {
+    const section = searchParams.get('section');
+    if (
+      section === 'overview' ||
+      section === 'operations' ||
+      section === 'catalog' ||
+      section === 'users'
+    ) {
+      setActiveSection(section);
+    }
+  }, [searchParams]);
+
+  const setSection = (nextSection: ManagementSection) => {
+    setActiveSection(nextSection);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('section', nextSection);
+    router.replace(`/management?${params.toString()}`);
+  };
+
   if (!isAuthorized) {
     return <div>Učitavanje...</div>;
   }
@@ -67,7 +88,7 @@ export default function ManagementPage() {
                     ? 'bg-primary text-primary-foreground'
                     : 'hover:bg-muted'
                 }`}
-                onClick={() => setActiveSection('overview')}
+                onClick={() => setSection('overview')}
               >
                 Pregled table
               </button>
@@ -77,7 +98,7 @@ export default function ManagementPage() {
                     ? 'bg-primary text-primary-foreground'
                     : 'hover:bg-muted'
                 }`}
-                onClick={() => setActiveSection('operations')}
+                onClick={() => setSection('operations')}
               >
                 Porudžbine i prodaja
               </button>
@@ -87,16 +108,28 @@ export default function ManagementPage() {
                     ? 'bg-primary text-primary-foreground'
                     : 'hover:bg-muted'
                 }`}
-                onClick={() => setActiveSection('catalog')}
+                onClick={() => setSection('catalog')}
               >
                 Upravljanje katalogom
+              </button>
+              <button
+                className={`w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors ${
+                  activeSection === 'users'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => setSection('users')}
+              >
+                Korisnici
               </button>
             </div>
           </CardContent>
         </Card>
 
         <div>
-          {activeSection === 'overview' ? <ManagementOverview /> : null}
+          {activeSection === 'overview' ? (
+            <ManagementOverview onOpenUsers={() => setSection('users')} />
+          ) : null}
 
           {activeSection === 'operations' ? (
             <Tabs defaultValue="orders" className="w-full">
@@ -140,6 +173,8 @@ export default function ManagementPage() {
               </TabsContent>
             </Tabs>
           ) : null}
+
+          {activeSection === 'users' ? <UserManagement /> : null}
         </div>
       </main>
     </div>

@@ -3,8 +3,10 @@
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import type { EmailOtpType } from '@supabase/supabase-js';
 import { fetchCurrentUser } from '@/api/auth/axios';
 import { supabase } from '@/lib/supabase';
+import { isPkceVerifierMissingError } from '@/lib/supabase-auth-errors';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +25,8 @@ function VerifiedPageContent() {
 
   const [state, setState] = useState<VerificationState>('checking');
   const [message, setMessage] = useState('Provjeravamo status verifikacije...');
+  const authSource = searchParams.get('auth_source');
+  const isOAuthFlow = authSource === 'oauth';
 
   const nextPath = useMemo(() => {
     const next = searchParams.get('next') || '/confirmation';
@@ -31,9 +35,20 @@ function VerifiedPageContent() {
 
   useEffect(() => {
     let cancelled = false;
+    const code = searchParams.get('code');
+    const tokenHash = searchParams.get('token_hash');
+    const type = searchParams.get('type') as EmailOtpType | null;
 
     const run = async () => {
       try {
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+        } else if (tokenHash && type) {
+          const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+          if (error) throw error;
+        }
+
         let session = null;
         for (let i = 0; i < 8; i += 1) {
           const {
@@ -46,10 +61,17 @@ function VerifiedPageContent() {
 
         if (!session) {
           if (cancelled) return;
-          setState('pending');
-          setMessage(
-            'Link je otvoren, ali sesija još nije aktivna. Prijavite se i nastavite na potvrdu porudžbine.'
-          );
+          if (isOAuthFlow) {
+            setState('error');
+            setMessage(
+              'Google prijava nije završena. Pokušajte ponovo kroz dugme "Google prijava".'
+            );
+          } else {
+            setState('pending');
+            setMessage(
+              'Link je otvoren, ali sesija još nije aktivna. Prijavite se i nastavite na potvrdu porudžbine.'
+            );
+          }
           return;
         }
 
@@ -57,6 +79,12 @@ function VerifiedPageContent() {
         const user = await fetchCurrentUser();
         if (cancelled) return;
         updateUser(user);
+
+        if (isOAuthFlow) {
+          setState('verified');
+          setMessage('Google prijava je uspješna. Nastavljamo dalje.');
+          return;
+        }
 
         if (user.email_verified) {
           setState('verified');
@@ -66,8 +94,22 @@ function VerifiedPageContent() {
 
         setState('pending');
         setMessage('E-mail još nije potvrđen. Otvorite link iz poruke i pokušajte ponovo.');
-      } catch {
+      } catch (error: unknown) {
         if (cancelled) return;
+        if (isPkceVerifierMissingError(error)) {
+          if (isOAuthFlow) {
+            setState('error');
+            setMessage(
+              'Google prijava je prekinuta zbog lokalnog auth stanja (PKCE). Osvježite stranicu i pokušajte Google prijavu ponovo iz istog browsera.'
+            );
+          } else {
+            setState('pending');
+            setMessage(
+              'Verifikacioni link je otvoren u drugom browseru ili je lokalna auth memorija obrisana. Prijavite se ponovo i otvorite novi verifikacioni link u istom browseru.'
+            );
+          }
+          return;
+        }
         setState('error');
         setMessage('Nijesmo uspjeli da provjerimo verifikaciju. Pokušajte ponovo.');
       }
@@ -78,7 +120,7 @@ function VerifiedPageContent() {
     return () => {
       cancelled = true;
     };
-  }, [setAuthSession, updateUser]);
+  }, [isOAuthFlow, searchParams, setAuthSession, updateUser]);
 
   useEffect(() => {
     if (state !== 'verified') return;
@@ -92,14 +134,16 @@ function VerifiedPageContent() {
     <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle className="text-center text-2xl text-primary">Verifikacija e-maila</CardTitle>
+          <CardTitle className="text-center text-2xl text-primary">
+            {isOAuthFlow ? 'Google prijava' : 'Verifikacija e-maila'}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 text-center">
           <p className="text-muted-foreground">{message}</p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Button asChild>
-              <Link href={nextPath}>Nastavi na porudžbinu</Link>
+              <Link href={nextPath}>{isOAuthFlow ? 'Nastavi' : 'Nastavi na porudžbinu'}</Link>
             </Button>
             <Button asChild variant="outline">
               <Link href="/auth/login">Idi na prijavu</Link>

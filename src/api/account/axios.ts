@@ -189,6 +189,23 @@ export const getOrderById = async (orderId: string): Promise<Order> => {
   }
 };
 
+// Get specific guest order using signed access token
+export const getGuestOrderByToken = async (
+  orderId: string,
+  accessToken: string
+): Promise<Order> => {
+  try {
+    const response = await api.get<Order>(`/orders/${orderId}/guest`, {
+      params: { token: accessToken },
+      headers: { 'X-Skip-Auth-Redirect': '1' },
+    });
+    return response.data;
+  } catch (error: unknown) {
+    console.error('Error fetching guest order:', getAxiosDetail(error) || error);
+    throw new Error(getAxiosDetail(error) || 'Unable to fetch order');
+  }
+};
+
 // Get Order Details (Order, Items, and Address) using hashed order ID
 export const getOrderDetails = async (orderId: string): Promise<Order> => {
   try {

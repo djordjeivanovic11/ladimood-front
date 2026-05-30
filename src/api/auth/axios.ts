@@ -1,11 +1,39 @@
 import api from '../axiosInstance';
 import type { MessageResponse, User } from '@/app/types/types';
 import { supabase } from '@/lib/supabase';
+import axios from 'axios';
+
+function getAxiosDetail(error: unknown): string | null {
+  if (!axios.isAxiosError(error)) return null;
+  const data = error.response?.data;
+  if (data && typeof data === 'object' && 'detail' in data) {
+    const detail = (data as { detail?: unknown }).detail;
+    if (typeof detail === 'string' && detail.trim()) return detail;
+  }
+  return null;
+}
 
 // Fetch current user
 export const fetchCurrentUser = async (): Promise<User> => {
   const response = await api.get<User>('/users/me');
   return response.data;
+};
+
+export const deleteAccount = async (confirmation: string): Promise<void> => {
+  try {
+    await api.delete('/users/me', { data: { confirmation } });
+  } catch (error: unknown) {
+    throw new Error(getAxiosDetail(error) || 'Unable to delete account');
+  }
+};
+
+export const updateUserPhone = async (phone_number: string): Promise<User> => {
+  try {
+    const response = await api.patch<User>('/users/me/phone', { phone_number });
+    return response.data;
+  } catch (error: unknown) {
+    throw new Error(getAxiosDetail(error) || 'Unable to update phone number');
+  }
 };
 
 // Forgot Password

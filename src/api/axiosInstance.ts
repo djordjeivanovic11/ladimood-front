@@ -49,7 +49,10 @@ axiosInstance.interceptors.request.use(async (config) => {
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
+    const skipAuthRedirect =
+      error.config?.headers?.['X-Skip-Auth-Redirect'] === '1' ||
+      error.config?.headers?.['x-skip-auth-redirect'] === '1';
+    if (axios.isAxiosError(error) && error.response?.status === 401 && !skipAuthRedirect) {
       void handleUnauthorized();
     }
     return Promise.reject(error);

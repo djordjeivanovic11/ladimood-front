@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 interface OrderByIdProps {
   orderId: string;
+  accessToken?: string | null;
 }
 
 function OrderSkeleton() {
@@ -32,8 +33,11 @@ function OrderSkeleton() {
   );
 }
 
-const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
-  const { data: order, isLoading, error } = useOrderByIdQuery(orderId);
+const OrderById: React.FC<OrderByIdProps> = ({ orderId, accessToken }) => {
+  const isGuestAccess = Boolean(accessToken?.trim());
+  const backHref = isGuestAccess ? '/' : '/account';
+  const backLabel = isGuestAccess ? 'Povratak na početnu' : 'Nazad na nalog';
+  const { data: order, isLoading, error } = useOrderByIdQuery(orderId, accessToken);
 
   if (isLoading) {
     return <OrderSkeleton />;
@@ -47,7 +51,7 @@ const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
             {error instanceof Error ? error.message : 'Učitavanje detalja porudžbine nije uspjelo.'}
           </p>
           <Button asChild variant="outline">
-            <Link href="/account">Nazad na nalog</Link>
+            <Link href={backHref}>{backLabel}</Link>
           </Button>
         </CardContent>
       </Card>
@@ -60,7 +64,7 @@ const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
         <CardContent className="space-y-4 py-10 text-center">
           <p className="text-sm text-muted-foreground">Porudžbina nije pronađena.</p>
           <Button asChild variant="outline">
-            <Link href="/account">Nazad na nalog</Link>
+            <Link href={backHref}>{backLabel}</Link>
           </Button>
         </CardContent>
       </Card>
@@ -104,7 +108,7 @@ const OrderById: React.FC<OrderByIdProps> = ({ orderId }) => {
         </p>
 
         <Button asChild variant="outline" className="w-full sm:w-auto">
-          <Link href="/account">Nazad na nalog</Link>
+          <Link href={backHref}>{backLabel}</Link>
         </Button>
       </CardContent>
     </Card>

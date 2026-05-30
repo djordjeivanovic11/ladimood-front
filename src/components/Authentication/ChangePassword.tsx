@@ -1,9 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import type { EmailOtpType } from '@supabase/supabase-js';
 import { resetPassword } from '@/api/auth/axios';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { supabase } from '@/lib/supabase';
+import { isPkceVerifierMissingError } from '@/lib/supabase-auth-errors';
 
 const ChangePassword = () => {
   const [newPassword, setNewPassword] = useState('');
@@ -19,11 +21,34 @@ const ChangePassword = () => {
     const prepareRecoverySession = async () => {
       const urlParams = new URLSearchParams(window.location.search);
       const code = urlParams.get('code');
+      const tokenHash = urlParams.get('token_hash');
+      const type = urlParams.get('type') as EmailOtpType | null;
 
       if (code) {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
+          if (isPkceVerifierMissingError(exchangeError)) {
+            setError(
+              'Link za reset lozinke mora biti otvoren u istom browseru gdje je reset pokrenut. Zatražite novi reset link i otvorite ga u istom browseru.'
+            );
+            return;
+          }
           setError(exchangeError.message);
+          return;
+        }
+      } else if (tokenHash && type) {
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          type,
+          token_hash: tokenHash,
+        });
+        if (verifyError) {
+          if (isPkceVerifierMissingError(verifyError)) {
+            setError(
+              'Link za reset lozinke mora biti otvoren u istom browseru gdje je reset pokrenut. Zatražite novi reset link i otvorite ga u istom browseru.'
+            );
+            return;
+          }
+          setError(verifyError.message);
           return;
         }
       }

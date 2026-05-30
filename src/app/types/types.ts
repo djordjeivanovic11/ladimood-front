@@ -265,6 +265,7 @@ export interface OrderBase {
 export interface Order extends OrderBase {
   id: string | number;
   order_number?: number;
+  access_token?: string | null;
   user_id?: number;
   plain_id?: string;
   payment_method?: string;

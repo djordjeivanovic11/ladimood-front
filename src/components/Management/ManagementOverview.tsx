@@ -35,7 +35,11 @@ function formatAddress(address?: AdminUserOverview['address']) {
   return parts.join(', ');
 }
 
-export default function ManagementOverview() {
+type ManagementOverviewProps = {
+  onOpenUsers: () => void;
+};
+
+export default function ManagementOverview({ onOpenUsers }: ManagementOverviewProps) {
   const [users, setUsers] = React.useState<AdminUserOverview[]>([]);
   const [summary, setSummary] = React.useState<DashboardSummary | null>(null);
   const [loading, setLoading] = React.useState(false);
@@ -91,7 +95,7 @@ export default function ManagementOverview() {
         </Card>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         <Card>
           <CardHeader>
             <CardTitle>Ukupno porudžbina</CardTitle>
@@ -114,6 +118,14 @@ export default function ManagementOverview() {
         </Card>
         <Card>
           <CardHeader>
+            <CardTitle>Newsletter</CardTitle>
+          </CardHeader>
+          <CardContent className="text-3xl font-semibold">
+            {summary?.newsletter_subscribers_count ?? 0}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
             <CardTitle>Ukupna prodaja</CardTitle>
           </CardHeader>
           <CardContent className="text-3xl font-semibold">
@@ -124,14 +136,17 @@ export default function ManagementOverview() {
 
       <div className="grid gap-6 xl:grid-cols-3">
         <Card className="xl:col-span-2">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
             <CardTitle>Korisnici, lični podaci i posljednja adresa</CardTitle>
+            <Button variant="outline" size="sm" onClick={onOpenUsers}>
+              Pogledaj sve korisnike
+            </Button>
           </CardHeader>
           <CardContent className="space-y-3">
             {users.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nema dostupnih korisnika.</p>
             ) : (
-              users.slice(0, 20).map((user) => (
+              users.slice(0, 5).map((user) => (
                 <div key={user.id} className="rounded-md border p-3 text-sm">
                   <div className="flex items-center justify-between gap-4">
                     <p className="font-medium">{user.full_name || `Korisnik #${user.id}`}</p>

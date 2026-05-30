@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { FaCheckCircle } from 'react-icons/fa';
 import ReferralPopup from '@/components/Order/Order/ReferralPopup';
 import { OrderLineImage } from '@/components/Order/OrderLineImage';
@@ -15,6 +15,7 @@ import { mapOrderItemsToDisplay } from '@/lib/order-display';
 type StoredOrder = {
   order_number?: number;
   id?: string;
+  access_token?: string;
   total_price: number;
   payment_method?: string;
   delivery_note?: string | null;
@@ -71,10 +72,12 @@ function readStoredOrder(key: string): StoredOrder | null {
   }
 }
 
-export default function SuccessPage() {
+function SuccessPageContent() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const orderId = typeof params.orderId === 'string' ? params.orderId : '';
+  const urlAccessToken = searchParams.get('token');
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const authLoading = useAuthStore((state) => state.isLoading);
 
@@ -83,7 +86,7 @@ export default function SuccessPage() {
   const [guestOrder, setGuestOrder] = useState<StoredOrder | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
-  const { data: fetchedOrder, isLoading: isFetchingOrder } = useOrderQuery(orderId);
+  const { data: fetchedOrder, isLoading: isFetchingOrder } = useOrderQuery(orderId, urlAccessToken);
 
   useEffect(() => {
     setStoredOrder(readStoredOrder('lastOrder'));
@@ -102,6 +105,7 @@ export default function SuccessPage() {
       address: source.address ?? null,
       delivery_note: source.delivery_note ?? null,
       items: mapOrderItemsToDisplay(source.items),
+      access_token: source.access_token ?? null,
     };
   }, [fetchedOrder, storedOrder, guestOrder, legacyOrder]);
 
@@ -188,11 +192,27 @@ export default function SuccessPage() {
       </Card>
 
       <div className="mt-8 flex w-full max-w-4xl flex-col gap-3 sm:flex-row">
-        <Button className="min-h-11 w-full sm:w-auto" onClick={() => router.push('/account')}>
-          Idi na Profil
+        <Button
+          className="min-h-11 w-full sm:w-auto"
+          onClick={() =>
+            router.push(
+              resolved.access_token
+                ? `/order/${orderId}?token=${encodeURIComponent(resolved.access_token)}`
+                : `/order/${orderId}`
+            )
+          }
+        >
+          Pregled porudžbine
         </Button>
         <Button
           variant="outline"
+          className="min-h-11 w-full sm:w-auto"
+          onClick={() => router.push(isAuthenticated ? '/account' : '/auth/login?next=/account')}
+        >
+          {isAuthenticated ? 'Idi na Profil' : 'Prijava'}
+        </Button>
+        <Button
+          variant="secondary"
           className="min-h-11 w-full sm:w-auto"
           onClick={() => router.push('/')}
         >
@@ -200,5 +220,19 @@ export default function SuccessPage() {
         </Button>
       </div>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4 sm:p-6">
+          <SuccessSkeleton />
+        </div>
+      }
+    >
+      <SuccessPageContent />
+    </Suspense>
   );
 }

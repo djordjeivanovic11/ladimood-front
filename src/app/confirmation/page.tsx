@@ -9,7 +9,9 @@ import { getPrimaryProductImageUrl } from '@/components/Management/catalog/catal
 import { IMAGE_SIZES } from '@/lib/image';
 import { Size } from '../types/types';
 import AddressManager from '@/components/Account/AddressManager';
+import { PhoneNumberEditor } from '@/components/Account/PhoneNumberEditor';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { normalizePhoneNumber } from '@/lib/phone';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -46,6 +48,7 @@ export default function ConfirmationPage() {
   const user = useAuthStore((state) => state.user);
   const authLoading = useAuthStore((state) => state.isLoading);
   const isVerifiedAccountCheckout = isAuthenticated && !!user?.email_verified;
+  const hasPhoneNumber = normalizePhoneNumber(user?.phone_number).length >= 9;
 
   const [cartItems, setCartItems] = useState<CartItemData[]>([]);
   const [totalAmount, setTotalAmount] = useState<number>(0);
@@ -86,6 +89,12 @@ export default function ConfirmationPage() {
   }, [authLoading, router, isVerifiedAccountCheckout]);
 
   const handleFinalizeOrder = async () => {
+    if (!hasPhoneNumber) {
+      setError('Unesite broj telefona prije završetka porudžbine.');
+      toast.error('Broj telefona je obavezan');
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -199,7 +208,13 @@ export default function ConfirmationPage() {
             </div>
           </div>
 
-          {/* Shipping Address */}
+          {/* Phone (only when missing) */}
+          {!hasPhoneNumber ? (
+            <div>
+              <PhoneNumberEditor />
+            </div>
+          ) : null}
+
           <div>
             <AddressManager />
           </div>
@@ -209,7 +224,10 @@ export default function ConfirmationPage() {
             <Button variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
               Nazad u korpu
             </Button>
-            <Button onClick={handleFinalizeOrder} disabled={isSubmitting || cartItems.length === 0}>
+            <Button
+              onClick={handleFinalizeOrder}
+              disabled={isSubmitting || cartItems.length === 0 || !hasPhoneNumber}
+            >
               {isSubmitting ? 'Završavanje...' : 'Završi porudžbinu'}
             </Button>
           </div>

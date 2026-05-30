@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { getUserOrders, createGuestOrder, getOrderById } from '@/api/account/axios';
+import {
+  getUserOrders,
+  createGuestOrder,
+  getOrderById,
+  getGuestOrderByToken,
+} from '@/api/account/axios';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCartStore } from '@/stores/useCartStore';
 import { toast } from '@/lib/toast';
@@ -10,7 +15,8 @@ import type { GuestOrderCreate } from '@/api/account/axios';
 export const orderKeys = {
   all: ['orders'] as const,
   list: () => [...orderKeys.all, 'list'] as const,
-  detail: (orderId: string) => [...orderKeys.all, 'detail', orderId] as const,
+  detail: (orderId: string, accessToken?: string | null) =>
+    [...orderKeys.all, 'detail', orderId, accessToken ?? 'auth'] as const,
 };
 
 export function useOrdersQuery() {
@@ -29,12 +35,21 @@ export function useOrdersQuery() {
   });
 }
 
-export function useOrderQuery(orderId: string) {
+export function useOrderQuery(orderId: string, accessToken?: string | null) {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const authLoading = useAuthStore((state) => state.isLoading);
+  const hasGuestToken = Boolean(accessToken?.trim());
+
   return useQuery({
-    queryKey: orderKeys.detail(orderId),
-    queryFn: () => getOrderById(orderId),
-    enabled: !!orderId,
+    queryKey: orderKeys.detail(orderId, accessToken),
+    queryFn: () =>
+      hasGuestToken ? getGuestOrderByToken(orderId, accessToken as string) : getOrderById(orderId),
+    enabled: !!orderId && (hasGuestToken || (!authLoading && isAuthenticated)),
     staleTime: 60 * 1000,
+    retry: (failureCount, error) => {
+      if (!hasGuestToken && isUnauthorizedError(error)) return false;
+      return failureCount < 1;
+    },
   });
 }
 

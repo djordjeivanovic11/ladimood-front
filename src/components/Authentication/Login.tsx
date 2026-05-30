@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
-import { useLogin } from '@/hooks/queries/useAuth';
+import { useLogin, useLoginWithGoogle } from '@/hooks/queries/useAuth';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { AuthDivider, GoogleSignInButton } from '@/components/Authentication/GoogleSignInButton';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -15,8 +16,12 @@ import { Label } from '@/components/ui/label';
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { mutate: login, isPending, error } = useLogin();
+  const { mutate: loginWithGoogle, isPending: isGooglePending } = useLoginWithGoogle();
+  const nextPath = searchParams.get('next') || '/account';
+  const safeNextPath = nextPath.startsWith('/') ? nextPath : '/account';
 
   const {
     register,
@@ -28,16 +33,16 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/account');
+      router.push(safeNextPath);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, safeNextPath]);
 
   const onSubmit = (data: LoginFormData) => {
     login(
       { email: data.email, password: data.password },
       {
         onSuccess: () => {
-          router.push('/account');
+          router.push(safeNextPath);
         },
       }
     );
@@ -51,6 +56,16 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-accent/30 p-4">
       <div className="w-full max-w-md transform space-y-6 rounded-2xl bg-card p-8 shadow-2xl transition-all duration-500">
         <h1 className="text-center text-4xl font-extrabold text-primary">Prijava</h1>
+
+        <GoogleSignInButton
+          label="Prijava putem Google-a"
+          loading={isGooglePending}
+          disabled={isPending}
+          onClick={() => loginWithGoogle({ nextPath: safeNextPath })}
+        />
+
+        <AuthDivider />
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="email">E-mail</Label>
@@ -97,7 +112,7 @@ const Login = () => {
             </p>
           )}
 
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button type="submit" className="w-full" disabled={isPending || isGooglePending}>
             {isPending ? (
               <span className="flex items-center gap-2">
                 <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
@@ -127,7 +142,7 @@ const Login = () => {
         <p className="text-center text-muted-foreground">
           Nemate nalog?{' '}
           <button
-            onClick={() => router.push('/auth/register')}
+            onClick={() => router.push(`/auth/register?next=${encodeURIComponent(safeNextPath)}`)}
             className="text-primary hover:underline focus:outline-none"
           >
             Registracija

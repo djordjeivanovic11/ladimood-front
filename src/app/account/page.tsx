@@ -8,6 +8,7 @@ import AddressManager from '@/components/Account/AddressManager';
 import OrderHistory from '@/components/Account/Order/OrderHistory';
 import Wishlist from '@/components/Account/Wishlist';
 import Cart from '@/components/Account/Cart';
+import { DeleteAccountSection } from '@/components/Account/DeleteAccountSection';
 import Newsletter from '@/components/Frontpage/Newsletter';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCurrentUser } from '@/hooks/queries/useAuth';
@@ -86,6 +87,8 @@ export default function AccountPage() {
               <Wishlist />
               <Cart />
             </div>
+
+            <DeleteAccountSection />
           </>
         )}
       </div>

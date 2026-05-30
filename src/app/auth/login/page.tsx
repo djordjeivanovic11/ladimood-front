@@ -1,12 +1,10 @@
+import { Suspense } from 'react';
 import Login from '@/components/Authentication/Login';
-import React from 'react';
 
-const LoginPage: React.FC = () => {
+export default function LoginPage() {
   return (
-    <div>
+    <Suspense fallback={null}>
       <Login />
-    </div>
+    </Suspense>
   );
-};
-
-export default LoginPage;
+}

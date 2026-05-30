@@ -2,22 +2,21 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { forgotPassword } from '@/api/auth/axios';
+import { toast } from '@/lib/toast';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
     try {
       const data = await forgotPassword(email);
 
-      setSuccess(
+      toast.success(
         data.message || 'Ako je ovaj e-mail registrovan, dobićete uputstva za resetovanje lozinke.'
       );
       setTimeout(() => {
@@ -49,7 +48,6 @@ const ForgotPassword = () => {
             />
           </div>
           {error && <p className="text-red-500 text-center">{error}</p>}
-          {success && <p className="text-green-500 text-center">{success}</p>}
           <button
             type="submit"
             className="w-full px-4 py-3 font-bold text-white bg-[#0097B2] rounded-lg hover:bg-[#007A90] focus:outline-none focus:ring-4 focus:ring-[#0097B2] transition duration-300 shadow-lg hover:shadow-xl"

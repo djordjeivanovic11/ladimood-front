@@ -97,13 +97,42 @@ export interface AdminUserOverview {
   full_name: string;
   phone_number?: string | null;
   is_active: boolean;
+  email_verified: boolean;
   role_name?: string | null;
   created_at: string;
+  last_active_at?: string | null;
   address?: AddressManagement | null;
   order_count: number;
   total_spent: number;
   last_order_at?: string | null;
   last_order_status?: OrderStatusEnum | null;
+  is_newsletter_subscriber: boolean;
+}
+
+export interface AdminUserOrderSummary {
+  id: number;
+  order_number: number;
+  status: OrderStatusEnum;
+  total_price: number;
+  created_at: string;
+}
+
+export interface AdminUserDetail extends AdminUserOverview {
+  updated_at: string;
+  orders: AdminUserOrderSummary[];
+}
+
+export interface AdminUserUpdatePayload {
+  is_active?: boolean;
+  role_name?: 'USER' | 'ADMIN';
+}
+
+export interface AdminNewsletterSubscriber {
+  id: number;
+  email: string;
+  created_at: string;
+  has_registered_account: boolean;
+  user_id?: number | null;
 }
 
 export interface DashboardSummary {
@@ -114,6 +143,7 @@ export interface DashboardSummary {
   delivered_orders_count: number;
   completion_rate: number;
   total_sales_amount: number;
+  newsletter_subscribers_count: number;
   status_counts: Record<string, number>;
 }
 
@@ -135,6 +165,65 @@ export const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
   } catch (error: unknown) {
     const message = getErrorMessage(error, 'Učitavanje sažetka table nije uspjelo.');
     console.error('Error fetching dashboard summary:', message);
+    throw new Error(message);
+  }
+};
+
+export const fetchAdminUserDetail = async (userId: number): Promise<AdminUserDetail> => {
+  try {
+    const response = await axiosInstance.get<AdminUserDetail>(`/admin/users/${userId}`);
+    return response.data;
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, `Učitavanje korisnika ID ${userId} nije uspjelo.`);
+    console.error(`Error fetching admin user detail for ID ${userId}:`, message);
+    throw new Error(message);
+  }
+};
+
+export const updateAdminUser = async (
+  userId: number,
+  payload: AdminUserUpdatePayload
+): Promise<AdminUserDetail> => {
+  try {
+    const response = await axiosInstance.patch<AdminUserDetail>(`/admin/users/${userId}`, payload);
+    return response.data;
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, `Ažuriranje korisnika ID ${userId} nije uspjelo.`);
+    console.error(`Error updating admin user ID ${userId}:`, message);
+    throw new Error(message);
+  }
+};
+
+export const deleteAdminUser = async (userId: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/admin/users/${userId}`);
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, `Trajno brisanje korisnika ID ${userId} nije uspjelo.`);
+    console.error(`Error permanently deleting user ID ${userId}:`, message);
+    throw new Error(message);
+  }
+};
+
+export const fetchNewsletterSubscribers = async (): Promise<AdminNewsletterSubscriber[]> => {
+  try {
+    const response = await axiosInstance.get<AdminNewsletterSubscriber[]>('/admin/newsletter');
+    return response.data;
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, 'Učitavanje newsletter korisnika nije uspjelo.');
+    console.error('Error fetching newsletter subscribers:', message);
+    throw new Error(message);
+  }
+};
+
+export const deleteNewsletterSubscriber = async (subscriberId: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/admin/newsletter/${subscriberId}`);
+  } catch (error: unknown) {
+    const message = getErrorMessage(
+      error,
+      `Brisanje newsletter korisnika ID ${subscriberId} nije uspjelo.`
+    );
+    console.error(`Error deleting newsletter subscriber ID ${subscriberId}:`, message);
     throw new Error(message);
   }
 };

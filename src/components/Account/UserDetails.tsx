@@ -3,15 +3,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { LogOut, Mail, Phone, User } from 'lucide-react';
+import { LogOut, Mail, User } from 'lucide-react';
 import { logoutUser } from '@/api/auth/axios';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCurrentUser } from '@/hooks/queries/useAuth';
 import { AccountSectionHeader } from '@/components/Account/AccountSectionHeader';
+import { PhoneNumberEditor } from '@/components/Account/PhoneNumberEditor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatPhoneNumber } from '@/lib/phone';
 
 function UserDetailsSkeleton() {
   return (
@@ -99,11 +99,7 @@ const UserDetails: React.FC = () => {
         <div className="space-y-3">
           <DetailRow icon={User} label="Ime" value={user.full_name} />
           <DetailRow icon={Mail} label="E-mail" value={user.email} />
-          <DetailRow
-            icon={Phone}
-            label="Telefon"
-            value={formatPhoneNumber(user.phone_number) || 'Nije unijeto'}
-          />
+          <PhoneNumberEditor />
         </div>
         <Button type="button" variant="outline" className="w-full gap-2" onClick={handleLogout}>
           <LogOut className="h-4 w-4" aria-hidden />
