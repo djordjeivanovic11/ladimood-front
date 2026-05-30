@@ -15,6 +15,7 @@ import { PhoneNumberInput } from '@/components/ui/phone-input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IMAGE_SIZES } from '@/lib/image';
 import { normalizePhoneNumber } from '@/lib/phone';
+import { generateIdempotencyKey } from '@/lib/idempotency';
 import { cn } from '@/lib/utils';
 import type { Size } from '@/app/types/types';
 
@@ -58,27 +59,34 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
 
     createOrder(
       {
-        items: cartItems.map((item) => ({
-          product_id: item.product.id,
-          quantity: item.quantity,
-          color: item.color,
-          size: item.size as Size,
-          price: item.product.price,
-        })),
-        guest_email: data.guest_email,
-        guest_name: data.guest_name,
-        guest_phone: normalizePhoneNumber(data.guest_phone),
-        delivery_note: data.delivery_note,
-        address: data.address,
+        orderData: {
+          items: cartItems.map((item) => ({
+            product_id: item.product.id,
+            quantity: item.quantity,
+            color: item.color,
+            size: item.size as Size,
+            price: item.product.price,
+          })),
+          guest_email: data.guest_email,
+          guest_name: data.guest_name,
+          guest_phone: normalizePhoneNumber(data.guest_phone),
+          delivery_note: data.delivery_note,
+          address: data.address,
+        },
+        idempotencyKey: generateIdempotencyKey('guest-order'),
       },
       {
         onSuccess: (order) => {
           // Store the latest guest order for the success page (since fetching orders requires auth)
           localStorage.setItem('lastGuestOrder', JSON.stringify(order));
+          const successPath =
+            order.access_token?.trim()
+              ? `/success/${order.id}?token=${encodeURIComponent(order.access_token)}`
+              : `/success/${order.id}`;
           if (onSuccess) {
             onSuccess(String(order.id));
           } else {
-            router.push(`/success/${order.id}`);
+            router.push(successPath);
           }
         },
       }

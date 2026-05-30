@@ -133,7 +133,7 @@ function ManagementPageContent() {
 
           {activeSection === 'operations' ? (
             <Tabs defaultValue="orders" className="w-full">
-              <TabsList>
+              <TabsList className="grid w-full grid-cols-2 sm:inline-flex sm:w-auto">
                 <TabsTrigger value="orders">Porudžbine</TabsTrigger>
                 <TabsTrigger value="sales">Prodaja</TabsTrigger>
               </TabsList>

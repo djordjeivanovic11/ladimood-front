@@ -218,9 +218,14 @@ export const getOrderDetails = async (orderId: string): Promise<Order> => {
 };
 
 // Create an order
-export const createOrder = async (order: OrderCreate): Promise<Order> => {
+export const createOrder = async (
+  order: OrderCreate,
+  options?: { idempotencyKey?: string }
+): Promise<Order> => {
   try {
-    const response = await api.post<Order>('/orders', order);
+    const response = await api.post<Order>('/orders', order, {
+      headers: options?.idempotencyKey ? { 'Idempotency-Key': options.idempotencyKey } : undefined,
+    });
     return response.data;
   } catch (error: unknown) {
     console.error('Error creating order:', getAxiosDetail(error) || error);
@@ -471,9 +476,14 @@ export interface GuestOrderCreate {
   delivery_note?: string;
 }
 
-export const createGuestOrder = async (orderData: GuestOrderCreate): Promise<Order> => {
+export const createGuestOrder = async (
+  orderData: GuestOrderCreate,
+  options?: { idempotencyKey?: string }
+): Promise<Order> => {
   try {
-    const response = await api.post<Order>('/orders/guest', orderData);
+    const response = await api.post<Order>('/orders/guest', orderData, {
+      headers: options?.idempotencyKey ? { 'Idempotency-Key': options.idempotencyKey } : undefined,
+    });
     return response.data;
   } catch (error: unknown) {
     console.error('Error creating guest order:', getAxiosDetail(error) || error);

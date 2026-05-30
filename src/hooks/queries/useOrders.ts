@@ -63,8 +63,14 @@ export function useCreateGuestOrder() {
   const clearGuestSession = useCartStore((state) => state.clearGuestSession);
 
   return useMutation({
-    mutationFn: async (orderData: GuestOrderCreate) => {
-      return createGuestOrder(orderData);
+    mutationFn: async ({
+      orderData,
+      idempotencyKey,
+    }: {
+      orderData: GuestOrderCreate;
+      idempotencyKey?: string;
+    }) => {
+      return createGuestOrder(orderData, { idempotencyKey });
     },
     onSuccess: (order) => {
       clearCart();

@@ -75,15 +75,25 @@ function VerifiedPageContent() {
 
         login(user);
 
-        if (isOAuthFlow) {
+        const isConfirmed = user.email_verified || (await isSupabaseEmailConfirmed());
+
+        if (isOAuthFlow && isConfirmed) {
           setState('verified');
           setMessage('Google prijava je uspješna. Nastavljamo dalje.');
           return;
         }
 
-        if (user.email_verified || (await isSupabaseEmailConfirmed())) {
+        if (!isOAuthFlow && isConfirmed) {
           setState('verified');
           setMessage('Vaš e-mail je potvrđen. Možete nastaviti na porudžbinu.');
+          return;
+        }
+
+        if (isOAuthFlow) {
+          setState('pending');
+          setMessage(
+            'Google prijava je završena, ali verifikacija naloga još nije potvrđena. Pokušajte ponovo za nekoliko trenutaka.'
+          );
           return;
         }
 

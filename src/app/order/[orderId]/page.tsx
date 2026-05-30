@@ -36,7 +36,9 @@ function OrderPageContent({ params }: OrderPageProps) {
       try {
         const resolvedParams = await params;
         if (!isAuthenticated && !isGuestAccess && !authLoading) {
-          const nextPath = `/order/${resolvedParams.orderId}`;
+          const nextPath = accessToken?.trim()
+            ? `/order/${resolvedParams.orderId}?token=${encodeURIComponent(accessToken)}`
+            : `/order/${resolvedParams.orderId}`;
           router.push(`/auth/login?next=${encodeURIComponent(nextPath)}`);
           return;
         }

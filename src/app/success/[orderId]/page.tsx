@@ -38,6 +38,16 @@ type StoredOrder = {
   }>;
 };
 
+function normalizeOrderId(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function matchesOrderId(candidateOrderId: unknown, routeOrderId: string): boolean {
+  return normalizeOrderId(candidateOrderId) === normalizeOrderId(routeOrderId);
+}
+
 function SuccessSkeleton() {
   return (
     <Card className="w-full max-w-4xl">
@@ -86,7 +96,23 @@ function SuccessPageContent() {
   const [guestOrder, setGuestOrder] = useState<StoredOrder | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
-  const { data: fetchedOrder, isLoading: isFetchingOrder } = useOrderQuery(orderId, urlAccessToken);
+  const fallbackAccessToken = useMemo(() => {
+    const localCandidates = [storedOrder, guestOrder, legacyOrder];
+    const matchingOrder = localCandidates.find(
+      (candidate) =>
+        matchesOrderId(candidate?.id, orderId) &&
+        typeof candidate?.access_token === 'string' &&
+        candidate.access_token.trim().length > 0
+    );
+    return matchingOrder?.access_token?.trim() ?? null;
+  }, [orderId, storedOrder, guestOrder, legacyOrder]);
+
+  const effectiveAccessToken = (urlAccessToken?.trim() || fallbackAccessToken)?.trim() ?? null;
+
+  const { data: fetchedOrder, isLoading: isFetchingOrder } = useOrderQuery(
+    orderId,
+    effectiveAccessToken
+  );
 
   useEffect(() => {
     setStoredOrder(readStoredOrder('lastOrder'));
@@ -97,7 +123,10 @@ function SuccessPageContent() {
 
   const resolved = useMemo(() => {
     const apiOrder = fetchedOrder as StoredOrder | undefined;
-    const source = apiOrder ?? storedOrder ?? guestOrder ?? legacyOrder;
+    const localSource = [storedOrder, guestOrder, legacyOrder].find(
+      (candidate) => matchesOrderId(candidate?.id, orderId) && Boolean(candidate?.items?.length)
+    );
+    const source = apiOrder?.items?.length ? apiOrder : localSource;
     if (!source?.items?.length) return null;
 
     return {
@@ -107,9 +136,10 @@ function SuccessPageContent() {
       items: mapOrderItemsToDisplay(source.items),
       access_token: source.access_token ?? null,
     };
-  }, [fetchedOrder, storedOrder, guestOrder, legacyOrder]);
+  }, [fetchedOrder, orderId, storedOrder, guestOrder, legacyOrder]);
 
-  const isLoading = !hydrated || (isAuthenticated && !authLoading && isFetchingOrder && !resolved);
+  const shouldFetchOrder = Boolean(orderId) && (Boolean(effectiveAccessToken) || isAuthenticated);
+  const isLoading = !hydrated || (shouldFetchOrder && !authLoading && isFetchingOrder && !resolved);
 
   if (isLoading) {
     return (
@@ -121,7 +151,22 @@ function SuccessPageContent() {
 
   if (!resolved) {
     return (
-      <div className="mt-10 text-center text-muted-foreground">Učitavanje vaše narudžbe...</div>
+      <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4 sm:p-6">
+        <Card className="w-full max-w-xl">
+          <CardContent className="space-y-4 p-6 text-center sm:p-8">
+            <h2 className="text-xl font-semibold">Ne možemo prikazati ovu porudžbinu</h2>
+            <p className="text-sm text-muted-foreground">
+              Provjerite email sa potvrdom porudžbine i otvorite sigurni link za pregled detalja.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button onClick={() => router.push('/')}>Povratak na Početnu</Button>
+              <Button variant="outline" onClick={() => router.push('/shop')}>
+                Nazad u Prodavnicu
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 

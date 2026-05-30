@@ -92,7 +92,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col overflow-y-auto sm:overflow-hidden">
           <div className="flex items-center justify-between border-b p-4">
             <h2 className="text-xl font-bold text-primary sm:text-2xl">Vaša korpa</h2>
             <Button
@@ -106,7 +106,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
             </Button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="p-4 sm:flex-1 sm:overflow-y-auto">
             {isLoading ? (
               <CartSkeleton />
             ) : cartItems.length === 0 ? (
@@ -131,7 +131,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
           </div>
 
           {cartItems.length > 0 && (
-            <div className="space-y-3 border-t p-4">
+            <div className="space-y-3 border-t p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-4">
               <CallToOrder
                 cartItems={cartItems}
                 onOrder={handleOrder}

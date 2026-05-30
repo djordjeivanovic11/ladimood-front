@@ -12,6 +12,7 @@ import AddressManager from '@/components/Account/AddressManager';
 import { PhoneNumberEditor } from '@/components/Account/PhoneNumberEditor';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { normalizePhoneNumber } from '@/lib/phone';
+import { generateIdempotencyKey } from '@/lib/idempotency';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -48,6 +49,7 @@ export default function ConfirmationPage() {
   const user = useAuthStore((state) => state.user);
   const authLoading = useAuthStore((state) => state.isLoading);
   const isVerifiedAccountCheckout = isAuthenticated && !!user?.email_verified;
+  const isAuthenticatedUnverified = isAuthenticated && !authLoading && !user?.email_verified;
   const hasPhoneNumber = normalizePhoneNumber(user?.phone_number).length >= 9;
 
   const [cartItems, setCartItems] = useState<CartItemData[]>([]);
@@ -112,7 +114,9 @@ export default function ConfirmationPage() {
         payment_method: 'COD' as const,
       };
 
-      const createdOrder = await createOrder(orderData);
+      const createdOrder = await createOrder(orderData, {
+        idempotencyKey: generateIdempotencyKey('user-order'),
+      });
 
       setCartItems([]);
       try {
@@ -135,6 +139,31 @@ export default function ConfirmationPage() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
         <ConfirmationSkeleton />
+      </div>
+    );
+  }
+
+  if (isAuthenticatedUnverified) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
+        <Card className="w-full max-w-lg">
+          <CardHeader>
+            <CardTitle className="text-center text-2xl text-primary">
+              Potrebna je verifikacija e-maila
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-center">
+            <p className="text-muted-foreground">
+              Prije završetka porudžbine potrebno je da vaš nalog bude verifikovan.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button onClick={() => router.push('/auth/verified')}>Provjeri verifikaciju</Button>
+              <Button variant="outline" onClick={() => router.push('/shop')}>
+                Nazad u prodavnicu
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
