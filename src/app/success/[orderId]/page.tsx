@@ -40,7 +40,7 @@ type StoredOrder = {
 function SuccessSkeleton() {
   return (
     <Card className="w-full max-w-4xl">
-      <CardContent className="p-10">
+      <CardContent className="p-6 sm:p-8 lg:p-10">
         <Skeleton className="mx-auto mb-6 h-16 w-16 rounded-full" />
         <Skeleton className="mx-auto mb-4 h-8 w-64" />
         <Skeleton className="mx-auto mb-8 h-4 w-48" />
@@ -109,7 +109,7 @@ export default function SuccessPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-muted/50 p-6">
+      <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4 sm:p-6">
         <SuccessSkeleton />
       </div>
     );
@@ -122,13 +122,15 @@ export default function SuccessPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-muted/50 p-6">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-muted/50 p-4 sm:p-6">
       <Card className="w-full max-w-4xl">
-        <CardContent className="flex flex-col gap-8 p-10 lg:flex-row">
+        <CardContent className="flex flex-col gap-8 p-5 sm:p-8 lg:flex-row lg:p-10">
           <div className="lg:w-1/2">
             <div className="text-center lg:text-left">
               <FaCheckCircle className="mx-auto mb-6 text-6xl text-primary lg:mx-0" />
-              <h2 className="mb-4 text-3xl font-bold">Hvala Vam na Vašoj porudžbini!</h2>
+              <h2 className="mb-4 text-2xl font-bold sm:text-3xl">
+                Hvala Vam na Vašoj porudžbini!
+              </h2>
               <p className="mb-6 text-muted-foreground">
                 Srećni smo što ste odabrali Ladimood. Vaša porudžbina je uspješno zabilježena!
               </p>
@@ -159,13 +161,13 @@ export default function SuccessPage() {
                 {resolved.items.map((item, index) => (
                   <li
                     key={`${item.product_id}-${index}`}
-                    className="flex items-center justify-between border-b pb-4"
+                    className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4">
                       <OrderLineImage src={item.image} alt={item.name} size="md" />
-                      <div>
+                      <div className="min-w-0">
                         <p className="font-medium">{item.name}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground break-words">
                           {item.quantity} × €{item.price.toFixed(2)} | Veličina: {item.size}
                         </p>
                       </div>
@@ -185,9 +187,15 @@ export default function SuccessPage() {
         </CardContent>
       </Card>
 
-      <div className="mt-8 flex gap-4">
-        <Button onClick={() => router.push('/account')}>Idi na Profil</Button>
-        <Button variant="outline" onClick={() => router.push('/')}>
+      <div className="mt-8 flex w-full max-w-4xl flex-col gap-3 sm:flex-row">
+        <Button className="min-h-11 w-full sm:w-auto" onClick={() => router.push('/account')}>
+          Idi na Profil
+        </Button>
+        <Button
+          variant="outline"
+          className="min-h-11 w-full sm:w-auto"
+          onClick={() => router.push('/')}
+        >
           Povratak na Početnu
         </Button>
       </div>

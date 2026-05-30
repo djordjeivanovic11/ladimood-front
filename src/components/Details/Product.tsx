@@ -9,7 +9,7 @@ import {
   getPrimaryProductImageUrl,
   getPrimaryProductMedia,
 } from '@/components/Management/catalog/catalog-image';
-import { shouldUnoptimizeImage } from '@/lib/image';
+import { IMAGE_SIZES } from '@/lib/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -24,6 +24,7 @@ function swatchBgClass(hex: string) {
 
 interface ProductProps {
   product: ProductType;
+  layoutVariant?: 'home' | 'shop';
   availableColors: string[];
   availableSizes: string[];
   selectedColor: string;
@@ -37,6 +38,7 @@ interface ProductProps {
 
 const Product: React.FC<ProductProps> = ({
   product,
+  layoutVariant = 'home',
   availableColors,
   availableSizes,
   selectedColor,
@@ -70,6 +72,8 @@ const Product: React.FC<ProductProps> = ({
   const primaryMedia = getPrimaryProductMedia(product);
   const imageSrc =
     getPrimaryProductImageUrl(product) || primaryMedia?.url || '/images/default-product.jpg';
+  const imageSizes =
+    layoutVariant === 'shop' ? IMAGE_SIZES.productCardShop : IMAGE_SIZES.productCardHome;
 
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -78,11 +82,11 @@ const Product: React.FC<ProductProps> = ({
           src={imageSrc}
           alt={product.name}
           framing={primaryMedia}
+          sizes={imageSizes}
           containerClassName="h-full w-full transition-transform duration-500 group-hover:scale-[1.02]"
-          unoptimized={shouldUnoptimizeImage(imageSrc)}
         />
       </div>
-      <CardContent className="space-y-4 p-4 sm:p-5">
+      <CardContent className="space-y-4 p-4 sm:space-y-5 sm:p-5">
         <div className="text-center">
           <h3 className="line-clamp-2 text-lg font-semibold transition-colors group-hover:text-primary sm:text-xl">
             {product.name}
@@ -92,7 +96,7 @@ const Product: React.FC<ProductProps> = ({
           </p>
         </div>
 
-        <div className="flex justify-center gap-2 md:opacity-0 md:transition-opacity md:duration-300 md:group-hover:opacity-100">
+        <div className="flex justify-center gap-2">
           {availableColors.map((color, index) => (
             <button
               key={index}
@@ -100,7 +104,7 @@ const Product: React.FC<ProductProps> = ({
               title={`Odaberi boju ${color}`}
               onClick={() => onSelectColor(color)}
               className={cn(
-                'h-6 w-6 rounded-full border-2 transition-transform hover:scale-110',
+                'h-8 w-8 rounded-full border-2 transition-transform hover:scale-105 sm:h-9 sm:w-9',
                 selectedColor === color ? 'border-primary ring-2 ring-primary/50' : 'border-border',
                 swatchBgClass(color)
               )}
@@ -109,14 +113,14 @@ const Product: React.FC<ProductProps> = ({
           ))}
         </div>
 
-        <div className="flex flex-wrap justify-center gap-2 md:opacity-0 md:transition-opacity md:duration-300 md:group-hover:opacity-100">
+        <div className="flex flex-wrap justify-center gap-2">
           {availableSizes.map((size, index) => (
             <button
               key={index}
               type="button"
               onClick={() => onSelectSize(size)}
               className={cn(
-                'rounded-full border px-3 py-1 text-sm font-semibold transition-all',
+                'min-h-11 rounded-full border px-3 py-2 text-sm font-semibold transition-all',
                 selectedSize === size
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'border-border hover:bg-muted'
@@ -133,13 +137,14 @@ const Product: React.FC<ProductProps> = ({
             onClick={() => {
               onAddToCart();
             }}
-            className="flex-1"
+            className="min-h-11 flex-1"
           >
             Dodaj u korpu
           </Button>
           <Button
             variant="outline"
             size="icon"
+            className="h-11 w-11"
             onClick={handleAddToWishlist}
             title="Dodaj u listu želja"
             aria-label="Dodaj u listu želja"

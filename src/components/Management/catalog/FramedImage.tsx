@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import type { MediaFraming } from '@/components/Management/catalog/media-frame';
 import { getFramedImageStyle } from '@/components/Management/catalog/media-frame';
+import { shouldUnoptimizeImage } from '@/lib/image';
 import { cn } from '@/lib/utils';
 
 type FramedImageProps = {
@@ -13,6 +14,7 @@ type FramedImageProps = {
   className?: string;
   containerClassName?: string;
   unoptimized?: boolean;
+  sizes?: string;
 };
 
 export function FramedImage({
@@ -21,7 +23,8 @@ export function FramedImage({
   framing,
   className,
   containerClassName,
-  unoptimized = true,
+  unoptimized,
+  sizes,
 }: FramedImageProps) {
   const [hasError, setHasError] = React.useState(false);
 
@@ -48,7 +51,8 @@ export function FramedImage({
         src={src}
         alt={alt}
         fill
-        unoptimized={unoptimized}
+        sizes={sizes}
+        unoptimized={unoptimized ?? shouldUnoptimizeImage(src)}
         className={cn('h-full w-full', className)}
         style={getFramedImageStyle(framing)}
         onError={() => setHasError(true)}

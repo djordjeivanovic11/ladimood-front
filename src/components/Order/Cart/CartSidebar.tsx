@@ -45,6 +45,17 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
     }
   }, [isOpen, refetch]);
 
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
   const handleRemoveFromCart = (itemId: number, color: string, size: Size) => {
     removeFromCart({ itemId, color, size });
   };
@@ -77,14 +88,20 @@ const CartSidebar: React.FC<CartSidebarProps> = ({ isOpen, closeCart }) => {
       )}
 
       <div
-        className={`fixed right-0 top-0 z-50 h-full w-full transform bg-background shadow-xl transition-transform duration-300 ease-in-out sm:w-96 md:w-[28rem] ${
+        className={`fixed right-0 top-0 z-50 h-full w-full transform bg-background shadow-xl transition-transform duration-300 ease-in-out sm:w-[28rem] ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between border-b p-4">
             <h2 className="text-xl font-bold text-primary sm:text-2xl">Vaša korpa</h2>
-            <Button variant="ghost" size="icon" onClick={closeCart} aria-label="Zatvori korpu">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-11 w-11"
+              onClick={closeCart}
+              aria-label="Zatvori korpu"
+            >
               <FaTimes className="h-5 w-5" />
             </Button>
           </div>

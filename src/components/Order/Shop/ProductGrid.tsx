@@ -123,7 +123,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, variant = 'home' })
         className={
           variant === 'shop'
             ? 'grid w-full grid-cols-1 justify-start gap-6 sm:grid-cols-[repeat(auto-fit,minmax(15.5rem,22rem))] lg:grid-cols-[repeat(auto-fit,minmax(17.5rem,24rem))]'
-            : 'grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-3'
+            : 'grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3'
         }
       >
         {products.map((product) => {
@@ -135,6 +135,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, variant = 'home' })
             <Product
               key={id}
               product={product}
+              layoutVariant={variant}
               availableColors={availableColors}
               availableSizes={availableSizes}
               selectedColor={selectedColor}

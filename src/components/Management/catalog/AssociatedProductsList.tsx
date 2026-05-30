@@ -10,9 +10,14 @@ import {
 type AssociatedProductsListProps = {
   products: Product[];
   emptyLabel: string;
+  onSelectProduct?: (productId: number) => void;
 };
 
-export function AssociatedProductsList({ products, emptyLabel }: AssociatedProductsListProps) {
+export function AssociatedProductsList({
+  products,
+  emptyLabel,
+  onSelectProduct,
+}: AssociatedProductsListProps) {
   if (products.length === 0) {
     return <p className="text-sm text-muted-foreground">{emptyLabel}</p>;
   }
@@ -23,6 +28,7 @@ export function AssociatedProductsList({ products, emptyLabel }: AssociatedProdu
         <AdminEntityListItem
           key={product.id}
           selected={false}
+          onClick={onSelectProduct ? () => onSelectProduct(product.id) : undefined}
           title={product.name}
           leading={
             <AdminThumbnail

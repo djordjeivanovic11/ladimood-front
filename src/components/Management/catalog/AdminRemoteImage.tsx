@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { shouldUnoptimizeImage } from '@/lib/image';
 import { cn } from '@/lib/utils';
 
 type AdminRemoteImageProps = {
@@ -49,7 +50,7 @@ export function AdminRemoteImage({
       alt={alt}
       width={width}
       height={height}
-      unoptimized
+      unoptimized={shouldUnoptimizeImage(src ?? '')}
       className={className}
       onError={() => setHasError(true)}
     />

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { getCart, createOrder } from '@/api/account/axios';
 import { GuestCheckout } from '@/components/Checkout/GuestCheckout';
 import { getPrimaryProductImageUrl } from '@/components/Management/catalog/catalog-image';
-import { shouldUnoptimizeImage } from '@/lib/image';
+import { IMAGE_SIZES } from '@/lib/image';
 import { Size } from '../types/types';
 import AddressManager from '@/components/Account/AddressManager';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -162,7 +162,7 @@ export default function ConfirmationPage() {
                             className="rounded-md border object-cover"
                             width={64}
                             height={64}
-                            unoptimized={shouldUnoptimizeImage(imageSrc)}
+                            sizes={IMAGE_SIZES.orderThumb}
                           />
                         ) : (
                           <div className="flex h-16 w-16 items-center justify-center rounded-md bg-muted">

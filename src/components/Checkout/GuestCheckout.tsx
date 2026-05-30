@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { PhoneNumberInput } from '@/components/ui/phone-input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { shouldUnoptimizeImage } from '@/lib/image';
+import { IMAGE_SIZES } from '@/lib/image';
 import { normalizePhoneNumber } from '@/lib/phone';
 import { cn } from '@/lib/utils';
 import type { Size } from '@/app/types/types';
@@ -260,10 +260,8 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
                           alt={item.product.name}
                           width={44}
                           height={44}
+                          sizes={IMAGE_SIZES.orderThumb}
                           className="h-11 w-11 rounded-md border object-cover"
-                          unoptimized={shouldUnoptimizeImage(
-                            getPrimaryProductImageUrl(item.product) as string
-                          )}
                         />
                       ) : null}
                       <div className="min-w-0">

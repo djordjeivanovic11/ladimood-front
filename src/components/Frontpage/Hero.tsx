@@ -10,27 +10,30 @@ const Hero: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden /* remove mt-4 or pt-4 if exists */">
+    <div className="relative h-[calc(100svh-5rem)] min-h-[28rem] w-full overflow-hidden md:h-[calc(100dvh-6rem)]">
       {/* Video Background */}
       <video
         autoPlay
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover z-0"
+        className="absolute inset-0 z-0 h-full w-full object-cover"
       >
         <source src="/videos/intro.MOV" type="video/mp4" />
         Vaš pregledač ne podržava video tag.
       </video>
 
       {/* Hero Content */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-black bg-opacity-40 z-10">
-        <h1 className="text-white text-4xl md:text-6xl font-bold drop-shadow-lg" data-aos="fade-up">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 px-4 text-center">
+        <h1
+          className="text-balance text-3xl font-bold text-white drop-shadow-lg sm:text-4xl md:text-6xl"
+          data-aos="fade-up"
+        >
           LADIMOOD, VJERUJ MI
         </h1>
         <div className="mt-8" data-aos="fade-up" data-aos-delay="500">
           <Link href="/shop">
-            <span className="bg-white text-[#0097B2] font-bold py-3 px-8 rounded-full transition-transform hover:scale-110 hover:bg-[#007A90] drop-shadow-md cursor-pointer">
+            <span className="inline-flex min-h-11 items-center rounded-full bg-white px-8 py-3 font-bold text-[#0097B2] transition-transform hover:scale-105 hover:bg-[#007A90] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 drop-shadow-md cursor-pointer">
               Shop now
             </span>
           </Link>

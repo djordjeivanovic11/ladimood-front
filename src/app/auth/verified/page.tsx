@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { fetchCurrentUser } from '@/api/auth/axios';
@@ -15,7 +15,7 @@ function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export default function VerifiedPage() {
+function VerifiedPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const updateUser = useAuthStore((state) => state.updateUser);
@@ -108,5 +108,13 @@ export default function VerifiedPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function VerifiedPage() {
+  return (
+    <Suspense fallback={null}>
+      <VerifiedPageContent />
+    </Suspense>
   );
 }

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatPhoneNumber } from '@/lib/phone';
+import { RotateCcw } from 'lucide-react';
 
 const statusOrder = ['CREATED', 'PENDING', 'SHIPPED', 'DELIVERED', 'CANCELLED'] as const;
 
@@ -71,8 +72,16 @@ export default function ManagementOverview() {
             Pregled korisnika, adresa, porudžbina, prodaje i stope završetka na nivou baze.
           </p>
         </div>
-        <Button variant="outline" onClick={() => void refresh()} disabled={loading}>
-          Osvježi
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => void refresh()}
+          disabled={loading}
+          aria-label="Osvježi"
+          title="Osvježi"
+        >
+          <RotateCcw className="h-4 w-4" />
         </Button>
       </div>
 

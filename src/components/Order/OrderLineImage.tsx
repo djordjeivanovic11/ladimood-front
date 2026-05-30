@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { shouldUnoptimizeImage } from '@/lib/image';
+import { IMAGE_SIZES } from '@/lib/image';
 import { cn } from '@/lib/utils';
 
 type OrderLineImageProps = {
@@ -41,7 +41,7 @@ export function OrderLineImage({ src, alt, size = 'md', className }: OrderLineIm
       alt={alt}
       width={dimension}
       height={dimension}
-      unoptimized={shouldUnoptimizeImage(imageSrc)}
+      sizes={IMAGE_SIZES.orderThumb}
       className={cn(
         'shrink-0 rounded-md border border-border/50 object-cover',
         sizeClasses[size],

@@ -11,6 +11,7 @@ type AdminImageGalleryProps = {
   media: ProductMedia[];
   productName: string;
   onRemove: (mediaId: number) => void;
+  onMoveMedia: (mediaId: number, direction: 'left' | 'right') => void;
   onSaveFraming: (
     mediaId: number,
     patch: { focal_x: number; focal_y: number; zoom: number }
@@ -22,9 +23,11 @@ export function AdminImageGallery({
   media,
   productName,
   onRemove,
+  onMoveMedia,
   onSaveFraming,
 }: AdminImageGalleryProps) {
   const [activeMediaId, setActiveMediaId] = React.useState<number | null>(media[0]?.id ?? null);
+  const [isMediaSettingsOpen, setIsMediaSettingsOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (!media.length) {
@@ -33,6 +36,7 @@ export function AdminImageGallery({
     }
     const stillExists = media.some((item) => item.id === activeMediaId);
     if (!stillExists) setActiveMediaId(media[0].id);
+    setIsMediaSettingsOpen(false);
   }, [activeMediaId, media]);
 
   const activeMedia = media.find((item) => item.id === activeMediaId) ?? media[0];
@@ -61,6 +65,8 @@ export function AdminImageGallery({
               key={item.id}
               type="button"
               onClick={() => setActiveMediaId(item.id)}
+              aria-label={`Odaberi sliku ${item.id}`}
+              title={`Odaberi sliku ${item.id}`}
               className={`rounded-md border p-1 transition-colors ${active ? 'border-primary' : 'border-border'}`}
             >
               <FramedImage
@@ -83,6 +89,23 @@ export function AdminImageGallery({
           >
             {title}
           </a>
+          <Button
+            variant="outline"
+            onClick={() => setIsMediaSettingsOpen((prev) => !prev)}
+            aria-expanded={isMediaSettingsOpen}
+          >
+            Podešavanja slike
+          </Button>
+        </div>
+      ) : null}
+      {activeMedia && isMediaSettingsOpen ? (
+        <div className="grid gap-2 rounded-md border bg-muted/30 p-2 sm:grid-cols-3">
+          <Button variant="outline" onClick={() => onMoveMedia(activeMedia.id, 'left')}>
+            Pomjeri lijevo
+          </Button>
+          <Button variant="outline" onClick={() => onMoveMedia(activeMedia.id, 'right')}>
+            Pomjeri desno
+          </Button>
           <Button variant="outline" onClick={() => onRemove(activeMedia.id)}>
             Ukloni
           </Button>

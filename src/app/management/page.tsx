@@ -12,10 +12,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 
 type ManagementSection = 'overview' | 'operations' | 'catalog';
+type CatalogTab = 'products' | 'taxonomy';
 
 export default function ManagementPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [activeSection, setActiveSection] = useState<ManagementSection>('overview');
+  const [catalogTab, setCatalogTab] = useState<CatalogTab>('products');
+  const [focusedProductId, setFocusedProductId] = useState<number | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -111,16 +114,29 @@ export default function ManagementPage() {
           ) : null}
 
           {activeSection === 'catalog' ? (
-            <Tabs defaultValue="products" className="w-full">
+            <Tabs
+              value={catalogTab}
+              onValueChange={(value) => setCatalogTab(value as CatalogTab)}
+              className="w-full"
+            >
               <TabsList>
                 <TabsTrigger value="products">Proizvodi</TabsTrigger>
                 <TabsTrigger value="taxonomy">Kategorije i kolekcije</TabsTrigger>
               </TabsList>
               <TabsContent value="products" className="mt-4">
-                <CatalogManagement />
+                <CatalogManagement
+                  onOpenTaxonomy={() => setCatalogTab('taxonomy')}
+                  focusedProductId={focusedProductId}
+                  onFocusedProductHandled={() => setFocusedProductId(null)}
+                />
               </TabsContent>
               <TabsContent value="taxonomy" className="mt-4">
-                <CatalogTaxonomyManagement />
+                <CatalogTaxonomyManagement
+                  onOpenProduct={(productId) => {
+                    setFocusedProductId(productId);
+                    setCatalogTab('products');
+                  }}
+                />
               </TabsContent>
             </Tabs>
           ) : null}

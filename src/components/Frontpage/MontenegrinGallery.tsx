@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { IMAGE_SIZES } from '@/lib/image';
 
 const MontenegrinGallery: React.FC = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -88,6 +89,8 @@ const MontenegrinGallery: React.FC = () => {
               alt={`Ladimood stil zabava ${index + 1}`}
               width={1000}
               height={1000}
+              sizes={IMAGE_SIZES.gallerySlide}
+              loading="lazy"
               className="transform rounded-xl object-cover shadow-lg transition-transform duration-300 hover:scale-105"
             />
           </div>

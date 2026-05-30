@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import axios from 'axios';
 import {
   adminCreateCategory,
   adminCreateCollection,
@@ -19,6 +18,7 @@ import { AdminEntityListItem } from '@/components/Management/catalog/AdminEntity
 import { AdminRemoteImage } from '@/components/Management/catalog/AdminRemoteImage';
 import { AdminThumbnail } from '@/components/Management/catalog/AdminThumbnail';
 import { AssociatedProductsList } from '@/components/Management/catalog/AssociatedProductsList';
+import { getApiErrorMessage, toSlug } from '@/components/Management/catalog/catalog-admin-utils';
 import {
   getCategoryImageUrl,
   getCollectionHeroUrl,
@@ -37,32 +37,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 
 type TaxonomyTab = 'categories' | 'collections';
-
-function toSlug(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
-}
-
-function getApiErrorMessage(err: unknown, fallback: string) {
-  if (axios.isAxiosError(err)) {
-    const data = err.response?.data;
-    if (data && typeof data === 'object' && 'detail' in data) {
-      const detail = (data as { detail?: unknown }).detail;
-      if (typeof detail === 'string' && detail.trim()) return detail;
-    }
-    const msg = err.message;
-    if (typeof msg === 'string' && msg.trim()) return msg;
-  }
-  if (err instanceof Error && err.message.trim()) return err.message;
-  return fallback;
-}
 
 function productCategoryId(product: Product): number | null {
   const row = product as Product & { category_id?: number | null };
@@ -74,7 +52,13 @@ function productCollectionId(product: Product): number | null {
   return row.collection_id ?? product.collection?.id ?? null;
 }
 
-export default function CatalogTaxonomyManagement() {
+type CatalogTaxonomyManagementProps = {
+  onOpenProduct?: (productId: number) => void;
+};
+
+export default function CatalogTaxonomyManagement({
+  onOpenProduct,
+}: CatalogTaxonomyManagementProps) {
   const [activeTab, setActiveTab] = React.useState<TaxonomyTab>('categories');
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [collections, setCollections] = React.useState<Collection[]>([]);
@@ -397,8 +381,16 @@ export default function CatalogTaxonomyManagement() {
             Upravljajte kategorijama i kolekcijama te pregledajte povezane proizvode.
           </p>
         </div>
-        <Button variant="outline" onClick={() => void refreshData()} disabled={isLoading}>
-          Osvježi
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => void refreshData()}
+          disabled={isLoading}
+          aria-label="Osvježi"
+          title="Osvježi"
+        >
+          <RotateCcw className="h-4 w-4" />
         </Button>
       </div>
 
@@ -414,7 +406,16 @@ export default function CatalogTaxonomyManagement() {
 
         <TabsContent value="categories" className="mt-4 space-y-4">
           <div className="flex justify-end">
-            <Button onClick={() => setIsAddCategoryOpen(true)}>Dodaj kategoriju</Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setIsAddCategoryOpen(true)}
+              aria-label="Dodaj kategoriju"
+              title="Dodaj kategoriju"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
@@ -546,6 +547,7 @@ export default function CatalogTaxonomyManagement() {
                       <AssociatedProductsList
                         products={selectedCategoryProducts}
                         emptyLabel="Nema proizvoda u ovoj kategoriji."
+                        onSelectProduct={onOpenProduct}
                       />
                     </div>
                   </>
@@ -557,7 +559,16 @@ export default function CatalogTaxonomyManagement() {
 
         <TabsContent value="collections" className="mt-4 space-y-4">
           <div className="flex justify-end">
-            <Button onClick={() => setIsAddCollectionOpen(true)}>Dodaj kolekciju</Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setIsAddCollectionOpen(true)}
+              aria-label="Dodaj kolekciju"
+              title="Dodaj kolekciju"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-3">
@@ -705,6 +716,7 @@ export default function CatalogTaxonomyManagement() {
                       <AssociatedProductsList
                         products={selectedCollectionProducts}
                         emptyLabel="Nema proizvoda u ovoj kolekciji."
+                        onSelectProduct={onOpenProduct}
                       />
                     </div>
                   </>

@@ -52,15 +52,15 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="p-8 bg-white shadow-lg rounded-lg text-center transform transition-transform duration-300 scale-100 w-96">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">Preporučite Prijatelje</h2>
-      <p className="text-gray-700 mb-6">
+    <div className="w-full max-w-md rounded-lg bg-white p-5 text-center shadow-lg transition-transform duration-300 sm:p-8">
+      <h2 className="mb-4 text-xl font-bold text-gray-900 sm:text-2xl">Preporučite Prijatelje</h2>
+      <p className="mb-6 text-sm text-gray-700 sm:text-base">
         Podijelite Ladimood sa svojim prijateljima i omogućite im da otkriju naš brend!
       </p>
 
       {referrals.map((referral, index) => (
         <div key={index} className="mb-4">
-          <div className="flex items-center mb-2 space-x-2">
+          <div className="mb-2 flex items-center space-x-2">
             {referral.name ? (
               <FaUserCheck className="text-[#0097B2] text-2xl" />
             ) : (
@@ -75,21 +75,21 @@ const ReferralPopup: React.FC<ReferralPopupProps> = ({ onClose }) => {
             placeholder="Ime i Prezime"
             value={referral.name}
             onChange={(e) => handleChange(index, 'name', e.target.value)}
-            className="w-full px-3 py-2 mb-2 border rounded-md text-gray-900"
+            className="mb-2 min-h-11 w-full rounded-md border px-3 py-2 text-gray-900"
           />
           <input
             type="email"
             placeholder="E-mail adresa"
             value={referral.email}
             onChange={(e) => handleChange(index, 'email', e.target.value)}
-            className="w-full px-3 py-2 border rounded-md text-gray-900"
+            className="min-h-11 w-full rounded-md border px-3 py-2 text-gray-900"
           />
         </div>
       ))}
 
       <button
         onClick={handleSubmit}
-        className="mt-6 w-full bg-[#0097B2] text-white py-2 rounded-lg shadow hover:bg-[#007A90] transition duration-300"
+        className="mt-6 min-h-11 w-full rounded-lg bg-[#0097B2] py-2 text-white shadow transition duration-300 hover:bg-[#007A90]"
         disabled={submitted}
       >
         Pošaljite Preporuke

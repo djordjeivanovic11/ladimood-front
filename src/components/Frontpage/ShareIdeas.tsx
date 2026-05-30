@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { IMAGE_SIZES } from '@/lib/image';
 import { Button } from '@/components/ui/button';
 
 const SuggestionBox: React.FC = () => {
@@ -18,11 +19,9 @@ const SuggestionBox: React.FC = () => {
             Podijelite svoje ideje i pomozite nam da kreiramo jedinstvene majice koje slave
             crnogorsku kulturu i stil života. Radujemo se vašim prijedlozima!
           </p>
-          <Link href="/contact" passHref>
-            <Button size="lg" className="w-full rounded-full md:w-auto">
-              Podijelite svoju ideju
-            </Button>
-          </Link>
+          <Button asChild size="lg" className="w-full rounded-full md:w-auto">
+            <Link href="/contact">Podijelite svoju ideju</Link>
+          </Button>
         </div>
 
         {/* Left Side: Image */}
@@ -32,8 +31,8 @@ const SuggestionBox: React.FC = () => {
               src="/images/slideshow/image6.jpeg"
               alt="Predložite svoj stil"
               fill
+              sizes={IMAGE_SIZES.shareIdeas}
               className="rounded-lg object-cover shadow-2xl transition duration-300 hover:scale-105"
-              priority
             />
           </div>
         </div>

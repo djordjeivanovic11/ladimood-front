@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingBag, X } from 'lucide-react';
 import { getWishlist, removeFromWishlist } from '@/api/account/axios';
 import { WishlistItem } from '@/app/types/types';
 import { AccountSectionHeader } from '@/components/Account/AccountSectionHeader';
+import { OrderLineImage } from '@/components/Order/OrderLineImage';
+import { getPrimaryProductImageUrl } from '@/components/Management/catalog/catalog-image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -38,15 +39,11 @@ const Wishlist: React.FC = () => {
                 key={item.id}
                 className="flex flex-col gap-3 rounded-lg border border-border/50 bg-muted/20 p-4 sm:flex-row sm:items-center"
               >
-                {item.product.image_url ? (
-                  <Image
-                    src={item.product.image_url}
-                    alt={item.product.name}
-                    width={96}
-                    height={96}
-                    className="mx-auto h-24 w-24 shrink-0 rounded-md border border-border/50 object-cover sm:mx-0"
-                  />
-                ) : null}
+                <OrderLineImage
+                  src={getPrimaryProductImageUrl(item.product)}
+                  alt={item.product.name}
+                  className="mx-auto sm:mx-0"
+                />
                 <div className="min-w-0 flex-1 text-center sm:text-left">
                   <p className="font-medium text-foreground">{item.product.name}</p>
                   <p className="mt-1 text-sm text-muted-foreground">

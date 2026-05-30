@@ -12,11 +12,9 @@ export default function OrderPage() {
         <CardContent className="flex flex-col items-center p-8 md:p-16">
           <h1 className="mb-4 text-2xl font-bold md:text-3xl">Još nema porudžbina.</h1>
           <p className="mb-6 text-muted-foreground">Izgleda da je korpa prazna. Popunimo je!</p>
-          <Link href="/shop" passHref>
-            <Button size="lg" className="rounded-full">
-              Kupi sada
-            </Button>
-          </Link>
+          <Button asChild size="lg" className="rounded-full">
+            <Link href="/shop">Kupi sada</Link>
+          </Button>
         </CardContent>
       </Card>
     </section>
