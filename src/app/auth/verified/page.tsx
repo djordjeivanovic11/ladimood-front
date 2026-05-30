@@ -4,7 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
-import { fetchCurrentUser } from '@/api/auth/axios';
+import { fetchCurrentUserWithRetry, isNetworkError, isUnauthorizedError } from '@/api/auth/axios';
 import { completeAuthCallback, isSupabaseEmailConfirmed } from '@/lib/supabase-auth-callback';
 import { isPkceVerifierMissingError } from '@/lib/supabase-auth-errors';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -14,6 +14,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 type VerificationState = 'checking' | 'verified' | 'pending' | 'error';
 
 function getErrorMessage(error: unknown): string {
+  if (isNetworkError(error)) {
+    return 'Backend nije dostupan. Pokrenite API (docker compose up) i pokušajte ponovo.';
+  }
   if (axios.isAxiosError(error)) {
     const detail = error.response?.data;
     if (detail && typeof detail === 'object' && 'detail' in detail) {
@@ -29,8 +32,8 @@ function getErrorMessage(error: unknown): string {
 function VerifiedPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const updateUser = useAuthStore((state) => state.updateUser);
-  const setAuthSession = useAuthStore((state) => state.setAuthSession);
+  const login = useAuthStore((state) => state.login);
+  const setLoading = useAuthStore((state) => state.setLoading);
 
   const [state, setState] = useState<VerificationState>('checking');
   const [message, setMessage] = useState('Provjeravamo status verifikacije...');
@@ -63,30 +66,14 @@ function VerifiedPageContent() {
               'Link je otvoren, ali sesija još nije aktivna. Prijavite se i nastavite na potvrdu porudžbine.'
             );
           }
+          setLoading(false);
           return;
         }
 
-        setAuthSession(true);
+        const user = await fetchCurrentUserWithRetry({ skipAuthRedirect: true, attempts: 4 });
+        if (cancelled) return;
 
-        let user = null;
-        try {
-          user = await fetchCurrentUser({ skipAuthRedirect: true });
-          if (cancelled) return;
-          updateUser(user);
-        } catch (backendError) {
-          if (cancelled) return;
-          const supabaseConfirmed = await isSupabaseEmailConfirmed();
-          if (isOAuthFlow || supabaseConfirmed) {
-            setState('verified');
-            setMessage(
-              isOAuthFlow
-                ? 'Google prijava je uspješna. Nastavljamo dalje.'
-                : 'Vaš e-mail je potvrđen u Supabase-u. Nastavljamo dalje.'
-            );
-            return;
-          }
-          throw backendError;
-        }
+        login(user);
 
         if (isOAuthFlow) {
           setState('verified');
@@ -94,7 +81,7 @@ function VerifiedPageContent() {
           return;
         }
 
-        if (user?.email_verified || (await isSupabaseEmailConfirmed())) {
+        if (user.email_verified || (await isSupabaseEmailConfirmed())) {
           setState('verified');
           setMessage('Vaš e-mail je potvrđen. Možete nastaviti na porudžbinu.');
           return;
@@ -104,6 +91,8 @@ function VerifiedPageContent() {
         setMessage('E-mail još nije potvrđen. Otvorite link iz poruke i pokušajte ponovo.');
       } catch (error: unknown) {
         if (cancelled) return;
+        setLoading(false);
+
         if (isPkceVerifierMissingError(error)) {
           if (isOAuthFlow) {
             setState('error');
@@ -118,6 +107,15 @@ function VerifiedPageContent() {
           }
           return;
         }
+
+        if (isOAuthFlow && isUnauthorizedError(error)) {
+          setState('error');
+          setMessage(
+            'Google sesija je aktivna, ali backend nije prihvatio token. Provjerite da API radi i da SUPABASE_URL odgovara frontend projektu.'
+          );
+          return;
+        }
+
         setState('error');
         setMessage(getErrorMessage(error));
       }
@@ -128,7 +126,7 @@ function VerifiedPageContent() {
     return () => {
       cancelled = true;
     };
-  }, [isOAuthFlow, setAuthSession, updateUser]);
+  }, [isOAuthFlow, login, setLoading]);
 
   useEffect(() => {
     if (state !== 'verified') return;
@@ -150,10 +148,12 @@ function VerifiedPageContent() {
           <p className="text-muted-foreground">{message}</p>
 
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Button asChild>
-              <Link href={nextPath}>{isOAuthFlow ? 'Nastavi' : 'Nastavi na porudžbinu'}</Link>
-            </Button>
-            <Button asChild variant="outline">
+            {state === 'verified' ? (
+              <Button asChild>
+                <Link href={nextPath}>{isOAuthFlow ? 'Nastavi' : 'Nastavi na porudžbinu'}</Link>
+              </Button>
+            ) : null}
+            <Button asChild variant={state === 'verified' ? 'outline' : 'default'}>
               <Link href="/auth/login">Idi na prijavu</Link>
             </Button>
           </div>

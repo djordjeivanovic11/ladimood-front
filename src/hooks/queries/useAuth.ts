@@ -1,5 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteAccount, fetchCurrentUser, updateUserPhone } from '@/api/auth/axios';
+import {
+  deleteAccount,
+  fetchCurrentUser,
+  fetchCurrentUserWithRetry,
+  isUnauthorizedError,
+  updateUserPhone,
+} from '@/api/auth/axios';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { toast } from '@/lib/toast';
 import { normalizePhoneNumber } from '@/lib/phone';
@@ -32,12 +38,14 @@ export function useCurrentUser() {
       setAuthSession(true);
 
       try {
-        const user = await fetchCurrentUser();
+        const user = await fetchCurrentUserWithRetry();
         setUser(user);
         return user;
       } catch (error) {
-        await supabase.auth.signOut();
-        logout();
+        if (isUnauthorizedError(error)) {
+          await supabase.auth.signOut();
+          logout();
+        }
         throw error;
       }
     },

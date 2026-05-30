@@ -18,6 +18,18 @@ type FetchCurrentUserOptions = {
   skipAuthRedirect?: boolean;
 };
 
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isUnauthorizedError(error: unknown): boolean {
+  return axios.isAxiosError(error) && error.response?.status === 401;
+}
+
+function isNetworkError(error: unknown): boolean {
+  return axios.isAxiosError(error) && !error.response;
+}
+
 // Fetch current user
 export const fetchCurrentUser = async (options?: FetchCurrentUserOptions): Promise<User> => {
   const response = await api.get<User>('/users/me', {
@@ -25,6 +37,28 @@ export const fetchCurrentUser = async (options?: FetchCurrentUserOptions): Promi
   });
   return response.data;
 };
+
+export async function fetchCurrentUserWithRetry(
+  options?: FetchCurrentUserOptions & { attempts?: number }
+): Promise<User> {
+  const attempts = options?.attempts ?? 3;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await fetchCurrentUser(options);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts - 1) {
+        await delay(400 * (attempt + 1));
+      }
+    }
+  }
+
+  throw lastError;
+}
+
+export { isNetworkError, isUnauthorizedError };
 
 export const deleteAccount = async (confirmation: string): Promise<void> => {
   try {

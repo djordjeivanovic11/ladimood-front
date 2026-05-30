@@ -1,13 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
-import axios from 'axios';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Toaster } from 'sonner';
 import { getQueryClient } from '@/lib/query-client';
 import { getOrCreateGuestSession } from '@/lib/storage';
-import { fetchCurrentUser } from '@/api/auth/axios';
+import { fetchCurrentUserWithRetry, isNetworkError, isUnauthorizedError } from '@/api/auth/axios';
 import { supabase } from '@/lib/supabase';
 import { useCartSync } from '@/hooks/useCartSync';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -60,15 +59,19 @@ export function Providers({ children }: ProvidersProps) {
 
       setAuthSession(true);
       try {
-        const user = await fetchCurrentUser();
+        const user = await fetchCurrentUserWithRetry({
+          skipAuthRedirect: isAuthCallbackPath(),
+        });
         if (mounted) {
           updateUser(user);
         }
       } catch (error) {
-        if (axios.isAxiosError(error) && error.response?.status === 401 && !isAuthCallbackPath()) {
+        if (isUnauthorizedError(error) && !isAuthCallbackPath()) {
           await supabase.auth.signOut();
+          if (mounted) logout();
+        } else if (!isNetworkError(error) && !isAuthCallbackPath()) {
+          if (mounted) logout();
         }
-        if (mounted) logout();
       } finally {
         if (mounted) setLoading(false);
       }

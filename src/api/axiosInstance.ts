@@ -13,6 +13,22 @@ const axiosInstance = axios.create({
 
 let handlingUnauthorized = false;
 
+const LOGIN_REDIRECT_SKIP_PREFIXES = [
+  '/auth/',
+  '/shop',
+  '/confirmation',
+  '/contact',
+  '/order',
+  '/success',
+];
+
+function shouldRedirectToLogin(): boolean {
+  if (typeof window === 'undefined') return false;
+  const path = window.location.pathname;
+  if (path === '/' || path.startsWith('/auth/login')) return false;
+  return !LOGIN_REDIRECT_SKIP_PREFIXES.some((prefix) => path.startsWith(prefix));
+}
+
 async function handleUnauthorized() {
   if (handlingUnauthorized) return;
   handlingUnauthorized = true;
@@ -20,7 +36,7 @@ async function handleUnauthorized() {
     await supabase.auth.signOut();
   } finally {
     useAuthStore.getState().logout();
-    if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/auth/login')) {
+    if (shouldRedirectToLogin()) {
       window.location.assign('/auth/login');
     }
     handlingUnauthorized = false;
