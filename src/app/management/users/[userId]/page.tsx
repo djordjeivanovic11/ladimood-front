@@ -24,9 +24,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatPhoneNumber } from '@/lib/phone';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 
 type ConfirmActionType = 'toggle-active' | 'toggle-role' | 'remove-newsletter' | 'permanent-delete';
@@ -247,70 +254,83 @@ export default function ManagementUserDetailPage() {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant={user.is_active ? 'destructive' : 'default'}
-                onClick={() =>
-                  setConfirmAction({
-                    type: 'toggle-active',
-                    title: user.is_active ? 'Deaktivacija korisnika' : 'Reaktivacija korisnika',
-                    description: user.is_active
-                      ? 'Nalog će biti deaktiviran i korisnik više neće moći da pristupa platformi.'
-                      : 'Nalog će ponovo biti aktivan.',
-                    confirmLabel: user.is_active ? 'Deaktiviraj' : 'Reaktiviraj',
-                  })
-                }
-              >
-                {user.is_active ? 'Deaktiviraj korisnika' : 'Reaktiviraj korisnika'}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  setConfirmAction({
-                    type: 'toggle-role',
-                    title:
-                      user.role_name === 'ADMIN' ? 'Uklanjanje ADMIN uloge' : 'Dodjela ADMIN uloge',
-                    description:
-                      user.role_name === 'ADMIN'
-                        ? 'Korisnik će izgubiti ADMIN pristup.'
-                        : 'Korisnik će dobiti ADMIN ulogu ako prolazi allowlist pravilo.',
-                    confirmLabel:
-                      user.role_name === 'ADMIN' ? 'Demotuj u USER' : 'Promoviši u ADMIN',
-                  })
-                }
-              >
-                {user.role_name === 'ADMIN' ? 'Demotuj u USER' : 'Promoviši u ADMIN'}
-              </Button>
-              {user.is_newsletter_subscriber ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
+                  size="icon"
+                  aria-label="Upravljanje korisnikom"
+                  title="Upravljanje korisnikom"
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem
+                  className={user.is_active ? 'text-destructive focus:text-destructive' : undefined}
                   onClick={() =>
                     setConfirmAction({
-                      type: 'remove-newsletter',
-                      title: 'Uklanjanje newsletter pretplate',
-                      description: 'Email će biti uklonjen iz newsletter liste.',
-                      confirmLabel: 'Ukloni iz newslettera',
+                      type: 'toggle-active',
+                      title: user.is_active ? 'Deaktivacija korisnika' : 'Reaktivacija korisnika',
+                      description: user.is_active
+                        ? 'Nalog će biti deaktiviran i korisnik više neće moći da pristupa platformi.'
+                        : 'Nalog će ponovo biti aktivan.',
+                      confirmLabel: user.is_active ? 'Deaktiviraj' : 'Reaktiviraj',
                     })
                   }
                 >
-                  Ukloni iz newslettera
-                </Button>
-              ) : null}
-              <Button
-                variant="destructive"
-                onClick={() =>
-                  setConfirmAction({
-                    type: 'permanent-delete',
-                    title: 'Trajno brisanje korisnika',
-                    description:
-                      'Ova akcija trajno briše korisnika i povezane zapise. Koristite samo kada ste sigurni.',
-                    confirmLabel: 'Trajno obriši',
-                  })
-                }
-              >
-                Trajno obriši korisnika
-              </Button>
-            </div>
+                  {user.is_active ? 'Deaktiviraj korisnika' : 'Reaktiviraj korisnika'}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    setConfirmAction({
+                      type: 'toggle-role',
+                      title:
+                        user.role_name === 'ADMIN'
+                          ? 'Uklanjanje ADMIN uloge'
+                          : 'Dodjela ADMIN uloge',
+                      description:
+                        user.role_name === 'ADMIN'
+                          ? 'Korisnik će izgubiti ADMIN pristup.'
+                          : 'Korisnik će dobiti ADMIN ulogu ako prolazi allowlist pravilo.',
+                      confirmLabel:
+                        user.role_name === 'ADMIN' ? 'Demotuj u USER' : 'Promoviši u ADMIN',
+                    })
+                  }
+                >
+                  {user.role_name === 'ADMIN' ? 'Demotuj u USER' : 'Promoviši u ADMIN'}
+                </DropdownMenuItem>
+                {user.is_newsletter_subscriber ? (
+                  <DropdownMenuItem
+                    onClick={() =>
+                      setConfirmAction({
+                        type: 'remove-newsletter',
+                        title: 'Uklanjanje newsletter pretplate',
+                        description: 'Email će biti uklonjen iz newsletter liste.',
+                        confirmLabel: 'Ukloni iz newslettera',
+                      })
+                    }
+                  >
+                    Ukloni iz newslettera
+                  </DropdownMenuItem>
+                ) : null}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  onClick={() =>
+                    setConfirmAction({
+                      type: 'permanent-delete',
+                      title: 'Trajno brisanje korisnika',
+                      description:
+                        'Ova akcija trajno briše korisnika i povezane zapise. Koristite samo kada ste sigurni.',
+                      confirmLabel: 'Trajno obriši',
+                    })
+                  }
+                >
+                  Trajno obriši korisnika
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </CardContent>
         </Card>
 

@@ -28,6 +28,7 @@ import {
   parsePublishChecksFromError,
   type PublishCheck,
 } from '@/components/Management/catalog/catalog-admin-utils';
+import { normalizeHex } from '@/components/Management/catalog/catalog-colors';
 import {
   getPrimaryProductImageUrl,
   getPrimaryProductMedia,
@@ -61,6 +62,7 @@ type ProductForm = {
   slug?: string | null;
   gender?: Gender | null;
   status?: ProductStatus | null;
+  is_sold_out?: boolean;
   category_id?: number | null;
   collection_id?: number | null;
 };
@@ -222,20 +224,62 @@ export default function CatalogManagement({
     }
   };
 
-  const onAddVariant = async (payload: {
-    color_name: string;
-    color_hex: string;
-    size: Size;
-    inventory_qty: number;
-    is_active: boolean;
-  }) => {
+  const onAddVariants = async (
+    payloads: Array<{
+      color_name: string;
+      color_hex: string;
+      size: Size;
+      inventory_qty: number;
+      is_active: boolean;
+      sku?: string | null;
+      price_override?: number | null;
+    }>
+  ) => {
     if (!selectedProduct) return;
-    try {
-      await adminAddVariant(selectedProduct.id, payload);
-      toast.success('Varijanta je dodata.');
+
+    const existing = new Set(
+      (selectedProduct.variants ?? []).map(
+        (variant) => `${normalizeHex(variant.color_hex)}::${variant.size as Size}`
+      )
+    );
+    let created = 0;
+    let skipped = 0;
+    let failed = 0;
+    let lastError: unknown = null;
+
+    for (const payload of payloads) {
+      const key = `${normalizeHex(payload.color_hex)}::${payload.size}`;
+      if (existing.has(key)) {
+        skipped += 1;
+        continue;
+      }
+
+      try {
+        await adminAddVariant(selectedProduct.id, payload);
+        created += 1;
+        existing.add(key);
+      } catch (e: unknown) {
+        failed += 1;
+        lastError = e;
+      }
+    }
+
+    if (created > 0) {
       await refresh();
-    } catch (e: unknown) {
-      toast.error(getApiErrorMessage(e, 'Dodavanje varijante nije uspjelo.'));
+      const messageParts = [`Dodato ${created} varijanti.`];
+      if (skipped > 0) messageParts.push(`Preskočeno ${skipped} (već postoje).`);
+      if (failed > 0) messageParts.push(`Neuspjelo ${failed}.`);
+      toast.success(messageParts.join(' '));
+      return;
+    }
+
+    if (skipped > 0 && failed === 0) {
+      toast.message(`Sve odabrane varijante već postoje (${skipped}).`);
+      return;
+    }
+
+    if (lastError) {
+      toast.error(getApiErrorMessage(lastError, 'Dodavanje varijanti nije uspjelo.'));
     }
   };
 
@@ -491,6 +535,11 @@ export default function CatalogManagement({
                     subtitle={
                       <div className="flex items-center gap-2">
                         <AdminStatusBadge status={p.status} />
+                        {p.is_sold_out ? (
+                          <span className="rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700">
+                            SOLD OUT
+                          </span>
+                        ) : null}
                         <span>{p.gender ?? 'UNISEX'}</span>
                       </div>
                     }
@@ -557,8 +606,17 @@ export default function CatalogManagement({
                     'Proizvod je arhiviran.'
                   )
                 }
+                onToggleSoldOut={() =>
+                  void onUpdateProduct(
+                    selectedProduct.id,
+                    { is_sold_out: !selectedProduct.is_sold_out },
+                    selectedProduct.is_sold_out
+                      ? 'Oznaka rasprodato je uklonjena.'
+                      : 'Proizvod je označen kao rasprodato.'
+                  )
+                }
                 onDeleteProduct={() => void onDeleteProduct(selectedProduct.id)}
-                onAddVariant={(payload) => void onAddVariant(payload)}
+                onAddVariants={(payloads) => void onAddVariants(payloads)}
                 onUpdateVariant={(variantId, patch) => void onUpdateVariant(variantId, patch)}
                 onDeleteVariant={(variantId) => void onDeleteVariant(variantId)}
                 onUploadImage={(files) => {

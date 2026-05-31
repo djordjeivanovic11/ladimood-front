@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Hero from '@/components/Frontpage/Hero';
-import Categories from '@/components/Frontpage/Categories';
+import TaxonomyExplore from '@/components/Frontpage/TaxonomyExplore';
 import ProductGrid from '@/components/Order/Shop/ProductGrid';
 import Newsletter from '@/components/Frontpage/Newsletter';
 import MontenegrinGallery from '@/components/Frontpage/MontenegrinGallery';
@@ -54,7 +54,7 @@ export default function Frontpage() {
       </div>
 
       <div className="mb-16">
-        <Categories />
+        <TaxonomyExplore />
       </div>
 
       <div className="mt-16">

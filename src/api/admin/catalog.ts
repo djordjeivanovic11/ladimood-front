@@ -23,6 +23,7 @@ export async function adminCreateProduct(payload: {
   slug?: string | null;
   gender?: Gender | null;
   status?: ProductStatus | null;
+  is_sold_out?: boolean;
   category_id?: number | null;
   collection_id?: number | null;
 }): Promise<Product> {
@@ -40,6 +41,7 @@ export async function adminUpdateProduct(
     slug: string | null;
     gender: Gender | null;
     status: ProductStatus | null;
+    is_sold_out?: boolean;
     category_id: number | null;
     collection_id: number | null;
   }>

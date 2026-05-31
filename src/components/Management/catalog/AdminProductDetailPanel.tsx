@@ -13,9 +13,15 @@ import { FramedImage } from '@/components/Management/catalog/FramedImage';
 import { AdminSection } from '@/components/Management/catalog/AdminSection';
 import { AdminStatusBadge } from '@/components/Management/catalog/AdminStatusBadge';
 import {
+  type CatalogColorOption,
+  normalizeHex,
+} from '@/components/Management/catalog/catalog-colors';
+import {
   getPrimaryProductImageUrl,
   getPrimaryProductMedia,
 } from '@/components/Management/catalog/catalog-image';
+import { VariantColorMultiSelect } from '@/components/Management/catalog/VariantColorMultiSelect';
+import { VariantSizeMultiSelect } from '@/components/Management/catalog/VariantSizeMultiSelect';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -79,8 +85,9 @@ type AdminProductDetailPanelProps = {
   onSaveDraft: () => void;
   onPublish: () => void;
   onArchive: () => void;
+  onToggleSoldOut: () => void;
   onDeleteProduct: () => void;
-  onAddVariant: (payload: AddVariantPayload) => void;
+  onAddVariants: (payloads: AddVariantPayload[]) => void;
   onUpdateVariant: (
     variantId: number,
     patch: Partial<{
@@ -116,8 +123,9 @@ export function AdminProductDetailPanel({
   onSaveDraft,
   onPublish,
   onArchive,
+  onToggleSoldOut,
   onDeleteProduct,
-  onAddVariant,
+  onAddVariants,
   onUpdateVariant,
   onDeleteVariant,
   onUploadImage,
@@ -144,8 +152,12 @@ export function AdminProductDetailPanel({
   const [isAddVariantOpen, setIsAddVariantOpen] = React.useState(false);
   const [editingVariant, setEditingVariant] = React.useState<ProductVariant | null>(null);
   const [variantSku, setVariantSku] = React.useState('');
-  const [variantColorName, setVariantColorName] = React.useState('Black');
+  const [variantColorName, setVariantColorName] = React.useState('Crna');
   const [variantColorHex, setVariantColorHex] = React.useState('#000000');
+  const [addVariantColors, setAddVariantColors] = React.useState<CatalogColorOption[]>([
+    { name: 'Crna', hex: '#000000' },
+  ]);
+  const [addVariantSizes, setAddVariantSizes] = React.useState<Size[]>([Size.M]);
   const [variantSize, setVariantSize] = React.useState<Size>(Size.M);
   const [variantInventory, setVariantInventory] = React.useState(0);
   const [variantIsActive, setVariantIsActive] = React.useState(true);
@@ -169,9 +181,11 @@ export function AdminProductDetailPanel({
 
   const resetVariantForm = () => {
     setVariantSku('');
-    setVariantColorName('Black');
+    setVariantColorName('Crna');
     setVariantColorHex('#000000');
     setVariantSize(Size.M);
+    setAddVariantColors([{ name: 'Crna', hex: '#000000' }]);
+    setAddVariantSizes([Size.M]);
     setVariantInventory(0);
     setVariantIsActive(true);
     setVariantPriceOverride('');
@@ -195,22 +209,42 @@ export function AdminProductDetailPanel({
   };
 
   const submitVariant = () => {
-    const colorName = variantColorName.trim();
-    const colorHex = variantColorHex.trim();
-    if (!colorName || !colorHex) {
-      toast.error('Boja i HEX su obavezni.');
+    if (!addVariantColors.length) {
+      toast.error('Odaberite barem jednu boju.');
+      return;
+    }
+    if (!addVariantSizes.length) {
+      toast.error('Odaberite barem jednu veličinu.');
       return;
     }
 
-    onAddVariant({
-      sku: variantSku.trim() || null,
-      color_name: colorName,
-      color_hex: colorHex,
-      size: variantSize,
-      inventory_qty: Number.isFinite(variantInventory) ? variantInventory : 0,
-      is_active: variantIsActive,
-      price_override: variantPriceOverride.trim() ? Number(variantPriceOverride) : null,
-    });
+    const payloads: AddVariantPayload[] = [];
+    for (const color of addVariantColors) {
+      const colorName = color.name.trim();
+      const colorHex = normalizeHex(color.hex);
+      if (!colorName || !colorHex) {
+        toast.error('Boja i HEX su obavezni.');
+        return;
+      }
+
+      for (const size of addVariantSizes) {
+        payloads.push({
+          color_name: colorName,
+          color_hex: colorHex,
+          size,
+          inventory_qty: Number.isFinite(variantInventory) ? variantInventory : 0,
+          is_active: variantIsActive,
+          price_override: variantPriceOverride.trim() ? Number(variantPriceOverride) : null,
+        });
+      }
+    }
+
+    if (!payloads.length) {
+      toast.error('Nije moguće kreirati varijante bez boja i veličina.');
+      return;
+    }
+
+    onAddVariants(payloads);
     resetVariantForm();
     setIsAddVariantOpen(false);
   };
@@ -240,7 +274,7 @@ export function AdminProductDetailPanel({
     onUpdateVariant(editingVariant.id, {
       sku: variantSku.trim() || null,
       color_name: variantColorName.trim(),
-      color_hex: variantColorHex.trim(),
+      color_hex: normalizeHex(variantColorHex),
       size: variantSize,
       inventory_qty: Number.isFinite(variantInventory) ? variantInventory : 0,
       is_active: variantIsActive,
@@ -299,6 +333,9 @@ export function AdminProductDetailPanel({
                       Arhiviraj
                     </Button>
                   ) : null}
+                  <Button variant="outline" onClick={onToggleSoldOut}>
+                    {product.is_sold_out ? 'Ukloni oznaku rasprodato' : 'Označi kao rasprodato'}
+                  </Button>
                   <Button variant="destructive" onClick={onDeleteProduct}>
                     Obriši
                   </Button>
@@ -308,6 +345,11 @@ export function AdminProductDetailPanel({
           </div>
           <div className="flex flex-wrap gap-2">
             <AdminStatusBadge status={product.status} />
+            {product.is_sold_out ? (
+              <span className="rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700">
+                SOLD OUT
+              </span>
+            ) : null}
             <span className="rounded-md border px-2 py-0.5 text-xs text-muted-foreground">
               {product.gender ?? 'UNISEX'}
             </span>
@@ -472,13 +514,20 @@ export function AdminProductDetailPanel({
                 key={variant.id}
                 className="flex items-center justify-between rounded-md border p-3 text-sm"
               >
-                <div>
-                  <div className="font-medium">
-                    {variant.color_name} • {variant.size}
-                  </div>
-                  <div className="text-muted-foreground">
-                    Zaliha: {variant.inventory_qty} {variant.is_active ? '' : '• neaktivno'}
-                    {variant.sku ? ` • SKU ${variant.sku}` : ''}
+                <div className="flex items-center gap-3">
+                  <span
+                    className="h-4 w-4 rounded-full border"
+                    style={{ backgroundColor: normalizeHex(variant.color_hex) }}
+                    aria-hidden
+                  />
+                  <div>
+                    <div className="font-medium">
+                      {variant.color_name} • {variant.size}
+                    </div>
+                    <div className="text-muted-foreground">
+                      Zaliha: {variant.inventory_qty} {variant.is_active ? '' : '• neaktivno'}
+                      {variant.sku ? ` • SKU ${variant.sku}` : ''}
+                    </div>
                   </div>
                 </div>
                 <DropdownMenu>
@@ -517,50 +566,23 @@ export function AdminProductDetailPanel({
       </AdminSection>
 
       <Dialog open={isAddVariantOpen} onOpenChange={setIsAddVariantOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Nova varijanta</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="space-y-2">
-              <Label>SKU (opciono)</Label>
-              <Input
-                value={variantSku}
-                onChange={(e) => setVariantSku(e.target.value)}
-                placeholder="SKU (opciono)"
-              />
+              <Label>Boje</Label>
+              <VariantColorMultiSelect value={addVariantColors} onChange={setAddVariantColors} />
             </div>
-            <div className="space-y-2">
-              <Label>Naziv boje</Label>
-              <Input
-                value={variantColorName}
-                onChange={(e) => setVariantColorName(e.target.value)}
-                placeholder="Black"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>HEX boje</Label>
-              <Input
-                value={variantColorHex}
-                onChange={(e) => setVariantColorHex(e.target.value)}
-                placeholder="#000000"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Veličina</Label>
-                <Select value={variantSize} onValueChange={(v) => setVariantSize(v as Size)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sizeOptions.map((size) => (
-                      <SelectItem key={size} value={size}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Veličine</Label>
+                <VariantSizeMultiSelect
+                  value={addVariantSizes}
+                  onChange={setAddVariantSizes}
+                  options={sizeOptions}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Zaliha (opciono za preorder)</Label>
@@ -599,6 +621,10 @@ export function AdminProductDetailPanel({
                 </Select>
               </div>
             </div>
+            <p className="text-xs text-muted-foreground">
+              Kreirati {addVariantColors.length * addVariantSizes.length} varijanti (
+              {addVariantColors.length} boja × {addVariantSizes.length} veličina).
+            </p>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsAddVariantOpen(false)}>
                 Otkaži
@@ -623,31 +649,30 @@ export function AdminProductDetailPanel({
               <Input value={variantSku} onChange={(e) => setVariantSku(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Naziv boje</Label>
-              <Input
-                value={variantColorName}
-                onChange={(e) => setVariantColorName(e.target.value)}
+              <Label>Boja</Label>
+              <VariantColorMultiSelect
+                mode="single"
+                value={[{ name: variantColorName, hex: variantColorHex }]}
+                onChange={(nextColors) => {
+                  const next = nextColors[0];
+                  if (!next) return;
+                  setVariantColorName(next.name);
+                  setVariantColorHex(next.hex);
+                }}
               />
-            </div>
-            <div className="space-y-2">
-              <Label>HEX boje</Label>
-              <Input value={variantColorHex} onChange={(e) => setVariantColorHex(e.target.value)} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>Veličina</Label>
-                <Select value={variantSize} onValueChange={(v) => setVariantSize(v as Size)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sizeOptions.map((size) => (
-                      <SelectItem key={size} value={size}>
-                        {size}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <VariantSizeMultiSelect
+                  mode="single"
+                  value={[variantSize]}
+                  onChange={(nextSizes) => {
+                    const next = nextSizes[0];
+                    if (next) setVariantSize(next);
+                  }}
+                  options={sizeOptions}
+                />
               </div>
               <div className="space-y-2">
                 <Label>Zaliha (opciono za preorder)</Label>

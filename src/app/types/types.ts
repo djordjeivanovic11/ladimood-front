@@ -125,6 +125,7 @@ export interface ProductBase {
   slug?: string | null;
   gender?: Gender | null;
   status?: ProductStatus | null;
+  is_sold_out?: boolean;
 }
 export interface ProductCreate extends ProductBase {
   category_id: number;

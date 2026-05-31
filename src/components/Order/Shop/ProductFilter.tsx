@@ -1,14 +1,17 @@
 import React, { useMemo, useState } from 'react';
 import { Filter } from 'lucide-react';
-import type { Category } from '@/app/types/types';
+import type { Category, Collection } from '@/app/types/types';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 
 interface ProductFilterProps {
   categories: Category[];
+  collections: Collection[];
   selectedCategoryId: number | null;
   setSelectedCategoryId: (categoryId: number | null) => void;
+  selectedCollectionId: number | null;
+  setSelectedCollectionId: (collectionId: number | null) => void;
   selectedPriceRange: [number, number];
   setSelectedPriceRange: (range: [number, number]) => void;
   sortBy: string;
@@ -17,8 +20,11 @@ interface ProductFilterProps {
 
 const ProductFilter: React.FC<ProductFilterProps> = ({
   categories,
+  collections,
   selectedCategoryId,
   setSelectedCategoryId,
+  selectedCollectionId,
+  setSelectedCollectionId,
   selectedPriceRange,
   setSelectedPriceRange,
   sortBy,
@@ -57,6 +63,39 @@ const ProductFilter: React.FC<ProductFilterProps> = ({
               }`}
             >
               {c.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Separator />
+
+      <div>
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          Kolekcija
+        </h3>
+        <div className="space-y-2">
+          <button
+            type="button"
+            onClick={() => setSelectedCollectionId(null)}
+            className={`w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${
+              selectedCollectionId === null ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
+            }`}
+          >
+            Sve
+          </button>
+          {collections.map((collection) => (
+            <button
+              key={collection.id}
+              type="button"
+              onClick={() => setSelectedCollectionId(collection.id)}
+              className={`w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${
+                selectedCollectionId === collection.id
+                  ? 'bg-accent text-accent-foreground'
+                  : 'hover:bg-muted'
+              }`}
+            >
+              {collection.name}
             </button>
           ))}
         </div>

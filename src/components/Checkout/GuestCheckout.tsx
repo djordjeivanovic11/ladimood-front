@@ -8,6 +8,7 @@ import { guestCheckoutSchema, type GuestCheckoutFormData } from '@/schemas/check
 import { useCreateGuestOrder } from '@/hooks/queries/useOrders';
 import { useCartStore } from '@/stores/useCartStore';
 import { getPrimaryProductImageUrl } from '@/components/Management/catalog/catalog-image';
+import { colorNameFromHex, normalizeHex } from '@/components/Management/catalog/catalog-colors';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -79,10 +80,9 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
         onSuccess: (order) => {
           // Store the latest guest order for the success page (since fetching orders requires auth)
           localStorage.setItem('lastGuestOrder', JSON.stringify(order));
-          const successPath =
-            order.access_token?.trim()
-              ? `/success/${order.id}?token=${encodeURIComponent(order.access_token)}`
-              : `/success/${order.id}`;
+          const successPath = order.access_token?.trim()
+            ? `/success/${order.id}?token=${encodeURIComponent(order.access_token)}`
+            : `/success/${order.id}`;
           if (onSuccess) {
             onSuccess(String(order.id));
           } else {
@@ -94,24 +94,6 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
   };
 
   const totalPrice = getTotalPrice();
-  const normalizeHex = (value: string) => value.trim().toLowerCase();
-  const colorNameFromHex: Record<string, string> = {
-    '#ffffff': 'Bijela',
-    '#fff': 'Bijela',
-    '#000000': 'Crna',
-    '#000': 'Crna',
-    '#ff0000': 'Crvena',
-    '#00ff00': 'Zelena',
-    '#0000ff': 'Plava',
-    '#ffff00': 'Žuta',
-    '#ffa500': 'Narandžasta',
-    '#800080': 'Ljubičasta',
-    '#808080': 'Siva',
-    '#a52a2a': 'Braon',
-    '#ffc0cb': 'Roze',
-    '#f5f5dc': 'Bež',
-  };
-
   const getColorLabel = (colorHex: string, itemProduct: (typeof cartItems)[number]['product']) => {
     const normalized = normalizeHex(colorHex);
     const variantMatch = itemProduct.variants?.find(
@@ -122,8 +104,9 @@ export function GuestCheckout({ onSuccess, onCancel }: GuestCheckoutProps) {
       return variantMatch.color_name;
     }
 
-    if (normalized in colorNameFromHex) {
-      return colorNameFromHex[normalized];
+    const fallbackColorName = colorNameFromHex(normalized);
+    if (fallbackColorName) {
+      return fallbackColorName;
     }
 
     return 'Odabrana boja';

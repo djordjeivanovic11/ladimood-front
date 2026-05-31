@@ -14,6 +14,7 @@ import type {
   AddressBase,
   Product,
   Category,
+  Collection,
   Referral,
   ReferralRequest,
   Size,
@@ -55,14 +56,23 @@ async function fetchCartSafely(request: () => Promise<AxiosResponse<Cart>>): Pro
   }
 }
 
-// Function to get all products with optional filters (category, price range)
-export const getProducts = async (
-  category_id?: number,
-  min_price?: number,
-  max_price?: number
-): Promise<Product[]> => {
+interface ProductCatalogFilters {
+  category_id?: number;
+  collection_id?: number;
+  min_price?: number;
+  max_price?: number;
+}
+
+// Function to get all products with optional filters (taxonomy, price range)
+export const getProducts = async ({
+  category_id,
+  collection_id,
+  min_price,
+  max_price,
+}: ProductCatalogFilters = {}): Promise<Product[]> => {
   const params = {
     category_id: category_id || undefined,
+    collection_id: collection_id || undefined,
     min_price: min_price || undefined,
     max_price: max_price || undefined,
   };
@@ -73,6 +83,11 @@ export const getProducts = async (
 // Function to get all categories
 export const getCategories = async (): Promise<Category[]> => {
   return fetchCatalogList(() => api.get('/catalog/categories'));
+};
+
+// Function to get all collections
+export const getCollections = async (): Promise<Collection[]> => {
+  return fetchCatalogList(() => api.get('/catalog/collections'));
 };
 
 // Function to get a single product by its ID

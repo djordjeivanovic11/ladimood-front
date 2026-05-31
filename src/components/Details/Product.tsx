@@ -74,10 +74,19 @@ const Product: React.FC<ProductProps> = ({
     getPrimaryProductImageUrl(product) || primaryMedia?.url || '/images/default-product.jpg';
   const imageSizes =
     layoutVariant === 'shop' ? IMAGE_SIZES.productCardShop : IMAGE_SIZES.productCardHome;
+  const isSoldOut = Boolean(product.is_sold_out);
 
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
       <div className="relative aspect-square w-full overflow-hidden bg-muted">
+        {isSoldOut ? (
+          <div
+            className="sold-out-badge absolute right-2.5 top-2.5 z-10 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground sm:px-3 sm:py-1.5 sm:text-xs"
+            aria-label="Sold out"
+          >
+            SOLD OUT
+          </div>
+        ) : null}
         <FramedImage
           src={imageSrc}
           alt={product.name}
@@ -138,8 +147,9 @@ const Product: React.FC<ProductProps> = ({
               onAddToCart();
             }}
             className="min-h-11 flex-1"
+            disabled={isSoldOut}
           >
-            Dodaj u korpu
+            {isSoldOut ? 'Rasprodato' : 'Dodaj u korpu'}
           </Button>
           <Button
             variant="outline"

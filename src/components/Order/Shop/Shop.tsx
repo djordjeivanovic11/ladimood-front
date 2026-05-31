@@ -4,7 +4,11 @@ import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ProductFilter from './ProductFilter';
 import ProductGrid from './ProductGrid';
-import { useCategoriesQuery, useProductsQuery } from '@/hooks/queries/useProducts';
+import {
+  useCategoriesQuery,
+  useCollectionsQuery,
+  useProductsQuery,
+} from '@/hooks/queries/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 
@@ -22,42 +26,52 @@ function ShopLoadingSkeleton() {
   );
 }
 
+function parseFilterId(value: string | null): number | null {
+  if (!value) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parsePriceRange(searchParams: URLSearchParams, defaultMaxPrice: number): [number, number] {
+  const maxPriceParam = searchParams.get('max_price');
+  if (!maxPriceParam) return [0, defaultMaxPrice];
+
+  const parsed = Number(maxPriceParam);
+  return Number.isFinite(parsed) ? [0, parsed] : [0, defaultMaxPrice];
+}
+
 const ShopContent: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const { data: categories = [] } = useCategoriesQuery();
+  const { data: collections = [] } = useCollectionsQuery();
 
   const DEFAULT_MAX_PRICE = 500;
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
-  const [selectedPriceRange, setSelectedPriceRange] = useState<[number, number]>([
-    0,
-    DEFAULT_MAX_PRICE,
-  ]);
-  const [sortBy, setSortBy] = useState<string>('relevance');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(() =>
+    parseFilterId(searchParams.get('category_id'))
+  );
+  const [selectedCollectionId, setSelectedCollectionId] = useState<number | null>(() =>
+    parseFilterId(searchParams.get('collection_id'))
+  );
+  const [selectedPriceRange, setSelectedPriceRange] = useState<[number, number]>(() =>
+    parsePriceRange(searchParams, DEFAULT_MAX_PRICE)
+  );
+  const [sortBy, setSortBy] = useState<string>(() => searchParams.get('sort') || 'relevance');
 
   useEffect(() => {
     const categoryIdParam = searchParams.get('category_id');
-    const maxPriceParam = searchParams.get('max_price');
+    const collectionIdParam = searchParams.get('collection_id');
     const sortParam = searchParams.get('sort');
 
-    if (categoryIdParam) {
-      const parsed = Number(categoryIdParam);
-      setSelectedCategoryId(Number.isFinite(parsed) ? parsed : null);
-    } else {
-      setSelectedCategoryId(null);
-    }
-
-    if (maxPriceParam) {
-      const parsed = Number(maxPriceParam);
-      if (Number.isFinite(parsed)) setSelectedPriceRange([0, parsed]);
-    } else {
-      setSelectedPriceRange([0, DEFAULT_MAX_PRICE]);
-    }
+    setSelectedCategoryId(parseFilterId(categoryIdParam));
+    setSelectedCollectionId(parseFilterId(collectionIdParam));
+    setSelectedPriceRange(parsePriceRange(searchParams, DEFAULT_MAX_PRICE));
 
     if (sortParam) setSortBy(sortParam);
-  }, [searchParams]);
+    else setSortBy('relevance');
+  }, [searchParams, DEFAULT_MAX_PRICE]);
 
   // Backwards compatibility for old links like /shop?category=hoodies
   useEffect(() => {
@@ -78,6 +92,9 @@ const ShopContent: React.FC = () => {
     if (selectedCategoryId) params.set('category_id', String(selectedCategoryId));
     else params.delete('category_id');
 
+    if (selectedCollectionId) params.set('collection_id', String(selectedCollectionId));
+    else params.delete('collection_id');
+
     if (selectedPriceRange[1] !== DEFAULT_MAX_PRICE) {
       params.set('max_price', String(selectedPriceRange[1]));
     } else {
@@ -96,10 +113,11 @@ const ShopContent: React.FC = () => {
       router.replace(`/shop${nextQuery ? `?${nextQuery}` : ''}`, { scroll: false });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategoryId, selectedPriceRange, sortBy, DEFAULT_MAX_PRICE]);
+  }, [selectedCategoryId, selectedCollectionId, selectedPriceRange, sortBy, DEFAULT_MAX_PRICE]);
 
   const { data: products = [], isLoading } = useProductsQuery({
     category_id: selectedCategoryId ?? undefined,
+    collection_id: selectedCollectionId ?? undefined,
     min_price: selectedPriceRange[0],
     max_price: selectedPriceRange[1],
   });
@@ -116,8 +134,30 @@ const ShopContent: React.FC = () => {
     return categories.find((c) => c.id === selectedCategoryId)?.name ?? null;
   }, [categories, selectedCategoryId]);
 
+  const activeCollectionName = useMemo(() => {
+    if (!selectedCollectionId) return null;
+    return collections.find((c) => c.id === selectedCollectionId)?.name ?? null;
+  }, [collections, selectedCollectionId]);
+
+  const handleCategoryChange = (categoryId: number | null) => {
+    setSelectedCategoryId(categoryId);
+    if (categoryId !== null) {
+      setSelectedCollectionId(null);
+    }
+  };
+
+  const handleCollectionChange = (collectionId: number | null) => {
+    setSelectedCollectionId(collectionId);
+    if (collectionId !== null) {
+      setSelectedCategoryId(null);
+    }
+  };
+
   const hasActiveFilters =
-    !!selectedCategoryId || selectedPriceRange[1] !== DEFAULT_MAX_PRICE || sortBy !== 'relevance';
+    !!selectedCategoryId ||
+    !!selectedCollectionId ||
+    selectedPriceRange[1] !== DEFAULT_MAX_PRICE ||
+    sortBy !== 'relevance';
 
   return (
     <div className="mx-auto flex max-w-screen-2xl flex-col gap-6 px-4 py-8 md:flex-row md:px-6">
@@ -125,8 +165,11 @@ const ShopContent: React.FC = () => {
       <div className="w-full shrink-0 md:w-72 lg:w-64">
         <ProductFilter
           categories={categories}
+          collections={collections}
           selectedCategoryId={selectedCategoryId}
-          setSelectedCategoryId={setSelectedCategoryId}
+          setSelectedCategoryId={handleCategoryChange}
+          selectedCollectionId={selectedCollectionId}
+          setSelectedCollectionId={handleCollectionChange}
           selectedPriceRange={selectedPriceRange}
           setSelectedPriceRange={setSelectedPriceRange}
           sortBy={sortBy}
@@ -146,6 +189,15 @@ const ShopContent: React.FC = () => {
                 className="rounded-full border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted"
               >
                 {activeCategoryName} ×
+              </button>
+            )}
+            {activeCollectionName && (
+              <button
+                type="button"
+                onClick={() => setSelectedCollectionId(null)}
+                className="rounded-full border bg-background px-3 py-1 text-sm text-foreground hover:bg-muted"
+              >
+                {activeCollectionName} ×
               </button>
             )}
             {selectedPriceRange[1] !== DEFAULT_MAX_PRICE && (
@@ -171,6 +223,7 @@ const ShopContent: React.FC = () => {
               className="h-8 px-3 text-sm"
               onClick={() => {
                 setSelectedCategoryId(null);
+                setSelectedCollectionId(null);
                 setSelectedPriceRange([0, DEFAULT_MAX_PRICE]);
                 setSortBy('relevance');
               }}
