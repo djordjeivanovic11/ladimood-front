@@ -1,5 +1,7 @@
 import React, { ReactNode } from 'react';
 import type { Metadata } from 'next';
+import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Cormorant_Garamond } from 'next/font/google';
 import Navbar from '@/components/Layout/Header/Navbar';
 import Footer from '@/components/Layout/Footer/Footer';
@@ -73,6 +75,8 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
           <main className="w-full flex-grow bg-background pt-20 md:pt-24">{children}</main>
           <Footer />
         </Providers>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

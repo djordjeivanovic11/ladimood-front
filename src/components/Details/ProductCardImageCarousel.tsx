@@ -13,9 +13,11 @@ type ProductCardImageCarouselProps = {
   productName: string;
   sizes: string;
   isSoldOut?: boolean;
+  isCardHovered?: boolean;
 };
 
 const SWIPE_THRESHOLD = 40;
+const AUTO_ADVANCE_MS = 2000;
 
 function clampIndex(index: number, length: number) {
   if (length <= 0) return 0;
@@ -43,10 +45,9 @@ export function ProductCardImageCarousel({
   productName,
   sizes,
   isSoldOut = false,
+  isCardHovered = false,
 }: ProductCardImageCarouselProps) {
   const [activeIndex, setActiveIndex] = React.useState(0);
-  const [hasManualNav, setHasManualNav] = React.useState(false);
-  const [isHovered, setIsHovered] = React.useState(false);
   const [galleryOpen, setGalleryOpen] = React.useState(false);
   const [galleryIndex, setGalleryIndex] = React.useState(0);
   const canHover = useCanHover();
@@ -55,11 +56,23 @@ export function ProductCardImageCarousel({
 
   const imageCount = media.length;
   const hasMultipleImages = imageCount > 1;
-  const displayIndex =
-    hasMultipleImages && canHover && isHovered && !hasManualNav && activeIndex === 0
-      ? 1
-      : activeIndex;
-  const normalizedDisplayIndex = clampIndex(displayIndex, imageCount);
+  const normalizedDisplayIndex = clampIndex(activeIndex, imageCount);
+
+  React.useEffect(() => {
+    if (!isCardHovered) {
+      setActiveIndex(0);
+    }
+  }, [isCardHovered]);
+
+  React.useEffect(() => {
+    if (!canHover || !isCardHovered || !hasMultipleImages || galleryOpen) return;
+
+    const intervalId = window.setInterval(() => {
+      setActiveIndex((current) => clampIndex(current + 1, imageCount));
+    }, AUTO_ADVANCE_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [canHover, galleryOpen, hasMultipleImages, imageCount, isCardHovered, normalizedDisplayIndex]);
 
   React.useEffect(() => {
     if (imageCount <= 1) return;
@@ -87,17 +100,6 @@ export function ProductCardImageCarousel({
 
   const goToIndex = (nextIndex: number) => {
     setActiveIndex(clampIndex(nextIndex, imageCount));
-    setHasManualNav(true);
-  };
-
-  const handleMouseEnter = () => {
-    if (canHover) setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    setHasManualNav(false);
-    setActiveIndex(0);
   };
 
   const openGallery = () => {
@@ -143,8 +145,6 @@ export function ProductCardImageCarousel({
     <>
       <div
         className="relative aspect-square w-full overflow-hidden bg-muted [touch-action:pan-y]"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >

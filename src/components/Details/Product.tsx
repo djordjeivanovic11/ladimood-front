@@ -83,14 +83,20 @@ const Product: React.FC<ProductProps> = ({
   const imageSizes =
     layoutVariant === 'shop' ? IMAGE_SIZES.productCardShop : IMAGE_SIZES.productCardHome;
   const isSoldOut = Boolean(product.is_sold_out);
+  const [isCardHovered, setIsCardHovered] = React.useState(false);
 
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <Card
+      className="group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      onMouseEnter={() => setIsCardHovered(true)}
+      onMouseLeave={() => setIsCardHovered(false)}
+    >
       <ProductCardImageCarousel
         media={displayMedia}
         productName={product.name}
         sizes={imageSizes}
         isSoldOut={isSoldOut}
+        isCardHovered={isCardHovered}
       />
       <CardContent className="space-y-4 p-4 sm:space-y-5 sm:p-5">
         <div className="text-center">
