@@ -8,8 +8,11 @@ function bySortOrder(a: ProductMedia, b: ProductMedia) {
 }
 
 export function getPrimaryProductMedia(product: Product) {
-  const sortedMedia = [...(product.media ?? [])].sort(bySortOrder);
-  return sortedMedia.find((item) => item.url?.trim()) ?? null;
+  return getSortedProductMedia(product)[0] ?? null;
+}
+
+export function getSortedProductMedia(product: Product): ProductMedia[] {
+  return [...(product.media ?? [])].sort(bySortOrder).filter((item) => item.url?.trim());
 }
 
 export function getPrimaryProductImageUrl(product: Product): string | null {

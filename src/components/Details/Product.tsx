@@ -3,12 +3,12 @@
 import React from 'react';
 import { FaHeart } from 'react-icons/fa';
 import { addToWishlist as addToWishlistAPI } from '@/api/account/axios';
-import { Product as ProductType } from '@/app/types/types';
-import { FramedImage } from '@/components/Management/catalog/FramedImage';
+import type { Product as ProductType, ProductMedia } from '@/app/types/types';
 import {
   getPrimaryProductImageUrl,
-  getPrimaryProductMedia,
+  getSortedProductMedia,
 } from '@/components/Management/catalog/catalog-image';
+import { ProductCardImageCarousel } from '@/components/Details/ProductCardImageCarousel';
 import { IMAGE_SIZES } from '@/lib/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -69,32 +69,29 @@ const Product: React.FC<ProductProps> = ({
     }
   };
 
-  const primaryMedia = getPrimaryProductMedia(product);
-  const imageSrc =
-    getPrimaryProductImageUrl(product) || primaryMedia?.url || '/images/default-product.jpg';
+  const sortedMedia = getSortedProductMedia(product);
+  const fallbackImageSrc = getPrimaryProductImageUrl(product) || '/images/default-product.jpg';
+  const displayMedia: ProductMedia[] =
+    sortedMedia.length > 0
+      ? sortedMedia
+      : [
+          {
+            id: -product.id,
+            url: fallbackImageSrc,
+          },
+        ];
   const imageSizes =
     layoutVariant === 'shop' ? IMAGE_SIZES.productCardShop : IMAGE_SIZES.productCardHome;
   const isSoldOut = Boolean(product.is_sold_out);
 
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-      <div className="relative aspect-square w-full overflow-hidden bg-muted">
-        {isSoldOut ? (
-          <div
-            className="sold-out-badge absolute right-2.5 top-2.5 z-10 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-foreground sm:px-3 sm:py-1.5 sm:text-xs"
-            aria-label="Sold out"
-          >
-            SOLD OUT
-          </div>
-        ) : null}
-        <FramedImage
-          src={imageSrc}
-          alt={product.name}
-          framing={primaryMedia}
-          sizes={imageSizes}
-          containerClassName="h-full w-full transition-transform duration-500 group-hover:scale-[1.02]"
-        />
-      </div>
+      <ProductCardImageCarousel
+        media={displayMedia}
+        productName={product.name}
+        sizes={imageSizes}
+        isSoldOut={isSoldOut}
+      />
       <CardContent className="space-y-4 p-4 sm:space-y-5 sm:p-5">
         <div className="text-center">
           <h3 className="line-clamp-2 text-lg font-semibold transition-colors group-hover:text-primary sm:text-xl">
