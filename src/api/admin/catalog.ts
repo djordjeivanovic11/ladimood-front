@@ -16,8 +16,8 @@ export async function adminListProducts(): Promise<Product[]> {
 }
 
 export async function adminReorderProducts(productIds: number[]): Promise<Product[]> {
-  const res = await axiosInstance.put<Product[]>('/admin/products/reorder', {
-    product_ids: productIds,
+  const res = await axiosInstance.post<Product[]>('/admin/products/reorder', {
+    product_ids: productIds.filter((id) => Number.isInteger(id)),
   });
   return res.data;
 }
