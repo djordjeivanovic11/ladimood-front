@@ -1,51 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
-import Image from 'next/image';
-import { IMAGE_SIZES } from '@/lib/image';
+import React from 'react';
+import { AutoScrollingGallery } from '@/components/Frontpage/AutoScrollingGallery';
 
 const MontenegrinGallery: React.FC = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    let scrollAmount = 0;
-    let isHovering = false;
-
-    const scrollGallery = () => {
-      if (scrollContainer && !isHovering) {
-        scrollAmount += 2;
-        if (scrollAmount >= scrollContainer.scrollWidth - scrollContainer.clientWidth) {
-          scrollAmount = 0;
-        }
-        scrollContainer.scrollLeft = scrollAmount;
-      }
-      requestAnimationFrame(scrollGallery);
-    };
-
-    const handleMouseEnter = () => {
-      isHovering = true;
-    };
-    const handleMouseLeave = () => {
-      isHovering = false;
-    };
-
-    if (scrollContainer) {
-      scrollContainer.addEventListener('mouseenter', handleMouseEnter);
-      scrollContainer.addEventListener('mouseleave', handleMouseLeave);
-    }
-
-    const animationId = requestAnimationFrame(scrollGallery);
-
-    return () => {
-      if (scrollContainer) {
-        scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
-        scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
-      }
-      cancelAnimationFrame(animationId);
-    };
-  }, []);
-
   const images = [
     '/images/slideshow/image1.jpeg',
     '/images/slideshow/image2.jpeg',
@@ -56,7 +14,11 @@ const MontenegrinGallery: React.FC = () => {
     '/images/slideshow/image7.jpeg',
     '/images/slideshow/image8.jpeg',
     '/images/slideshow/image9.jpeg',
-  ];
+  ].map((src, index) => ({
+    src,
+    alt: `Ladimood stil zabava ${index + 1}`,
+    key: src,
+  }));
 
   return (
     <div className="relative bg-muted/50">
@@ -71,31 +33,7 @@ const MontenegrinGallery: React.FC = () => {
         </p>
       </div>
 
-      <div
-        ref={scrollRef}
-        className="scrollbar-hide flex space-x-4 overflow-x-auto px-4 pb-8 sm:space-x-6 sm:pb-12 md:space-x-8"
-        style={{
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-        }}
-      >
-        {images.map((src, index) => (
-          <div
-            key={index}
-            className="relative w-[200px] flex-none overflow-hidden sm:w-[300px] md:w-[450px] lg:w-[600px]"
-          >
-            <Image
-              src={src}
-              alt={`Ladimood stil zabava ${index + 1}`}
-              width={1000}
-              height={1000}
-              sizes={IMAGE_SIZES.gallerySlide}
-              loading="lazy"
-              className="transform rounded-xl object-cover shadow-lg transition-transform duration-300 hover:scale-105"
-            />
-          </div>
-        ))}
-      </div>
+      <AutoScrollingGallery images={images} scrollSpeed={2} />
     </div>
   );
 };

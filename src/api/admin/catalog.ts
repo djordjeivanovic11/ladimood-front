@@ -15,6 +15,13 @@ export async function adminListProducts(): Promise<Product[]> {
   return res.data;
 }
 
+export async function adminReorderProducts(productIds: number[]): Promise<Product[]> {
+  const res = await axiosInstance.put<Product[]>('/admin/products/reorder', {
+    product_ids: productIds,
+  });
+  return res.data;
+}
+
 export async function adminCreateProduct(payload: {
   name: string;
   description: string;

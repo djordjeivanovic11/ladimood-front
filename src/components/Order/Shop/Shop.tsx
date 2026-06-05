@@ -126,7 +126,7 @@ const ShopContent: React.FC = () => {
     const list = [...products];
     if (sortBy === 'priceLowToHigh') return list.sort((a, b) => a.price - b.price);
     if (sortBy === 'priceHighToLow') return list.sort((a, b) => b.price - a.price);
-    return list;
+    return list.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.id - b.id);
   }, [products, sortBy]);
 
   const activeCategoryName = useMemo(() => {

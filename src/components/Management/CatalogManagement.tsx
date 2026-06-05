@@ -13,15 +13,14 @@ import {
   adminListCategories,
   adminListCollections,
   adminListProducts,
+  adminReorderProducts,
   adminUpdateMedia,
   adminUpdateProduct,
   adminUpdateVariant,
 } from '@/api/admin/catalog';
 import { adminUploadStorageFile } from '@/api/admin/storage';
-import { AdminEntityListItem } from '@/components/Management/catalog/AdminEntityListItem';
+import { AdminReorderableProductList } from '@/components/Management/catalog/AdminReorderableProductList';
 import { AdminProductDetailPanel } from '@/components/Management/catalog/AdminProductDetailPanel';
-import { AdminStatusBadge } from '@/components/Management/catalog/AdminStatusBadge';
-import { AdminThumbnail } from '@/components/Management/catalog/AdminThumbnail';
 import {
   derivePublishChecks,
   getApiErrorMessage,
@@ -29,10 +28,6 @@ import {
   type PublishCheck,
 } from '@/components/Management/catalog/catalog-admin-utils';
 import { normalizeHex } from '@/components/Management/catalog/catalog-colors';
-import {
-  getPrimaryProductImageUrl,
-  getPrimaryProductMedia,
-} from '@/components/Management/catalog/catalog-image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -517,39 +512,22 @@ export default function CatalogManagement({
             {products.length === 0 ? (
               <p className="text-sm text-muted-foreground">Još nema proizvoda.</p>
             ) : (
-              <div className="max-h-[min(70vh,640px)] space-y-2 overflow-y-auto pr-1">
-                {products.map((p) => (
-                  <AdminEntityListItem
-                    key={p.id}
-                    selected={selectedProductId === p.id}
-                    onClick={() => setSelectedProductId(p.id)}
-                    title={p.name}
-                    leading={
-                      <AdminThumbnail
-                        src={getPrimaryProductImageUrl(p)}
-                        framing={getPrimaryProductMedia(p)}
-                        alt={p.name}
-                        size="md"
-                      />
+              <div className="max-h-[min(70vh,640px)] overflow-y-auto pr-1">
+                <AdminReorderableProductList
+                  products={products}
+                  selectedProductId={selectedProductId}
+                  onSelectProduct={setSelectedProductId}
+                  onReorder={async (productIds) => {
+                    try {
+                      const reordered = await adminReorderProducts(productIds);
+                      setProducts(reordered);
+                      toast.success('Redoslijed proizvoda je sačuvan.');
+                    } catch (error) {
+                      toast.error(getApiErrorMessage(error, 'Nije moguće sačuvati redoslijed.'));
+                      throw error;
                     }
-                    subtitle={
-                      <div className="flex items-center gap-2">
-                        <AdminStatusBadge status={p.status} />
-                        {p.is_sold_out ? (
-                          <span className="rounded-md border border-rose-200 bg-rose-50 px-2 py-0.5 text-xs font-medium text-rose-700">
-                            SOLD OUT
-                          </span>
-                        ) : null}
-                        <span>{p.gender ?? 'UNISEX'}</span>
-                      </div>
-                    }
-                    trailing={
-                      <span className="text-sm font-medium text-muted-foreground">
-                        €{p.price.toFixed(2)}
-                      </span>
-                    }
-                  />
-                ))}
+                  }}
+                />
               </div>
             )}
           </CardContent>

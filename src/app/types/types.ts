@@ -126,6 +126,7 @@ export interface ProductBase {
   gender?: Gender | null;
   status?: ProductStatus | null;
   is_sold_out?: boolean;
+  sort_order?: number;
 }
 export interface ProductCreate extends ProductBase {
   category_id: number;

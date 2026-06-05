@@ -6,6 +6,7 @@ import TaxonomyExplore from '@/components/Frontpage/TaxonomyExplore';
 import ProductGrid from '@/components/Order/Shop/ProductGrid';
 import Newsletter from '@/components/Frontpage/Newsletter';
 import MontenegrinGallery from '@/components/Frontpage/MontenegrinGallery';
+import { ProductGallerySlideshow } from '@/components/Frontpage/ProductGallerySlideshow';
 import SuggestionBox from '@/components/Frontpage/ShareIdeas';
 import { useProductsQuery } from '@/hooks/queries/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -48,6 +49,12 @@ export default function Frontpage() {
           </p>
         )}
       </div>
+
+      {!isLoading && products.length > 0 ? (
+        <div className="mb-16">
+          <ProductGallerySlideshow products={products} />
+        </div>
+      ) : null}
 
       <div className="mb-16">
         <SuggestionBox />
