@@ -18,6 +18,7 @@ type ProductCardImageCarouselProps = {
 
 const SWIPE_THRESHOLD = 40;
 const AUTO_ADVANCE_MS = 2000;
+const MOBILE_AUTO_ADVANCE_MS = 1000;
 
 function clampIndex(index: number, length: number) {
   if (length <= 0) return 0;
@@ -50,7 +51,9 @@ export function ProductCardImageCarousel({
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [galleryOpen, setGalleryOpen] = React.useState(false);
   const [galleryIndex, setGalleryIndex] = React.useState(0);
+  const [isInView, setIsInView] = React.useState(false);
   const canHover = useCanHover();
+  const carouselRef = React.useRef<HTMLDivElement>(null);
   const touchStartRef = React.useRef<{ x: number; y: number } | null>(null);
   const suppressClickRef = React.useRef(false);
 
@@ -59,15 +62,45 @@ export function ProductCardImageCarousel({
   const normalizedDisplayIndex = clampIndex(activeIndex, imageCount);
 
   React.useLayoutEffect(() => {
+    if (!canHover) return;
+
     if (!isCardHovered) {
       setActiveIndex(0);
       return;
     }
 
-    if (canHover && hasMultipleImages && !galleryOpen) {
+    if (hasMultipleImages && !galleryOpen) {
       setActiveIndex((current) => (current === 0 ? 1 : current));
     }
   }, [canHover, galleryOpen, hasMultipleImages, isCardHovered]);
+
+  React.useEffect(() => {
+    const node = carouselRef.current;
+    if (!node || canHover) return;
+
+    const observer = new IntersectionObserver(([entry]) => setIsInView(entry.isIntersecting), {
+      threshold: 0.6,
+    });
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [canHover]);
+
+  React.useEffect(() => {
+    if (canHover || !isInView || !hasMultipleImages || galleryOpen) return;
+
+    const intervalId = window.setInterval(() => {
+      setActiveIndex((current) => clampIndex(current + 1, imageCount));
+    }, MOBILE_AUTO_ADVANCE_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [canHover, galleryOpen, hasMultipleImages, imageCount, isInView]);
+
+  React.useEffect(() => {
+    if (canHover || isInView) return;
+
+    setActiveIndex(0);
+  }, [canHover, isInView]);
 
   React.useEffect(() => {
     if (!canHover || !isCardHovered || !hasMultipleImages || galleryOpen) return;
@@ -149,6 +182,7 @@ export function ProductCardImageCarousel({
   return (
     <>
       <div
+        ref={carouselRef}
         className="relative aspect-square w-full overflow-hidden bg-muted [touch-action:pan-y]"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
