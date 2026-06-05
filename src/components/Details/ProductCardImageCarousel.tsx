@@ -58,11 +58,16 @@ export function ProductCardImageCarousel({
   const hasMultipleImages = imageCount > 1;
   const normalizedDisplayIndex = clampIndex(activeIndex, imageCount);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (!isCardHovered) {
       setActiveIndex(0);
+      return;
     }
-  }, [isCardHovered]);
+
+    if (canHover && hasMultipleImages && !galleryOpen) {
+      setActiveIndex((current) => (current === 0 ? 1 : current));
+    }
+  }, [canHover, galleryOpen, hasMultipleImages, isCardHovered]);
 
   React.useEffect(() => {
     if (!canHover || !isCardHovered || !hasMultipleImages || galleryOpen) return;
@@ -72,7 +77,7 @@ export function ProductCardImageCarousel({
     }, AUTO_ADVANCE_MS);
 
     return () => window.clearInterval(intervalId);
-  }, [canHover, galleryOpen, hasMultipleImages, imageCount, isCardHovered, normalizedDisplayIndex]);
+  }, [canHover, galleryOpen, hasMultipleImages, imageCount, isCardHovered]);
 
   React.useEffect(() => {
     if (imageCount <= 1) return;
