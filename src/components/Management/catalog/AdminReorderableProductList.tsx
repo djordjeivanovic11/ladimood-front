@@ -110,15 +110,14 @@ export function AdminReorderableProductList({
               title={product.name}
               leading={
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
+                  <span
                     className="cursor-grab touch-none rounded p-1 text-muted-foreground hover:bg-muted active:cursor-grabbing"
                     aria-label={`Promijeni redoslijed proizvoda ${product.name}`}
                     onClick={(event) => event.stopPropagation()}
                     onMouseDown={(event) => event.stopPropagation()}
                   >
                     <GripVertical className="h-4 w-4" />
-                  </button>
+                  </span>
                   <AdminThumbnail
                     src={getPrimaryProductImageUrl(product)}
                     framing={getPrimaryProductMedia(product)}

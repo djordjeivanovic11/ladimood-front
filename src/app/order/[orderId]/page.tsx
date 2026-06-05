@@ -51,7 +51,7 @@ function OrderPageContent({ params }: OrderPageProps) {
     };
 
     unwrapParams();
-  }, [authLoading, params, isAuthenticated, isGuestAccess, router]);
+  }, [accessToken, authLoading, params, isAuthenticated, isGuestAccess, router]);
 
   if (isLoading || authLoading || !orderId) {
     return (

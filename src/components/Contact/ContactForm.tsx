@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { submitContactForm } from '@/api/management/axios';
+import { PhoneNumberInput } from '@/components/ui/phone-input';
+import { normalizePhoneNumber } from '@/lib/phone';
 
 const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
 const ALLOWED_FILE_TYPES = [
@@ -66,7 +68,11 @@ const ContactForm: React.FC = () => {
     setErrorMessage(null);
 
     try {
-      const response = await submitContactForm({ ...formData, attachment });
+      const response = await submitContactForm({
+        ...formData,
+        phone: normalizePhoneNumber(formData.phone),
+        attachment,
+      });
       setSuccessMessage(response.message);
       setFormData({
         name: '',
@@ -142,16 +148,18 @@ const ContactForm: React.FC = () => {
           <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
             Telefon
           </label>
-          <input
-            type="text"
-            id="phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            required
-            placeholder="+382 67 123 456"
-            className="mt-2 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-[#0097B2] focus:border-[#0097B2] bg-gray-50 text-gray-800"
-          />
+          <div className="mt-2">
+            <PhoneNumberInput
+              inputProps={{ id: 'phone', name: 'phone', required: true }}
+              value={formData.phone}
+              onChange={(phone) =>
+                setFormData((prevData) => ({
+                  ...prevData,
+                  phone,
+                }))
+              }
+            />
+          </div>
         </div>
         <div>
           <label htmlFor="inquiry_type" className="block text-sm font-medium text-gray-700">

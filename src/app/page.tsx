@@ -6,6 +6,7 @@ import TaxonomyExplore from '@/components/Frontpage/TaxonomyExplore';
 import ProductGrid from '@/components/Order/Shop/ProductGrid';
 import Newsletter from '@/components/Frontpage/Newsletter';
 import MontenegrinGallery from '@/components/Frontpage/MontenegrinGallery';
+import CreatorChallengeSection from '@/components/Frontpage/CreatorChallengeSection';
 import { ProductGallerySlideshow } from '@/components/Frontpage/ProductGallerySlideshow';
 import SuggestionBox from '@/components/Frontpage/ShareIdeas';
 import { sortProductsByDisplayOrder } from '@/lib/product-order';
@@ -38,6 +39,10 @@ export default function Frontpage() {
 
       <div className="mb-16">
         <MontenegrinGallery />
+      </div>
+
+      <div className="mb-16">
+        <CreatorChallengeSection />
       </div>
 
       <div className="mb-16">

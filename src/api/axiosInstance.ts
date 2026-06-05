@@ -18,6 +18,7 @@ const LOGIN_REDIRECT_SKIP_PREFIXES = [
   '/shop',
   '/confirmation',
   '/contact',
+  '/creator-challenge',
   '/order',
   '/success',
 ];

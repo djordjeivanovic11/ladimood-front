@@ -144,7 +144,33 @@ export interface DashboardSummary {
   completion_rate: number;
   total_sales_amount: number;
   newsletter_subscribers_count: number;
+  creator_challenge_pending_count: number;
+  creator_challenge_unseen_count: number;
   status_counts: Record<string, number>;
+}
+
+export type CreatorChallengeStatus = 'pending' | 'reviewing' | 'approved' | 'rejected' | 'rewarded';
+
+export type CreatorChallengeMilestone = 'none' | 'views_2k' | 'views_10k' | 'viral';
+
+export interface CreatorChallengeSubmission {
+  id: number;
+  full_name: string;
+  email: string;
+  phone: string;
+  instagram_handle?: string | null;
+  video_url: string;
+  platform: 'instagram' | 'tiktok';
+  message?: string | null;
+  status: CreatorChallengeStatus;
+  milestone: CreatorChallengeMilestone;
+  view_count?: number | null;
+  seen_at?: string | null;
+  admin_notes?: string | null;
+  reviewed_by_user_id?: number | null;
+  reviewed_at?: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export const fetchAdminUsersOverview = async (): Promise<AdminUserOverview[]> => {
@@ -224,6 +250,52 @@ export const deleteNewsletterSubscriber = async (subscriberId: number): Promise<
       `Brisanje newsletter korisnika ID ${subscriberId} nije uspjelo.`
     );
     console.error(`Error deleting newsletter subscriber ID ${subscriberId}:`, message);
+    throw new Error(message);
+  }
+};
+
+export const fetchCreatorChallengeSubmissions = async (): Promise<CreatorChallengeSubmission[]> => {
+  try {
+    const response = await axiosInstance.get<CreatorChallengeSubmission[]>(
+      '/admin/creator-challenge/submissions'
+    );
+    return response.data;
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, 'Učitavanje prijava igre nije uspjelo.');
+    console.error('Error fetching creator challenge submissions:', message);
+    throw new Error(message);
+  }
+};
+
+export const updateCreatorChallengeSubmission = async (
+  submissionId: number,
+  payload: {
+    status?: CreatorChallengeStatus;
+    admin_notes?: string | null;
+    seen?: boolean;
+    milestone?: CreatorChallengeMilestone;
+    view_count?: number | null;
+  }
+): Promise<CreatorChallengeSubmission> => {
+  try {
+    const response = await axiosInstance.patch<CreatorChallengeSubmission>(
+      `/admin/creator-challenge/submissions/${submissionId}`,
+      payload
+    );
+    return response.data;
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, 'Ažuriranje prijave nije uspjelo.');
+    console.error(`Error updating creator challenge submission ${submissionId}:`, message);
+    throw new Error(message);
+  }
+};
+
+export const deleteCreatorChallengeSubmission = async (submissionId: number): Promise<void> => {
+  try {
+    await axiosInstance.delete(`/admin/creator-challenge/submissions/${submissionId}`);
+  } catch (error: unknown) {
+    const message = getErrorMessage(error, 'Brisanje prijave nije uspjelo.');
+    console.error(`Error deleting creator challenge submission ${submissionId}:`, message);
     throw new Error(message);
   }
 };

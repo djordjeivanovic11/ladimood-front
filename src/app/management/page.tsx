@@ -8,17 +8,22 @@ import CatalogManagement from '@/components/Management/CatalogManagement';
 import ManagementOverview from '@/components/Management/ManagementOverview';
 import CatalogTaxonomyManagement from '@/components/Management/CatalogTaxonomyManagement';
 import UserManagement from '@/components/Management/UserManagement';
+import CreatorChallengeManagement from '@/components/Management/CreatorChallengeManagement';
 import { User } from '@/app/types/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 
-type ManagementSection = 'overview' | 'operations' | 'catalog' | 'users';
+type ManagementSection = 'overview' | 'operations' | 'growth' | 'catalog' | 'users';
 type CatalogTab = 'products' | 'taxonomy';
+type OperationsTab = 'orders' | 'sales';
+type GrowthTab = 'creator-challenge';
 
 function ManagementPageContent() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [activeSection, setActiveSection] = useState<ManagementSection>('overview');
   const [catalogTab, setCatalogTab] = useState<CatalogTab>('products');
+  const [operationsTab, setOperationsTab] = useState<OperationsTab>('orders');
+  const [growthTab, setGrowthTab] = useState<GrowthTab>('creator-challenge');
   const [focusedProductId, setFocusedProductId] = useState<number | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,20 +54,62 @@ function ManagementPageContent() {
 
   useEffect(() => {
     const section = searchParams.get('section');
+    const tab = searchParams.get('tab');
+
+    if (section === 'operations' && tab === 'creator-challenge') {
+      setActiveSection('growth');
+      setGrowthTab('creator-challenge');
+      return;
+    }
+
     if (
       section === 'overview' ||
       section === 'operations' ||
+      section === 'growth' ||
       section === 'catalog' ||
       section === 'users'
     ) {
       setActiveSection(section);
     }
+
+    if (tab === 'orders' || tab === 'sales') {
+      setOperationsTab(tab);
+    }
+
+    if (tab === 'creator-challenge') {
+      setGrowthTab('creator-challenge');
+    }
   }, [searchParams]);
+
+  const setOperationsSection = (nextTab: OperationsTab) => {
+    setActiveSection('operations');
+    setOperationsTab(nextTab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('section', 'operations');
+    params.set('tab', nextTab);
+    router.replace(`/management?${params.toString()}`);
+  };
+
+  const setGrowthSection = (nextTab: GrowthTab) => {
+    setActiveSection('growth');
+    setGrowthTab(nextTab);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('section', 'growth');
+    params.set('tab', nextTab);
+    router.replace(`/management?${params.toString()}`);
+  };
 
   const setSection = (nextSection: ManagementSection) => {
     setActiveSection(nextSection);
     const params = new URLSearchParams(searchParams.toString());
     params.set('section', nextSection);
+    if (nextSection === 'growth') {
+      params.set('tab', growthTab);
+    } else if (nextSection === 'operations') {
+      params.set('tab', operationsTab);
+    } else {
+      params.delete('tab');
+    }
     router.replace(`/management?${params.toString()}`);
   };
 
@@ -104,6 +151,16 @@ function ManagementPageContent() {
               </button>
               <button
                 className={`w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors ${
+                  activeSection === 'growth'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+                onClick={() => setSection('growth')}
+              >
+                Rast na mrežama
+              </button>
+              <button
+                className={`w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors ${
                   activeSection === 'catalog'
                     ? 'bg-primary text-primary-foreground'
                     : 'hover:bg-muted'
@@ -132,7 +189,11 @@ function ManagementPageContent() {
           ) : null}
 
           {activeSection === 'operations' ? (
-            <Tabs defaultValue="orders" className="w-full">
+            <Tabs
+              value={operationsTab}
+              onValueChange={(value) => setOperationsSection(value as OperationsTab)}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-2 sm:inline-flex sm:w-auto">
                 <TabsTrigger value="orders">Porudžbine</TabsTrigger>
                 <TabsTrigger value="sales">Prodaja</TabsTrigger>
@@ -142,6 +203,21 @@ function ManagementPageContent() {
               </TabsContent>
               <TabsContent value="sales" className="mt-4">
                 <SalesManagement />
+              </TabsContent>
+            </Tabs>
+          ) : null}
+
+          {activeSection === 'growth' ? (
+            <Tabs
+              value={growthTab}
+              onValueChange={(value) => setGrowthSection(value as GrowthTab)}
+              className="w-full"
+            >
+              <TabsList className="sm:inline-flex sm:w-auto">
+                <TabsTrigger value="creator-challenge">Ladimood igra</TabsTrigger>
+              </TabsList>
+              <TabsContent value="creator-challenge" className="mt-4">
+                <CreatorChallengeManagement />
               </TabsContent>
             </Tabs>
           ) : null}
