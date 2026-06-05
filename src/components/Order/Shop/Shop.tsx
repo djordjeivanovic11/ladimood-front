@@ -11,6 +11,7 @@ import {
 } from '@/hooks/queries/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { sortProductsByDisplayOrder } from '@/lib/product-order';
 
 function ShopLoadingSkeleton() {
   return (
@@ -126,7 +127,7 @@ const ShopContent: React.FC = () => {
     const list = [...products];
     if (sortBy === 'priceLowToHigh') return list.sort((a, b) => a.price - b.price);
     if (sortBy === 'priceHighToLow') return list.sort((a, b) => b.price - a.price);
-    return list.sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0) || a.id - b.id);
+    return sortProductsByDisplayOrder(list);
   }, [products, sortBy]);
 
   const activeCategoryName = useMemo(() => {

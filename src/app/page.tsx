@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Hero from '@/components/Frontpage/Hero';
 import TaxonomyExplore from '@/components/Frontpage/TaxonomyExplore';
 import ProductGrid from '@/components/Order/Shop/ProductGrid';
@@ -8,6 +8,7 @@ import Newsletter from '@/components/Frontpage/Newsletter';
 import MontenegrinGallery from '@/components/Frontpage/MontenegrinGallery';
 import { ProductGallerySlideshow } from '@/components/Frontpage/ProductGallerySlideshow';
 import SuggestionBox from '@/components/Frontpage/ShareIdeas';
+import { sortProductsByDisplayOrder } from '@/lib/product-order';
 import { useProductsQuery } from '@/hooks/queries/useProducts';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -27,6 +28,7 @@ function ProductLoadingSkeleton() {
 
 export default function Frontpage() {
   const { data: products = [], isLoading } = useProductsQuery();
+  const displayProducts = useMemo(() => sortProductsByDisplayOrder(products), [products]);
 
   return (
     <div className="bg-background">
@@ -41,8 +43,8 @@ export default function Frontpage() {
       <div className="mb-16">
         {isLoading ? (
           <ProductLoadingSkeleton />
-        ) : products.length > 0 ? (
-          <ProductGrid products={products} />
+        ) : displayProducts.length > 0 ? (
+          <ProductGrid products={displayProducts} />
         ) : (
           <p className="px-8 text-center text-muted-foreground">
             Trenutno nema proizvoda u ponudi. Uskoro dodajemo nove komade.
@@ -50,9 +52,9 @@ export default function Frontpage() {
         )}
       </div>
 
-      {!isLoading && products.length > 0 ? (
+      {!isLoading && displayProducts.length > 0 ? (
         <div className="mb-16">
-          <ProductGallerySlideshow products={products} />
+          <ProductGallerySlideshow products={displayProducts} />
         </div>
       ) : null}
 

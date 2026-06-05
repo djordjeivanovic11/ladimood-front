@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Size } from '@/app/types/types';
 import type { Category, Collection, Gender, Product, ProductStatus } from '@/app/types/types';
 import {
@@ -48,6 +49,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Plus, RotateCcw } from 'lucide-react';
+import { productKeys } from '@/hooks/queries/useProducts';
 import { toast } from 'sonner';
 
 type ProductForm = {
@@ -76,6 +78,7 @@ export default function CatalogManagement({
   focusedProductId,
   onFocusedProductHandled,
 }: CatalogManagementProps) {
+  const queryClient = useQueryClient();
   const [categoryOptions, setCategoryOptions] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -521,6 +524,7 @@ export default function CatalogManagement({
                     try {
                       const reordered = await adminReorderProducts(productIds);
                       setProducts(reordered);
+                      await queryClient.invalidateQueries({ queryKey: productKeys.all });
                       toast.success('Redoslijed proizvoda je sačuvan.');
                     } catch (error) {
                       toast.error(getApiErrorMessage(error, 'Nije moguće sačuvati redoslijed.'));

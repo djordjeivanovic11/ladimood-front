@@ -11,6 +11,7 @@ import {
   getPrimaryProductMedia,
 } from '@/components/Management/catalog/catalog-image';
 import { cn } from '@/lib/utils';
+import { sortProductsByDisplayOrder } from '@/lib/product-order';
 
 type AdminReorderableProductListProps = {
   products: Product[];
@@ -18,12 +19,6 @@ type AdminReorderableProductListProps = {
   onSelectProduct: (productId: number) => void;
   onReorder: (productIds: number[]) => Promise<void>;
 };
-
-function sortProducts(products: Product[]) {
-  return [...products].sort(
-    (left, right) => (left.sort_order ?? 0) - (right.sort_order ?? 0) || left.id - right.id
-  );
-}
 
 function reorderProducts(products: Product[], fromIndex: number, toIndex: number) {
   const next = [...products];
@@ -38,13 +33,15 @@ export function AdminReorderableProductList({
   onSelectProduct,
   onReorder,
 }: AdminReorderableProductListProps) {
-  const [orderedProducts, setOrderedProducts] = React.useState(() => sortProducts(products));
+  const [orderedProducts, setOrderedProducts] = React.useState(() =>
+    sortProductsByDisplayOrder(products)
+  );
   const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
   const [dropIndex, setDropIndex] = React.useState<number | null>(null);
   const [isSaving, setIsSaving] = React.useState(false);
 
   React.useEffect(() => {
-    setOrderedProducts(sortProducts(products));
+    setOrderedProducts(sortProductsByDisplayOrder(products));
   }, [products]);
 
   const persistOrder = async (nextProducts: Product[]) => {
