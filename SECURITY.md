@@ -37,6 +37,29 @@ This repository uses [Dependabot](https://github.com/djordjeivanovic11/ladimood-
 
 Maintainers review and address alerts on the default branch. If you see a vulnerable dependency in production, report it through the process above or open a regular issue for non-sensitive dependency upgrade requests.
 
+### Minimum pinned versions (2026-06-17)
+
+Production dependencies are kept at or above these versions:
+
+| Package                              | Minimum version |
+| ------------------------------------ | --------------- |
+| `next`                               | 16.2.6          |
+| `axios`                              | 1.16.1          |
+| `postcss`                            | 8.5.10          |
+| `lodash` (transitive via `recharts`) | 4.18.0          |
+
+Transitive packages are additionally pinned via Yarn `resolutions` in [`package.json`](package.json) (`follow-redirects`, `form-data`, `flatted`, `js-yaml`, `minimatch`, `ws`, `yaml`, and others).
+
+### Release checklist
+
+Before merging dependency upgrades to `main`:
+
+1. `yarn install`
+2. `yarn audit --level moderate` (investigate any remaining highs; dev-tool-only advisories may be accepted until upstream ranges widen)
+3. `yarn type-check`
+4. `yarn lint`
+5. `yarn build`
+
 ## Scope
 
 This policy covers the **ladimood-front** repository (Next.js storefront and admin UI). Backend/API issues for the Ladimood platform should be reported separately if they affect customer data or authentication.

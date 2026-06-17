@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import ExploreCardGrid, { type ExploreCard } from './ExploreCardGrid';
 import { useCategoriesQuery, useCollectionsQuery } from '@/hooks/queries/useProducts';
 

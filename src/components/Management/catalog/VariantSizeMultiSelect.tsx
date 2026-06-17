@@ -1,4 +1,3 @@
-import React from 'react';
 import { type Size } from '@/app/types/types';
 import { cn } from '@/lib/utils';
 

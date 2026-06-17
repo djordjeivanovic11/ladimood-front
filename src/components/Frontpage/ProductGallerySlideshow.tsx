@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { Product } from '@/app/types/types';
 import { getSortedProductMedia } from '@/components/Management/catalog/catalog-image';
 import { AutoScrollingGallery } from '@/components/Frontpage/AutoScrollingGallery';

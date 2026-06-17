@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import Hero from '@/components/Frontpage/Hero';
 import TaxonomyExplore from '@/components/Frontpage/TaxonomyExplore';
 import ProductGrid from '@/components/Order/Shop/ProductGrid';

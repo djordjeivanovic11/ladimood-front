@@ -1,5 +1,5 @@
 'use client';
-import React, { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import axiosInstance from '@/api/axiosInstance';
 import OrderManagement from '@/components/Management/OrderManagement';
