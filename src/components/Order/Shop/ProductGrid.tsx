@@ -8,10 +8,12 @@ import { useAddToCart } from '@/hooks/queries/useCart';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCartStore } from '@/stores/useCartStore';
 import Product from '@/components/Details/Product';
+import {
+  getProductColorOptions,
+  getProductDefaultSelections,
+  getProductSizesForColor,
+} from '@/lib/product-variants';
 import { toast } from 'sonner';
-
-const availableColors = ['#000000', '#FFFFFF'];
-const availableSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 interface ProductGridProps {
   products: ProductType[];
@@ -31,14 +33,24 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, variant = 'home' })
   const openCart = useCartStore((state) => state.openCart);
   const { mutate: addToCart } = useAddToCart();
 
-  const handleSelectColor = (productId: number, color: string) => {
-    setSelectedAttributes((prev) => ({
-      ...prev,
-      [productId]: {
-        ...prev[productId],
-        color,
-      },
-    }));
+  const handleSelectColor = (productId: number, product: ProductType, color: string) => {
+    const sizesForColor = getProductSizesForColor(product, color);
+
+    setSelectedAttributes((prev) => {
+      const previousSize = prev[productId]?.size;
+      const nextSize =
+        previousSize && sizesForColor.includes(previousSize as (typeof sizesForColor)[number])
+          ? previousSize
+          : (sizesForColor[0] ?? '');
+
+      return {
+        ...prev,
+        [productId]: {
+          color,
+          size: nextSize,
+        },
+      };
+    });
   };
 
   const handleSelectSize = (productId: number, size: string) => {
@@ -58,8 +70,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, variant = 'home' })
     }
 
     const { id, name } = product;
-    const selectedColor = selectedAttributes[id]?.color || availableColors[0];
-    const selectedSize = selectedAttributes[id]?.size || availableSizes[0];
+    const defaultSelections = getProductDefaultSelections(product);
+    if (!defaultSelections) {
+      toast.error('Ovaj proizvod trenutno nema dostupnih varijanti.');
+      return;
+    }
+
+    const selectedColor = selectedAttributes[id]?.color || defaultSelections.color;
+    const selectedSize = selectedAttributes[id]?.size || defaultSelections.size;
 
     const wishlistItem: AddWishlistItemRequest = {
       product_id: id,
@@ -77,8 +95,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, variant = 'home' })
   };
 
   const handleAddToCartClick = (product: ProductType) => {
-    const selectedColor = selectedAttributes[product.id]?.color || availableColors[0];
-    const selectedSize = selectedAttributes[product.id]?.size || availableSizes[0];
+    const defaultSelections = getProductDefaultSelections(product);
+    if (!defaultSelections) {
+      toast.error('Ovaj proizvod trenutno nema dostupnih varijanti.');
+      return;
+    }
+
+    const selectedColor = selectedAttributes[product.id]?.color || defaultSelections.color;
+    const selectedSize = selectedAttributes[product.id]?.size || defaultSelections.size;
 
     addToCart(
       {
@@ -128,22 +152,34 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, variant = 'home' })
       >
         {products.map((product) => {
           const { id } = product;
-          const selectedColor = selectedAttributes[id]?.color || availableColors[0];
-          const selectedSize = selectedAttributes[id]?.size || availableSizes[0];
+          const colorOptions = getProductColorOptions(product);
+          const defaultSelections = getProductDefaultSelections(product);
+          const selectedColor = selectedAttributes[id]?.color ?? defaultSelections?.color ?? '';
+          const availableSizes = selectedColor
+            ? getProductSizesForColor(product, selectedColor)
+            : [];
+          const selectedSize = selectedAttributes[id]?.size ?? availableSizes[0] ?? '';
+          const hasVariants = colorOptions.length > 0 && availableSizes.length > 0;
 
           return (
             <Product
               key={id}
               product={product}
               layoutVariant={variant}
-              availableColors={availableColors}
+              availableColors={colorOptions}
               availableSizes={availableSizes}
               selectedColor={selectedColor}
               selectedSize={selectedSize}
               feedbackMessage={feedbackMessages[id] || null}
-              onSelectColor={(color) => handleSelectColor(id, color)}
+              onSelectColor={(color) => handleSelectColor(id, product, color)}
               onSelectSize={(size) => handleSelectSize(id, size)}
-              onAddToCart={() => handleAddToCartClick(product)}
+              onAddToCart={() => {
+                if (!hasVariants) {
+                  toast.error('Ovaj proizvod trenutno nema dostupnih varijanti.');
+                  return;
+                }
+                handleAddToCartClick(product);
+              }}
               onAddToWishlist={() => handleAddToWishlist(product)}
             />
           );

@@ -370,32 +370,20 @@ export default function CatalogManagement({
     }
   };
 
-  const onMoveMedia = async (mediaId: number, direction: 'left' | 'right') => {
-    if (!selectedProduct?.media?.length) return;
-    const orderedMedia = [...selectedProduct.media].sort(
-      (left, right) => (left.sort_order ?? 0) - (right.sort_order ?? 0)
-    );
-    const currentIndex = orderedMedia.findIndex((media) => media.id === mediaId);
-    if (currentIndex === -1) return;
-    const targetIndex = direction === 'left' ? currentIndex - 1 : currentIndex + 1;
-    if (targetIndex < 0 || targetIndex >= orderedMedia.length) return;
-
-    const currentMedia = orderedMedia[currentIndex];
-    const targetMedia = orderedMedia[targetIndex];
+  const onReorderMedia = async (mediaIds: number[]) => {
+    if (!selectedProduct) return;
 
     try {
-      await Promise.all([
-        adminUpdateMedia(selectedProduct.id, currentMedia.id, {
-          sort_order: targetMedia.sort_order ?? targetIndex,
-        }),
-        adminUpdateMedia(selectedProduct.id, targetMedia.id, {
-          sort_order: currentMedia.sort_order ?? currentIndex,
-        }),
-      ]);
+      await Promise.all(
+        mediaIds.map((mediaId, index) =>
+          adminUpdateMedia(selectedProduct.id, mediaId, { sort_order: index })
+        )
+      );
       toast.success('Redoslijed slika je ažuriran.');
       await refresh();
     } catch (error: unknown) {
       toast.error(getApiErrorMessage(error, 'Ažuriranje redoslijeda slika nije uspjelo.'));
+      throw error;
     }
   };
 
@@ -606,7 +594,7 @@ export default function CatalogManagement({
                 }}
                 onDeleteMedia={(mediaId) => void onDeleteMedia(mediaId)}
                 onSaveMediaFraming={(mediaId, patch) => void onSaveMediaFraming(mediaId, patch)}
-                onMoveMedia={(mediaId, direction) => void onMoveMedia(mediaId, direction)}
+                onReorderMedia={(mediaIds) => void onReorderMedia(mediaIds)}
                 onNavigateToTaxonomy={() => onOpenTaxonomy?.()}
               />
             )}

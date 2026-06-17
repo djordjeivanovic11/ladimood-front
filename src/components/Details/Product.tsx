@@ -10,22 +10,23 @@ import {
 } from '@/components/Management/catalog/catalog-image';
 import { ProductCardImageCarousel } from '@/components/Details/ProductCardImageCarousel';
 import { IMAGE_SIZES } from '@/lib/image';
+import type { ProductColorOption } from '@/lib/product-variants';
+import { normalizeHex } from '@/components/Management/catalog/catalog-colors';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-function swatchBgClass(hex: string) {
-  const normalized = hex.trim().toLowerCase();
-  if (normalized === '#000000' || normalized === '#000') return 'bg-black';
-  if (normalized === '#ffffff' || normalized === '#fff') return 'bg-white';
-  return 'bg-muted';
+function isLightSwatch(hex: string) {
+  const normalized = normalizeHex(hex);
+  return normalized === '#ffffff' || normalized === '#f5f5dc';
 }
 
 interface ProductProps {
   product: ProductType;
   layoutVariant?: 'home' | 'shop';
-  availableColors: string[];
+  availableColors: ProductColorOption[];
   availableSizes: string[];
   selectedColor: string;
   selectedSize: string;
@@ -108,22 +109,35 @@ const Product: React.FC<ProductProps> = ({
           </p>
         </div>
 
-        <div className="flex justify-center gap-2">
-          {availableColors.map((color, index) => (
-            <button
-              key={index}
-              type="button"
-              title={`Odaberi boju ${color}`}
-              onClick={() => onSelectColor(color)}
-              className={cn(
-                'h-8 w-8 rounded-full border-2 transition-transform hover:scale-105 sm:h-9 sm:w-9',
-                selectedColor === color ? 'border-primary ring-2 ring-primary/50' : 'border-border',
-                swatchBgClass(color)
-              )}
-              aria-label={`Odaberi boju ${color}`}
-            />
-          ))}
-        </div>
+        {availableColors.length > 0 ? (
+          <TooltipProvider delayDuration={150}>
+            <div className="flex justify-center gap-2">
+              {availableColors.map((color) => (
+                <Tooltip key={color.hex}>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      title={color.name}
+                      onClick={() => onSelectColor(color.hex)}
+                      className={cn(
+                        'h-8 w-8 rounded-full border-2 transition-transform hover:scale-105 sm:h-9 sm:w-9',
+                        selectedColor === color.hex
+                          ? 'border-primary ring-2 ring-primary/50'
+                          : 'border-border',
+                        isLightSwatch(color.hex) && 'border-muted-foreground/40'
+                      )}
+                      style={{ backgroundColor: color.hex }}
+                      aria-label={`Odaberi boju ${color.name}`}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="px-2 py-1 text-xs">
+                    {color.name}
+                  </TooltipContent>
+                </Tooltip>
+              ))}
+            </div>
+          </TooltipProvider>
+        ) : null}
 
         <div className="flex flex-wrap justify-center gap-2">
           {availableSizes.map((size, index) => (
@@ -150,7 +164,7 @@ const Product: React.FC<ProductProps> = ({
               onAddToCart();
             }}
             className="min-h-11 flex-1"
-            disabled={isSoldOut}
+            disabled={isSoldOut || availableColors.length === 0 || availableSizes.length === 0}
           >
             {isSoldOut ? 'Rasprodato' : 'Dodaj u korpu'}
           </Button>

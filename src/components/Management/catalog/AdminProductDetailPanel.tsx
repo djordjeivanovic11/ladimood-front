@@ -107,7 +107,7 @@ type AdminProductDetailPanelProps = {
     mediaId: number,
     patch: { focal_x: number; focal_y: number; zoom: number }
   ) => void;
-  onMoveMedia: (mediaId: number, direction: 'left' | 'right') => void;
+  onReorderMedia: (mediaIds: number[]) => void | Promise<void>;
   onNavigateToTaxonomy: () => void;
 };
 
@@ -131,7 +131,7 @@ export function AdminProductDetailPanel({
   onUploadImage,
   onDeleteMedia,
   onSaveMediaFraming,
-  onMoveMedia,
+  onReorderMedia,
   onNavigateToTaxonomy,
 }: AdminProductDetailPanelProps) {
   const [isProductSettingsOpen, setIsProductSettingsOpen] = React.useState(false);
@@ -746,7 +746,7 @@ export function AdminProductDetailPanel({
           productName={product.name}
           onRemove={onDeleteMedia}
           onSaveFraming={onSaveMediaFraming}
-          onMoveMedia={onMoveMedia}
+          onReorder={onReorderMedia}
         />
       </AdminSection>
 

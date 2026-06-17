@@ -7,7 +7,6 @@ import ProductGrid from '@/components/Order/Shop/ProductGrid';
 import Newsletter from '@/components/Frontpage/Newsletter';
 import MontenegrinGallery from '@/components/Frontpage/MontenegrinGallery';
 import CreatorChallengeSection from '@/components/Frontpage/CreatorChallengeSection';
-import { ProductGallerySlideshow } from '@/components/Frontpage/ProductGallerySlideshow';
 import SuggestionBox from '@/components/Frontpage/ShareIdeas';
 import { sortProductsByDisplayOrder } from '@/lib/product-order';
 import { useProductsQuery } from '@/hooks/queries/useProducts';
@@ -56,12 +55,6 @@ export default function Frontpage() {
           </p>
         )}
       </div>
-
-      {!isLoading && displayProducts.length > 0 ? (
-        <div className="mb-16">
-          <ProductGallerySlideshow products={displayProducts} />
-        </div>
-      ) : null}
 
       <div className="mb-16">
         <SuggestionBox />

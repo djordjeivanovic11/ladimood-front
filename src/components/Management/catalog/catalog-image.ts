@@ -12,7 +12,11 @@ export function getPrimaryProductMedia(product: Product) {
 }
 
 export function getSortedProductMedia(product: Product): ProductMedia[] {
-  return [...(product.media ?? [])].sort(bySortOrder).filter((item) => item.url?.trim());
+  return sortProductMediaList(product.media ?? []);
+}
+
+export function sortProductMediaList(media: ProductMedia[]): ProductMedia[] {
+  return [...media].sort(bySortOrder).filter((item) => item.url?.trim());
 }
 
 export function getPrimaryProductImageUrl(product: Product): string | null {
